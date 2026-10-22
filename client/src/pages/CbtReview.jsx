@@ -27,10 +27,45 @@ export default function CbtReview() {
       setLoading(false);
       return;
     }
+
+    // Helper to build data from local storage
+    const buildFromLocal = () => {
+      const local = JSON.parse(localStorage.getItem("cbt_result") || "{}");
+      if (local.questions || local.questionsSnapshot) {
+        return {
+          attemptId: local.attemptId || attemptId,
+          userAnswers: local.answers || local.userAnswers || {},
+          questionsSnapshot: local.questions || local.questionsSnapshot || {},
+          totalScore: local.jambScore || local.totalScore,
+          rawScore: local.score,
+          rawTotal: local.total,
+        };
+      }
+      return null;
+    };
+
     fetch(`${API_BASE}/api/cbt/review/${attemptId}`)
       .then((r) => r.json())
       .then((res) => {
         if (res.error) throw new Error(res.error);
+
+        // FIX: If backend returned null snapshot, fallback to localStorage
+        if (
+          !res.questionsSnapshot ||
+          res.questionsSnapshot === null ||
+          Object.keys(res.questionsSnapshot).length === 0
+        ) {
+          const localData = buildFromLocal();
+          if (localData) {
+            setData(localData);
+            setSubject(
+              Object.keys(localData.questionsSnapshot || {})[0] || "english",
+            );
+            setLoading(false);
+            return;
+          }
+        }
+
         setData(res);
         const firstSub =
           Object.keys(res.questionsSnapshot || {})[0] || "english";
@@ -38,17 +73,12 @@ export default function CbtReview() {
         setLoading(false);
       })
       .catch(() => {
-        const local = JSON.parse(localStorage.getItem("cbt_result") || "{}");
-        if (local.questions) {
-          setData({
-            attemptId,
-            userAnswers: local.answers || {},
-            questionsSnapshot: local.questions,
-            totalScore: local.jambScore || local.totalScore,
-            rawScore: local.score,
-            rawTotal: local.total,
-          });
-          setSubject(Object.keys(local.questions)[0]);
+        const localData = buildFromLocal();
+        if (localData) {
+          setData(localData);
+          setSubject(
+            Object.keys(localData.questionsSnapshot || {})[0] || "english",
+          );
         }
         setLoading(false);
       });

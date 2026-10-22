@@ -185,8 +185,9 @@ export default function CBTExam() {
     localStorage.setItem("lastAttemptId", attemptId);
 
     const payload = {
-      answers,
-      questions: questionsBySubject,
+      attemptId,
+      userAnswers: answers,
+      questionsSnapshot: questionsBySubject,
       examId: examData.examId || examData._id,
       subjects: subjectList,
       isAutoSubmit: isAuto,
@@ -194,6 +195,7 @@ export default function CBTExam() {
       total,
       breakdown,
       timeTaken,
+      totalScore: Math.round((score / (total || 1)) * 400),
     };
 
     try {

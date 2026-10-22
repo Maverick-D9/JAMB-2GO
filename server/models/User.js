@@ -1,0 +1,129 @@
+const mongoose = require("mongoose");
+const VITALS = require("../config/vitals");
+
+const userSchema = new mongoose.Schema(
+  {
+    userId: { type: String, unique: true, index: true },
+    id: { type: String, index: true },
+    email: {
+      type: String,
+      unique: true,
+      lowercase: true,
+      index: true,
+      required: true,
+    },
+    username: { type: String, sparse: true, index: true },
+    password: String,
+    fullName: String,
+    subject: { type: String, default: "english-room" },
+    picture: String,
+    isGoogle: Boolean,
+    verified: { type: Boolean, default: true },
+    trialEndsAt: Date,
+    subscriptionStatus: { type: String, default: "trial", index: true },
+    subscriptionExpiresAt: { type: Date, index: true },
+    lastPaymentReference: String,
+  },
+  { timestamps: true },
+);
+
+userSchema.statics.findByEmail = function (email) {
+  if (!email) return null;
+  return this.findOne({ email: email.toLowerCase() });
+};
+userSchema.statics.findByUsername = function (username) {
+  if (!username) return null;
+  return this.findOne({ username: new RegExp(`^${username}$`, "i") });
+};
+userSchema.statics.findByIdCustom = function (userId) {
+  if (!userId) return null;
+  return this.findOne({
+    $or: [
+      { userId },
+      { id: userId },
+      { email: userId.toLowerCase?.() || userId },
+    ],
+  });
+};
+
+userSchema.statics.createUser = function (userInput) {
+  const now = new Date();
+  const trialEndsAt = new Date();
+  // === WAS: +3 hardcoded, NOW: from vitals ===
+  trialEndsAt.setDate(now.getDate() + VITALS.TRIAL.DURATION_DAYS);
+
+  return this.create({
+    userId:
+      userInput.userId ||
+      userInput.id ||
+      `user_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+    id: userInput.userId || userInput.id,
+    email: (userInput.email || "").toLowerCase(),
+    username: userInput.username,
+    password: userInput.password,
+    fullName: userInput.fullName || userInput.username || "User",
+    subject: userInput.subject || "english-room",
+    picture: userInput.picture || null,
+    isGoogle: !!userInput.isGoogle,
+    verified: true,
+    trialEndsAt,
+    subscriptionStatus: "trial",
+    subscriptionExpiresAt: null,
+    lastPaymentReference: null,
+  });
+};
+
+userSchema.statics.updateUser = function (userId, updates) {
+  return this.findOneAndUpdate(
+    { $or: [{ userId }, { id: userId }, { email: userId }] },
+    { $set: updates },
+    { returnDocument: "after" },
+  );
+};
+
+userSchema.statics.checkUserAccess = function (user) {
+  if (!user)
+    return {
+      tier: VITALS.SUBSCRIPTION.FREE_TIER_NAME,
+      status: "free",
+      daysLeft: 0,
+    };
+  const now = new Date();
+  const trialEnds = user.trialEndsAt ? new Date(user.trialEndsAt) : new Date(0);
+  const subExpires = user.subscriptionExpiresAt
+    ? new Date(user.subscriptionExpiresAt)
+    : null;
+
+  if (user.subscriptionStatus === "trial" && now < trialEnds) {
+    const daysLeft = Math.ceil((trialEnds - now) / 86400000);
+    return {
+      tier: VITALS.SUBSCRIPTION.TIER_NAME,
+      status: "trial",
+      daysLeft,
+      trialEndsAt: user.trialEndsAt,
+    };
+  }
+  if (user.subscriptionStatus === "active" && subExpires && now < subExpires) {
+    const daysLeft = Math.ceil((subExpires - now) / 86400000);
+    return {
+      tier: VITALS.SUBSCRIPTION.TIER_NAME,
+      status: "active",
+      daysLeft,
+      expiresAt: user.subscriptionExpiresAt,
+    };
+  }
+  const isExpiredActive =
+    user.subscriptionStatus === "active" && subExpires && now >= subExpires;
+  return {
+    tier: VITALS.SUBSCRIPTION.FREE_TIER_NAME,
+    status: isExpiredActive
+      ? "expired"
+      : user.subscriptionStatus === "trial"
+        ? "expired"
+        : user.subscriptionStatus || "free",
+    daysLeft: 0,
+    expiredAt: isExpiredActive ? user.subscriptionExpiresAt : undefined,
+  };
+};
+
+module.exports = mongoose.model("User", userSchema);

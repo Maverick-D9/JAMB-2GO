@@ -1,0 +1,1119 @@
+question_text,option_a,option_b,option_c,option_d,correct
+Which of the following is a fundamental SI unit?,Volt,Ampere,Newton,Joule,B
+A car accelerates uniformly from rest at 4 m/s2 for 6 seconds. Its final velocity is,24 m/s,12 m/s,72 m/s,48 m/s,A
+An object is dropped from a cliff 45 meters high. The time taken to reach the ground is [Take g = 10 m/s2],3 s,4.5 s,9 s,2 s,A
+A body of mass 3 kg moves in a circular path of radius 4 m with a linear speed of 8 m/s. Calculate the centripetal force.,48 N,24 N,12 N,96 N,A
+"A lifting machine has an efficiency of 75%. If its velocity ratio (V.R.) is 8, calculate its mechanical advantage (M.A.).",6,10,0.6,600,A
+A uniform meter rule balances horizontally on a knife edge placed at the 40 cm mark when a mass of 60 g is suspended from the 10 cm mark. Calculate the mass of the meter rule.,180 g,60 g,40 g,120 g,A
+A force of 40 N stretches a spring by 5 cm. Calculate the elastic potential energy stored in the spring.,1.0 J,2.0 J,100 J,200 J,A
+A boy of mass 50 kg climbs a flight of stairs 6 meters high in 5 seconds. Calculate his power output. [Take g = 10 m/s2],600 W,300 W,1500 W,250 W,A
+Two bodies have masses in the ratio 3:1. They experience forces which impart to them accelerations in the ratio 2:9 respectively. Find the ratio of forces the masses experienced.,1:04,2:01,2:03,2:05,C
+"Particles of mass 10-2 kg is fixed to the tip of a fan blade which rotates with angular velocity of 100 rad s-1. If the radius of the blade is 0.2m, the centripetal force is",2N,20N,200N,400N,B
+"A lead bullet of mass 0.05kg is fired with a velocity of 200ms-1 into a block of mass 0.95kg. Given that the lead block can move freely, the final kinetic energy after impact is",50J,100J,150J,200J,A
+"A ball of mass 0.1kg is thrown vertically upwards with a speed of 10ms-1 from the top of a tower 10m high. Neglecting air resistance, its total energy just before hitting the ground is [Take g = 10ms-2]",5J,10J,15J,20J,C
+A car of mass 800kg attains a speed of 25m/s in 20secs. The power developed in the engine is,1.25 x 10^4 W,2.50 x 10^4 W,1.25 x 10^6 W,2.50 x 10^6 W,A
+A tuning fork has a frequency of 312Hz and emits a wave which has a wavelength of 1.10 m. Find the velocity of sound.,312.0 ms-1,110.0 ms-1,343.2 ms-1,686.4 ms-1,C
+The main factor which affects the speed of sound wave is the,properties of the medium,amplitude of the sound wave,intensity of the sound wave,loudness of the sound wave,A
+"A source of sound produces waves in air of wavelength 1.65m. If the speed of sound in air is 330ms-1, the period of vibration in air is",200,0.005,0.5,0.02,B
+A plane sound wave of frequency 85.5Hz and velocity 342ms-1 is reflected from a vertical wall. At what distance from the wall does the wave have antinode?,2m,4m,1m,3m,C
+A water wave of frequency 5 Hz travels a distance of 20 m in 4 s. What is the distance between two successive troughs of the wave?,1.0 m,2.0 m,4.0 m,0.5 m,A
+Longitudinal waves do not exhibit,Polarization,Reflection,Refraction,Diffraction,A
+"If a source of sound is moving, a stationary listener will hear a sound of different frequency. This is called",doppler effect,resonance,ultra sound,rarefaction,A
+A car moving at 20m/s with its horn blowing (f = 1200Hz) is chasing another car going at 15m/s. What is the apparent frequency of the horn as heard by the driver being chased?,1.22 kHz,1.32 kHz,1.25 kHz,1.15 kHz,A
+"When vibration occurs in an air column, the distance between a node and an antinode is equal to",one-quarter of the wavelength,one-half of the wavelength,the wavelength,twice the wavelength,A
+The wavelength of the first overtone of a note in a closed pipe of length 33cm is,0.44 m,0.33 m,0.66 m,0.22 m,A
+An object 3.0cm high is placed 60.0cm from a converging lens whose focal length is 20.0cm. Calculate the size of the image formed,0.5 cm,1.5 cm,2.0 cm,6.0 cm,B
+"To obtain a magnification of 2.5, how far should an object be placed from the pole of thin converging lens of focal length 0.20 m?",0.13 m,0.25 m,0.28 m,0.50 m,C
+"The refractive index of a liquid is 1.5. If the velocity of light in vacuum is 3.0 x 10^8 ms-1, the velocity of light in the liquid is",1.5 x 10^8 ms-1,2.0 x 10^8 ms-1,3.0 x 10^8 ms-1,4.5 x 10^8 ms-1,B
+"A pool of water appears to be 1.0m deep when viewed vertically from above. If the refractive index of water is 1.33, what is the actual depth of the pool?",1.33 m,0.75 m,1.50 m,1.00 m,A
+The inability of the eyes to focus in different planes is known as,Hyperopia,Presbyopia,Astigmatism,Myopia,C
+A current of 0.5 A flows through a resistor when connected to a 40 V battery. How much energy is dispatched in 2 minutes?,2400 J,9600 J,1500 J,1200 J,A
+An electric current of 2 amperes flows in a heating coil of resistance 50 ohms for 3 minutes 20 seconds. Determine the heat produced,0.5kJ,8.0kJ,20.0kJ,40.0kJ,D
+What charge is stored in a 0.1 F capacitor when a 10 V supply is connected across it?,1 C,0.1 C,10 C,0.01 C,A
+A mass of gas at 40mmHg is heated from 298k to 348k at constant volume. Calculate the pressure exerted by the gas.,50.21mmHg,46.71mmHg,42.35mmHg,35.12mmHg,B
+Calculate the heat energy required to vaporize 50g of water initially at 80C if the specific heat capacity of water is 4.23Jg-1K-1 (specific latent heat of vaporization of water is 2260Jg-1),530000J,23200J,17200J,130000J,D
+"If the frequency of an emitted x-ray is 1.6 x 10^16 Hz, the accelerating potential is [e = 1.6 x 10^-19 J, h = 6.63 x 10^-34 Js]",6630.0V,663.0V,66.3V,6.6V,A
+"An electron falls from an energy level of -5.44eV to another energy level, E. If the emitted photon is of wavelength 5.68 x 10^-6m, calculate the energy change. [Planck's constant = 6.63 x 10^-34Js, speed = 3.0 x 10^8ms-1]",1.49 x 10^-20J,1.49 x 10^-19J,3.49 x 10^-20J,3.49 x 10^-19J,C
+"When light of a certain frequency is incident on a metal surface, no photoelectrons are emitted. If the frequency of the light is increased, what happens to the stopping potential?",The stopping potential does not change.,The stopping potential decreases.,"The stopping potential can either increase or decrease, depending on the intensity of the light.",The stopping potential increases.,D
+Charge carriers in doped semiconductors are,electrons and protons,electrons and neutrons,anions and cations,electrons and holes,D
+"In a pure semiconductor, the number of electrons in the conduction band is",less than the number of holes in the valence band,equal to the number of holes in the valence band,greater than the number of holes in the valence band,twice the number of holes in the valence band,B
+The number of holes in an intrinsic semiconductor,is less than the number of free electrons,is equal to the number of free electrons,is greater than the number of free electrons,is twice the number of free electrons,B
+The operation of a photovoltaic cell is possible by the action of,Semi-conductor,Conductors,Insulators,Resistors,A
+A transistor functions mainly as a,switch and an amplifier,rectifier and an amplifier,charge storer and a switch,charge storer and an amplifier,A
+A zener diode is used for,current amplification,power amplification,voltage regulation,energy conversion,C
+Which of the following is NOT true about a semiconductor?,Moving holes are equivalent to moving positive charges,There are two kinds of charge carriers; free electron and hole,The escape of a valence electron from an atom produces electron-hole pair of charge carriers,Increase in temperature increases its electrical resistance,D
+"In a semiconductor junction diode, as the depletion or barrier layer is forward-biased, the layer",widens,narrows,remains constant,widens then narrows,B
+"In a reverse biased junction diode, current flows in by",positive holes alone,majority carriers,electron alone,minority carriers,D
+"In a semiconductor, current conduction is due to",only holes,only electrons,holes and electrons,none of the above,C
+"In a semiconductor crystal, if current flows due to breakage of crystal bonds, then the semiconductor is called",donor,acceptor,extrinsic semiconductor,intrinsic semiconductor,D
+How many depletion regions does a transistor have?,Three,One,Two,Zero,C
+"In an n-p-n transistor, the emitter current is",equal to base current,slightly less than the collector current,slightly more than the collector current,equal to the collector current,C
+For functioning of a transistor its emitter-base junction has to be,forward biased,reverse biased,may be forward biased or reverse biased,may not be biased at all,A
+"When the base current of a common-emitter transistor is kept at zero, it operates in the",active-on region,breakdown region,saturation region,cut-off region,D
+The primary purpose of the depletion region in a p-n junction diode is,to increase the diode's current-carrying capacity,to reduce the diode's reverse saturation current,to create a potential barrier for majority charge carriers,to enhance the diode's switching speed,C
+The barrier voltage at a p-n junction for germanium is about,3.5 V,3 V,zero,0.3 V,D
+A zener diode utilises ______ characteristic for its operation,forward,reverse,both forward and reverse,none of the above,B
+When a p-n junction is in forward bias it has,minimal resistance,almost no current,large current flow,very narrow depletion layer,C
+The most widely used rectifier is,half-wave rectifier,centre-tap full-wave rectifier,bridge full-wave rectifier,none of the above,C
+A lorry accelerates uniformly in a straight line with acceleration of 4ms-2 and covers a distance of 250 m in a time interval of 10 s. How far will it travel in the next 10 s?,650,900,800,250,A
+A car moves with an initial velocity of 25 ms-1 and reaches a velocity of 45 ms-1 in 10s. What is the acceleration of the car?,2 ms-2,5 ms-2,20 ms-2,25 ms-2,A
+"A motorcyclist traveling at 30ms-1 starts to apply his brakes when he is 50m from the traffic light that had just turned red. If he reached the traffic light, his deceleration is",18 ms-2,10 ms-2,9 ms-2,5 ms-2,C
+A bullet fired vertically upward from a gun held 2.0 m above the ground reaches its maximum height in 4.0s. Calculate its initial velocity. [g = 10ms-2],10 ms-1,8 ms-1,40 ms-1,20 ms-1,C
+"Two bodies X and Y are projected on the same horizontal plane, with same initial speed but at angles 30 and 60 respectively to the horizontal. Neglecting air resistance, the ratio of the range of X to that of Y is",1:01,1:02,sqrt3:1,1:sqrt3,A
+"A stone, Q is thrown with velocity U at an angle of 75 to the horizontal. Another stone R is thrown with the same velocity U but with an angle of 15 to the horizontal. The ranges covered by the stones will be",greater for Q,greater for R,the same for Q and R,greater for the heavier of the two stones,C
+"Two balls, X and Y, weighing 5 g and 50 kg respectively, were thrown up vertically at the same time with a velocity of 100 ms-1. How will their positions be one second later?",X and Y will be 500 m from each other,Y will be 500 m ahead of X,X will be 500 m ahead of Y,X and Y both be 500 m from the point of throw,D
+A body of mass 20g projected vertically upwards in vacuum returns to the point of projection in 0.6s. Calculate the speed of projection. [g = 10ms-2],4 ms-1,6 ms-1,8 ms-1,10 ms-1,B
+"A simple pendulum has a period of 5.77 seconds. When the pendulum is shortened by 3 m, the period is 4.60 seconds. Calculate the new length of the pendulum.",5.23 m,6.42 m,4.87 m,7.26 m,C
+"If the length of a simple pendulum is 120cm, calculate its frequency. [pi = 22/7, g = 10ms-2]",2.8Hz,1.2Hz,12Hz,0.5Hz,D
+Which of the following with respect to a body performing simple harmonic motion are in phase?,displacement and velocity of the body,displacement and force on the body,velocity and acceleration of the body,force acting on the body and the acceleration,D
+Which of the following statements is true of a body moving with simple harmonic oscillation about its equilibrium position?,The velocity is maximum when the body is passing through the equilibrium position,The velocity is minimum when the body is passing through the equilibrium position,Acceleration is maximum when body is passing through the equilibrium position,Acceleration is constant throughout the period of motion,A
+I. The motion of the tyres of a moving car. II. The motion of a loaded test tube oscillated vertically. III. The beating of the heart. IV. A stone tied to a string and whirled round. V. The motion of the pistons in a gasoline engine. Which of the motions above is simple harmonic?,"III, IV and V only","II, III and V only","II, III and IV only","I, II and III only",B
+A simple pendulum of length 0.4m has a period of 2s. What is the period of a similar pendulum of length 0.8m at the same place?,8s,4s,2 sqrt2 s,sqrt2 s,C
+"A body moves in SHM between two points 20m apart on the straight line joining the points. If the angular speed of the body is 5 rad/s, calculate its speed when it is 6m from the center of the motion.",20 m/s,30 m/s,40 m/s,50 m/s,C
+"Using the oscillating simple pendulum above, the maximum kinetic energy is obtained at",the equilibrium position,the maximum displacement,the point of release,the highest point,A
+"A body moving with simple harmonic motion in a straight line has velocity, v and acceleration, a, when the instantaneous displacement, x in cm, from its maximum position is given by x = 2.5 sin 0.4 pi t, where t is in seconds. Determine the magnitude of the maximum velocity.",3.14 x 10-2 m/s,2.50 x 10-2 m/s,1.00 x 10-2 m/s,4.00 x 10-2 m/s,A
+"A mass m attached to a light spiral is caused to perform simple harmonic motion of frequency f = (1/2 pi) sqrt(k/m). If m = 0.30 kg, k = 30Nm-1 and the maximum position is 0.015m, calculate the maximum kinetic energy.",3.38 x 10-3 J,3.38 x 10-2 J,3.38 x 10-4 J,3.38 x 10-1 J,A
+Which of the following statements describes an atom accurately? i. atoms of all elements are identical ii. an atom contains a nucleus and number of electrons iii. due to the electrons in the atom an atom is negatively charged iv. electrons in the atom move in circular orbits round the nucleus,i and ii,ii and iii,iii and iv,ii and iv only,D
+What is the name of the model of the atom that describes electrons as orbiting the nucleus in specific energy levels?,Bohr model,Dalton model,Rutherford model,Thomson model,A
+Which of the following statements is Not true about atoms?,Atom of different elements have different atomic weights,The mass of an atom is concentrated in the nucleus,An atom is made up of a nucleus and number of electrons,Atoms of all elements are identical,D
+Which of the following statements are true in the structure of atoms?,the atoms of the different element differ only in the number of protons and electrons,the number of protons equals the number of electrons,atoms are constructed according to the plan of our solar system,all of the above,B
+It is known that a neutron exists in a light atomic nucleus. Which of the following also exists in the nucleus?,an electron,a beta-particle,an alpha-particle,a proton,D
+"An electron makes a transition from a certain energy level Ek to the ground state E0. If the frequency of emission is 8.0 x 10^14 Hz, the energy emitted is",8.25 x 10^-19 J,5.28 x 10^-19 J,5.28 x 10^19 J,8.25 x 10^19 J,B
+The energy of light of frequency 2.0 x 10^15 Hz is (h = 6.63 x 10^-34 Js),3.33 x 10^-18 J,1.33 x 10^-18 J,1.33 x 10^-19 J,3.33 x 10^-19 J,B
+"In a model of the hydrogen atom, the energy levels Wn are given by the formula Wn = -R/n^2, where n is an integer and R is a constant. Determine the energy released in the transition from n = 3 to n = 2.",R/5,-R/4,5R/36,-5R/36,C
+The particle and wave nature of matter are demonstrated in the equation,lambda = hc/E,lambda = h/P,lambda = c/f,lambda = 2 d sin theta,B
+An electron in the n = 5 energy level of hydrogen undergoes a transition to the n = 3 energy level. Determine the wavelength of the photon the atom emits in this process.,1.28 x 10^-6 m,2.37 x 10^-6 m,4.22 x 10^-7 m,3.04 x 10^-6 m,A
+Which of the following statements is TRUE about the force between a proton and a neutron inside the nucleus? (I) attractive in nature (II) electrical in nature (III) extremely short range (IV) strongest forces in nature,"(I), (II) and (IV)",(II) and (III),"(I), (III) and (IV)",(III) and (IV),C
+"A substance has a half-life of 5 minutes. After 10 minutes, the count rate was observed to be 500. What was its count at zero time?",100,200,"2,000","5,000",C
+One of the features of the nuclear fission process is that,neutrons are not released,it leads to chain reaction,the sum of the masses of the reactants equals the sum of the masses of the products,its products are non-radioactive,B
+The half-life of a radioactive element is 9 days. What fraction of atoms has decayed in 36 days?,16/1,8/1,4/1,15/16,D
+The characteristic x-ray depends on,the electron energy,tube voltage,the electron wavelength,the target,D
+A hydrogen atom is in its fourth excited state. Calculate the radius of the electron's Bohr orbit.,1.32 x 10^-9 m,8.46 x 10^-10 m,2.65 x 10^-10 m,2.13 x 10^-10 m,A
+Find the charge on a stationary oil drop of mass 0.5 kg located at a distance 5 mm between two plates with potential difference 1000 V in an electric field.,2.5 x 10^-4 C,2.5 x 10^-5 C,2.5 x 10^5 C,2.5 x 10^4 C,B
+The number of neutrons in the Uranium isotope 238/92X is,92,146,238,330,B
+A coil of copper wire of N turns is kept rotating between the poles of a permanent magnet such that the magnetic flux linking the coil changes continuously. Which of the following statements is TRUE?,"An emf is induced in the coil such that when the change of flux is positive the emf is positive, and when the change of flux is negative, the emf is negative.",An emf is induced in the coil whose magnitude is inversely proportional to both the number of turns in the coil and the rate of change of magnetic flux.,An emf is set up in the permanent magnet which reduces the flux in the coil to zero.,A current flows in the coil and an emf is set up proportional to both the rate of change of the flux and the number of turns.,D
+The principle of operation of an induction coil is based on,Ohm's law,Ampere's law,Faraday's law,Coulomb's law,C
+Which expression gives the magnetic flux?,qVB sin theta,BA cos theta,BA sin theta,qVB cos theta,B
+A magnet is similar to a bipolar charged system in that,it consists of two opposite poles - the north and south poles,the earth's magnetic field has a south pole near the geographical north pole and a north pole near the geographical south pole,the force of attraction and repulsion between opposite and between like poles obeys a law for electrostatic charges,all of the above,D
+"The Earth's magnetic equator passes through Jos in Nigeria. At Jos, the",angle of dip is zero,angle of dip is 90 degrees,horizontal component of the earth's magnetic field is zero,magnetic declination is 90 degrees,A
+The main purpose of the transformer in an a.c radio set is to,increase power to the radio,step up the voltage,convert energy from a.c to d.c,step down the voltage,D
+The iron core of an induction coil is made from bundles of wire so as to,minimize eddy-currents,generate eddy-current,prevent sparking at the contact breaker,get the greatest possible secondary voltage,A
+Which parts of a d.c generator convert an a.c in the armature to a d.c in the external circuit?,The commutator and brushes,The slip rings and brushes,The armature and field coils,The brushes and field coils,A
+An ideal transformer has,Maximum primary resistance,No flux leakage,Hysteresis,Eddy current,B
+"The primary winding of a transformer has 400 turns and its secondary has 100 turns. If a source of e.m.f. of 12V is applied to the primary, the secondary e.m.f. will be",3V,48V,0.3V,4.8V,A
+"The primary coil of a transformer has N turns and is connected to a 120 V a.c. power line. If the secondary coil has 1000 turns and a terminal voltage of 1200 volts, what is the value of N?",120,100,1000,1200,B
+"A transformer has 300 turns of wire in the primary coil and 30 turns in the secondary coil. If the input voltage is 100 volts, the output voltage is",5 volts,10 volts,15 volts,20 volts,B
+"A transformer which can produce 8V from a 240V a.c. supply, has an efficiency of 80%. If the current in the secondary coil is 15A, calculate the current in the primary coil.",0.625A,1.600A,2.500A,6.250A,A
+An air column 10cm in length is trapped into the sea end of a capillary tube by a 15cm column of mercury with the tube held vertically. On inverting the tube the air column becomes 15cm long. The atmospheric pressure during the experiment is,90cm,76cm,75cm,60cm,C
+Which of the following statements is correct? The reading of pressure on a mercury barometer is independent of,the cross-sectional area of the tube,the atmospheric pressure,the density of mercury,the temperature of mercury,A
+"The height at which the atmosphere ceases to exist is about 80km. If the atmospheric pressure on the ground level is 760mmHg, the pressure at a height of 20km above the ground level is",380mmHg,570mmHg,190mmHg,480mmHg,B
+"A pilot records the atmospheric pressure outside his plane as 63cm of Hg while a ground observer records a reading of 75cm of Hg. Assuming that the density of air is constant, calculate the height of the plane above the ground. (Take the relative densities of air and mercury as 0.00136 and 13.6 respectively)",1200m,120m,12000m,120000m,A
+What is the length of liquid column in a barometer tube that would support an atmospheric pressure of 102000Nm-2 if the density of the liquid is 2600kgm-3? [g = 10ms-2],0.75m,0.76m,3.92m,39.23m,C
+"As a result of air at the top of a barometer, the height of the mercury column is 73.5cm when it should be 75.0cm; the volume of the space above the mercury is 8.0cm3. Calculate the correct barometer height when the barometer reads 74.0cm and the volume of the space above the mercury is 6.0cm3.",76cm,75cm,74cm,73cm,A
+"The atmospheric pressure due to water is 1.3 x 10^6Nm-2. What is the total pressure at the bottom of an ocean 10m deep? [Density of water = 1000kgm-3, g = 10ms-2]",1.3 x 10^7Nm-2,1.4 x 10^6Nm-2,1.4 x 10^5Nm-2,1.0 x 10^5Nm-2,B
+An isotope has an initial activity of 120 Bq. 6 days later its activity is 15 Bq. The half-life is,3 days,2 days,1 day,4 days,B
+"In a nuclear fusion experiment, the loss of mass amounts to 1.0 x 10^-6 kg. The amount of energy obtained from the fusion is",3.0 x 10^-4 J,3.0 x 10^-1 J,9.0 x 10^4 J,9.0 x 10^10 J,D
+Which of the following statements are correct about nuclear fission? I. The number of neutrons released exceeds the number that caused the fission. II. There is loss of mass. III. Energy is produced. IV. Smaller nuclei merge to form larger nuclei,"I, II and III only",I and IV only,"II, III and IV only","I, II, III and IV",A
+Which of the following phrases are true regarding forces between a proton and a neutron inside the nucleus? (I) attractive in nature (II) electrical in nature (III) extremely short range (IV) strongest forces in nature,"(I), (II) and (IV)",(II) and (III),"(I), (III) and (IV)",(III) and (IV),C
+A lorry accelerates uniformly in a straight line with acceleration of 4 ms^-2 and covers a distance of 250 m in a time interval of 10 s. How far will it travel in the next 10 s?,650 m,900 m,800 m,250 m,A
+"A bullet fired vertically upwards reaches a height of 500m. Neglecting air resistance, calculate the magnitude of the initial velocity of the bullet. [g = 10 ms^-2]",100 ms^-1,50 ms^-1,200 ms^-1,150 ms^-1,A
+Two particles X and Y starting from rest cover the same distance. The acceleration of X is twice that of Y. The ratio of the time taken by X to that taken by Y is,2/1,2 sqrt(2),1/sqrt(2),sqrt(2),C
+"A ball of mass 0.1 kg is thrown vertically upwards with a speed of 10 ms^-1 from the top of a tower 10 m high. Neglecting air resistance, its total energy just before hitting the ground is? (Take g = 10 ms^-2)",5 J,10 J,15 J,20 J,C
+What will be the weight of a man of mass 60 kg standing in a lift if the lift is descending vertically at 3 ms^-2?,780 N,546 N,660 N,420 N,D
+I. Jet propelled aircraft II. Rocket propulsion III. The recoil of a gun IV. A person walking. Which of the above is based on Newton's third law of motion?,I and II only,"I, II, III, and IV only",I and III only,"I, II and III only",B
+A machine gun with a mass of 5 kg fires a 50 g bullet at a speed of 100 ms^-1. The recoil speed of the machine gun is,2 ms^-1,0.5 ms^-1,1 ms^-1,5 ms^-1,C
+"A ball of mass 0.5 kg moving at 10 ms^-1 collides with another ball of equal mass at rest. If the two balls move off together after the impact, calculate their common velocity.",0.2 ms^-1,0.5 ms^-1,5.0 ms^-1,5.5 ms^-1,C
+A body of mass 12 kg traveling at 4.2 ms^-1 collides with a second body of mass 18 kg at rest. Calculate their common velocity if the two bodies coalesce after collision.,1.5 ms^-1,1.4 ms^-1,2.1 ms^-1,1.7 ms^-1,D
+"A lead bullet of mass 0.05 kg is fired with a velocity of 200 ms^-1 into a block of mass 0.95 kg. Given that the lead block can move freely, the final kinetic energy after impact is",50 J,100 J,150 J,200 J,A
+Which of the following statements is true regarding a radioactive isotope X that decays by emitting a gamma ray?,The resulting isotope has a different Z value,The resulting isotope has the same A value and the same Z value,The resulting isotope has a different A value,Both A and Z are different,B
+In an elastic collision: I. Energy is conserved II. Energy is decreased III. Energy is increased IV. Linear momentum conserved,I only,I and IV only,II only,III only,B
+Which of the following statements is true about collision event?,"In elastic collision, both linear momentum and kinetic energy are conserved","In elastic collision, linear momentum is conserved but the kinetic energy is not conserved","In inelastic collision, both linear momentum and kinetic energy are conserved","In inelastic collision, kinetic energy is conserved but the linear momentum is not conserved",A
+Which of the statements is/are true of two bodies involved in an inelastic collision? After collision. I. the kinetic energy increases II. The momentum decreases III. Their velocities are the same,I only,II only,III only,I and II only,C
+"A ball of mass 0.5 kg moving at 10 m/s collides with another ball of equal mass at rest. If the two balls move off together after the impact, calculate their common velocity",0.2 m/s,0.5 m/s,5.0 m/s,5.5 m/s,C
+A body of mass 12 kg traveling at 4.2 m/s collides with a second body of mass 18 kg at rest. Calculate their common velocity if the two bodies coalesce after collision,1.5 m/s,1.4 m/s,2.1 m/s,1.7 m/s,D
+"A lead bullet of mass 0.05 kg is fired with a velocity of 200 m/s into a block of mass 0.95 kg. Given that the lead block can move freely, the final kinetic energy after impact is",50 J,100 J,150 J,200 J,A
+Which of the following statements is not correct about the molecules of a substance in a gaseous state? They,are in a constant state of motion,have different speeds,have a temperature which is measured by the average kinetic energy,The collision between the gases is perfectly inelastic,D
+"A 5 kg mass moving with a velocity of 4 m/s collides with a stationary 3 kg mass. If they move together after collision, the common velocity is",2.5 m/s,1.5 m/s,3.0 m/s,2.0 m/s,A
+"Two identical bodies of mass 2 kg each approach each other with velocities 5 m/s and 3 m/s respectively. If they stick together after collision, their common velocity is",1 m/s in the direction of the 5 m/s body,1 m/s in the direction of the 3 m/s body,4 m/s in the direction of the 5 m/s body,8 m/s in the direction of the 3 m/s body,A
+"A 2 kg object moving at 6 m/s collides head-on with a 4 kg object moving at 3 m/s in the opposite direction. If they stick together, their common velocity is",0 m/s,2 m/s,3 m/s,6 m/s,A
+"A body of mass 5 kg moving with velocity 8 m/s collides with a stationary body of mass 3 kg. If they move together after collision, the loss in kinetic energy is",60 J,80 J,20 J,40 J,A
+Which of the following is true for a perfectly inelastic collision?,Kinetic energy is conserved,The colliding bodies stick together after collision,Momentum is not conserved,The coefficient of restitution is greater than 1,B
+A gun of mass 5 kg fires a bullet of mass 0.02 kg with a muzzle velocity of 400 m/s. Calculate the recoil velocity of the gun,1.6 m/s,0.8 m/s,2.0 m/s,4.0 m/s,A
+A machine gun with a mass of 5 kg fires a 50 g bullet at a speed of 100 m/s. The recoil speed of the machine gun is,2 m/s,0.5 m/s,1 m/s,5 m/s,C
+Which of the following is the correct expression for the coefficient of restitution e for two colliding bodies?,e = (v2 - v1) / (u1 - u2),e = (v1 + v2) / (u1 + u2),e = (m1u1 + m2u2) / (m1v1 + m2v2),e = (m1v1 + m2v2) / (m1u1 + m2u2),A
+A ball is dropped from a height of 20 m and rebounds to a height of 5 m. The coefficient of restitution is,0.25,0.5,0.75,1,B
+"Two bodies of equal masses moving in opposite directions with equal speeds collide head-on and stick together. After collision, the combined body will",move in the direction of the faster body,move in the direction of the slower body,be at rest,move perpendicular to the original direction,C
+A 1 kg ball moving at 4 m/s collides elastically head-on with a stationary 1 kg ball. The final velocities of the two balls respectively are,4 m/s and 0 m/s,0 m/s and 4 m/s,2 m/s and 2 m/s,-4 m/s and 4 m/s,B
+Calculate the heat capacity of a material that absorbs 48KJ of heat at a differential temperature of 53 degrees C,760.8 J/K,2500 J/K,905.7 J/K,260.5 J/K,C
+"1kg of copper is transferred quickly from boiling water to a block of ice. Calculate the mass of ice melted, neglecting heat loss. [Specific heat capacity of copper = 400J/kgK, latent heat of fusion of ice = 333 x 10^3 J/kg]",60g,67g,120g,133g,C
+Calculate the specific heat capacity of a metal rod of mass 0.025kg whose temperature was raised by 15 degrees C when 1000J of heat energy was added to the rod,2666.7 J/kgK,1500.0 J/kgK,375.0 J/kgK,4500.0 J/kgK,A
+5 X 10^-3 kg of liquid at its boiling point is evaporated in 20s by the heat generated by a resistor of 2 ohms when a current of 10A is used. The specific latent heat of vaporization of the liquid is,8.0 x 10^4 J/kg,8.0 x 10^5 J/kg,8.0 x 10^6 J/kg,8.0 x 10^7 J/kg,B
+"Calculate the mass of ice that would melt when 2kg of copper is quickly transferred from boiling water to a block of ice without heat loss (specific heat capacity of copper = 400J/kgK, latent heat of fusion of ice = 3.3 x 10^5 J/kg)",8/33 kg,3.3/80 kg,80/33 kg,3.3/8 kg,A
+How long does it take a 750W heater to raise the temperature of 1kg of water from 20 degrees C to 50 degrees C [specific heat capacity of water = 4200J/kgK],84s,112s,168s,280s,C
+A piece of substance of specific heat capacity 450J/kgK falls through a vertical distance of 20m from rest. Calculate the rise in temperature of the substance on hitting the ground when all its energies are converted into heat. [g = 10m/s^2],29 degrees C,49 degrees C,92 degrees C,94 degrees C,A
+"An electric current of 3A flowing through an electric heating element of resistance 20 ohms embedded in 1,000g of an oil raises the temperature of the oil by 10 degrees C in 10 sec. What is the specific heat capacity of the liquid?",1.8 J/gC,0.6 J/gC,0.18 J/gC,1.8 J/gC,C
+"An electric heater is used to melt a block of ice of mass 1.5kg. If the heater is powered by a 12V battery and a current of 20A flows through the coil, calculate the time taken to melt the block of ice at 0 degrees C. [specific latent heat of fusion of ice = 336 x 10^3 J/kg]",76.0 min,35.0 min,21.0 min,2.9 min,B
+Calculate the heat energy lost when 10g of boiling water changes to ice at 0 degrees C. [Specific latent heat of ice 336 J/g. Specific heat capacity of water 4.2 J/gK],840J,3360J,3420J,7560J,D
+The surface temperature of a swimming pool on a warm day is 25 degrees C and the temperature at the bottom is 15 degrees C. If the swimming pool has a surface area of 620 m^2 and a depth of 1.5m. Find the rate at which energy is transferred by conduction from the surface to the bottom of the swimming pool. [Thermal conductivity of water (k) = 0.6071 W/mK],2.5 kW,250 kW,300 kW,3.0 kW,A
+"Heat is supplied uniformly at the rate of 100W to 1.0 x 10^-2 kg of a liquid for 20 seconds. If the temperature of the liquid rises by 5 degrees C, then the specific heat capacity of the liquid is",2.0 x 10^2 J/kgK,2.0 x 10^2 J/kg,4.0 x 10^4 J/kgK,4.0 x 10^4 J/kg,A
+How much heat is absorbed when a block of copper of mass 0.05kg and specific heat capacity 390J/kgK is heated from 20 degrees C to 70 degrees C?,3.98 x 10^-1 J,9.75 x 10^2 J,3.98 x 10^3 J,9.75 x 10^3 J,B
+How long does it take a 750W heater to raise the temperature of 1kg of water from 20 degrees C to 50 degrees C. [Specific heat capacity of water = 4200J/kgK],84s,112s,168s,280s,C
+"A 50W electric heater is used to heat a metal block of mass 5kg. If in 10 minutes a temperature rise of 12 degrees C is achieved, the specific heat capacity of the metal is",500 J/kgK,420 J/kgK,210 J/kgK,1000 J/kgK,A
+"A block of aluminium is heated electrically by a 25W heater. If the temperature rises by 10 degrees C in 5 minutes, the heat capacity of the aluminium is",850 J/K,750 J/K,650 J/K,500 J/K,B
+"An electric heater rated 220V, 1000W is immersed into a bucket full of water. Calculate the mass of water if the temperature changes from 30 degrees C to 100 degrees C and the current flows for 300 seconds. [specific heat capacity of water = 4200J/kgK]",4.28 kg,42.86 kg,1.02 kg,7.14 kg,C
+A heater marked 50W will evaporate 0.005kg of boiling water in 50 seconds. What is the specific latent heat of vaporization of water in J/kg?,5 x 10^5 J/kg,1.0 x 10^6 J/kg,2.0 x 10^6 J/kg,5 x 10^4 J/kg,A
+"Calculate the amount of heat required to convert 2kg of ice at -2 degrees C to water at 0 degrees C. [Specific heat capacity of ice = 2090 J/kgC, specific latent heat of fusion = 333 J/kg]",666 J,8360 J,666000 J,674360 J,D
+Which of the following is/are not true about the heat capacity of a substance? (i) It is an intensive property (ii) Its S.I unit is J/K (iii) It is an extensive property (iv) Its S.I unit is J/kgK,(ii) and (iii) only,(i) and (iv) only,(i) and (iii) only,(ii) and (iv) only,A
+"An electron falls from an energy level of -5.44eV to another energy level, E. If the emitted photon is of wavelength 5.68 x 10^-6m, calculate the energy change. [Planck's constant = 6.63 x 10^-34Js, emitted radiation speed = 3.0 x 10^8ms^-1]",1.49 x 10^-20J,1.49 x 10^-19J,3.49 x 10^-20J,3.49 x 10^-19J,C
+"An electron makes a transition from a certain energy level Ek to the ground state E0. If the frequency of emission is 8.0 x 10^14Hz, the energy emitted is",8.25 x 10^-19J,5.28 x 10^-19J,5.28 x 10^19J,8.25 x 10^19J,B
+"The ground state energy for the hydrogen atom is 5.44 x 10^-19J. If an electron drops from zero energy to the ground state, calculate the frequency of the emitted radiation. [h = 6.6 x 10^-34 Js]",5.0 x 10^16 Hz,2.0 x 10^16 Hz,5.0 x 10^15 Hz,No correct option,D
+"An electron in a hydrogen atom makes a transition from the ground level to the third level. If the energy at the ground level is 13.6 eV, calculate the energy at the third level.",1.51 eV,3.40 eV,4.53 eV,13.6 eV,A
+Which of the following statements about the Bohr model is/are correct? I. It explains the structure of the hydrogen atom. II. It explains the line spectra of the hydrogen atom. III. It explains multi-electron atoms.,I only,II only,I and II only,I and III only,C
+Which of the following gives rise to the line spectra obtained from atoms?,Kinetic energy of a moving atom,Potential energy of an electron inside an atom,Change of an electron from a higher to a lower energy level in the atom,Disturbed proton in the nucleus,C
+"In photoelectric effect, electrons will leave the metal surface when illuminated by light of appropriate frequency if the photon energy is",greater than the work function,less than the work function,equal to the work function,equal to the maximum kinetic energy of the electron,A
+"A material of threshold frequency 4.5 x 10^15 Hz was bombarded with photons of frequency 8 x 10^15 Hz. What is the kinetic energy of the emitted photoelectrons (in eV)? [h = 6.60 x 10^-34 Js, 1 eV = 1.6 x 10^-19 J]",14.44 eV,23.10 eV,1.44 eV,2.31 eV,A
+Which of the following statements about photoelectrons is correct?,A faint green light produces photoelectrons with less kinetic energy than a bright red light,A red light releases a smaller number of electrons than a green light,A faint green light produces photoelectrons with greater kinetic energy than a bright red light,A red light produces more photoelectrons than a green light,B
+Which of the following statements is/are NOT true about the emission of photoelectrons from metallic surfaces? i. All metallic surfaces emit the same number of photoelectrons in a given light. ii. Most metallic surfaces emit the same number of photoelectrons in visible and infra-red light. iii. A metallic surface emits photoelectrons only if the frequency of the incident light is higher than its own characteristic threshold frequency.,i and ii only,ii and iii only,i and iii only,"i, ii and iii",A
+The two phenomena that can only be explained in terms of the particulate nature of light are,reflection and refraction,interference and diffraction,photoelectric effect and Compton effect,polarization and dispersion,C
+The scattered wave which has the same wavelength as that of the incident radiation in Compton Effect is called,Modified radiation,Unmodified radiation,Scattered radiation,None of the above,B
+The scattered wave which has the higher wavelength as compared to the incident radiation in Compton Effect is called,Modified radiation,Unmodified radiation,Scattered radiation,None of the above,A
+Compton shift depends on,Wavelength of the incident radiation,Nature of the scattering substance,Angle of scattering,All of the above,D
+The change in wavelength in Compton scattering is called,Photoelectric shift,Compton shift,Doppler shift,Red shift,B
+The shift in wavelength corresponding to the scattering angle of 90 degrees is called,Compton wavelength,de Broglie wavelength,Rydberg constant,Bohr radius,A
+Which of the following pairs of phenomena helps in the resolution of the wave-particle paradox of matter?,Compton effect and thermionic emission,Photoelectric effect and diffraction,Compton effect and diffraction of electrons,Reflection and refraction,C
+State two effects to show that radiation behaves like particles.,Reflection and refraction,Photoelectric effect and Compton effect,Interference and diffraction,Polarization and dispersion,B
+State two effects to show the existence of matter waves.,Diffraction of electrons and diffraction of neutrons from crystal surfaces,Reflection and refraction of light,Interference and polarization of light,Photoelectric effect and Compton effect,A
+"According to Heisenberg's uncertainty principle, there is always an uncertainty in any attempt to measure which two quantities of a particle simultaneously?",Position and momentum,Energy and time,Velocity and acceleration,Mass and charge,A
+Calculate the heat capacity of a material that absorbs 48 kJ of heat at a differential temperature of 53°C,760.8 J/K,2500 J/K,905.7 J/K,260.5 J/K,C
+"1 kg of copper is transferred quickly from boiling water to a block of ice. Calculate the mass of ice melted, neglecting heat loss. [Specific heat capacity of copper = 400 J/kgK, latent heat of fusion of ice = 333 × 10³ J/kg]",60 g,67 g,120 g,133 g,C
+Calculate the specific heat capacity of a metal rod of mass 0.025 kg whose temperature was raised by 15°C when 1000 J of heat energy was added to the rod,2666.7 J/kgK,1500.0 J/kgK,375.0 J/kgK,4500.0 J/kgK,A
+5 × 10⁻³ kg of liquid at its boiling point is evaporated in 20 s by the heat generated by a resistor of 2 Ω when a current of 10 A is used. The specific latent heat of vaporization of the liquid is,8.0 × 10⁴ J/kg,8.0 × 10⁵ J/kg,8.0 × 10⁶ J/kg,8.0 × 10⁷ J/kg,B
+"Calculate the mass of ice that would melt when 2 kg of copper is quickly transferred from boiling water to a block of ice without heat loss (specific heat capacity of copper = 400 J/kgK, latent heat of fusion of ice = 3.3 × 10⁵ J/kg)",8⁄33 kg,3.3⁄80 kg,80⁄33 kg,3.3⁄8 kg,A
+How long does it take a 750 W heater to raise the temperature of 1 kg of water from 20°C to 50°C [specific heat capacity of water = 4200 J/kgK],84 s,112 s,168 s,280 s,C
+A piece of substance of specific heat capacity 450 J/kgK falls through a vertical distance of 20 m from rest. Calculate the rise in temperature of the substance on hitting the ground when all its energies are converted into heat. [g = 10 m/s²],29°C,49°C,92°C,94°C,A
+"An electric current of 3 A flowing through an electric heating element of resistance 20 Ω embedded in 1,000 g of an oil raises the temperature of the oil by 10°C in 10 s. What is the specific heat capacity of the liquid?",1.8 J/g°C,0.6 J/g°C,0.18 J/g°C,1.8 J/g°C,C
+"An electric heater is used to melt a block of ice of mass 1.5 kg. If the heater is powered by a 12 V battery and a current of 20 A flows through the coil, calculate the time taken to melt the block of ice at 0°C. [specific latent heat of fusion of ice = 336 × 10³ J/kg]",76.0 min,35.0 min,21.0 min,2.9 min,B
+Calculate the heat energy lost when 10 g of boiling water changes to ice at 0°C. [Specific latent heat of ice = 336 J/g. Specific heat capacity of water = 4.2 J/gK],840 J,3360 J,3420 J,7560 J,D
+The surface temperature of a swimming pool on a warm day is 25°C and the temperature at the bottom is 15°C. If the swimming pool has a surface area of 620 m² and a depth of 1.5 m. Find the rate at which energy is transferred by conduction from the surface to the bottom of the swimming pool. [Thermal conductivity of water (k) = 0.6071 W/mK],2.5 kW,250 kW,300 kW,3.0 kW,A
+"Heat is supplied uniformly at the rate of 100 W to 1.0 × 10⁻² kg of a liquid for 20 seconds. If the temperature of the liquid rises by 5°C, then the specific heat capacity of the liquid is",2.0 × 10² J/kgK,2.0 × 10² J/kg,4.0 × 10⁴ J/kgK,4.0 × 10⁴ J/kg,A
+How much heat is absorbed when a block of copper of mass 0.05 kg and specific heat capacity 390 J/kgK is heated from 20°C to 70°C?,3.98 × 10⁻¹ J,9.75 × 10² J,3.98 × 10³ J,9.75 × 10³ J,B
+"A 50 W electric heater is used to heat a metal block of mass 5 kg. If in 10 minutes a temperature rise of 12°C is achieved, the specific heat capacity of the metal is",500 J/kgK,420 J/kgK,210 J/kgK,1000 J/kgK,A
+"A block of aluminium is heated electrically by a 25 W heater. If the temperature rises by 10°C in 5 minutes, the heat capacity of the aluminium is",850 J/K,750 J/K,650 J/K,500 J/K,B
+"An electric heater rated 220 V, 1000 W is immersed into a bucket full of water. Calculate the mass of water if the temperature changes from 30°C to 100°C and the current flows for 300 seconds. [specific heat capacity of water = 4200 J/kgK]",4.28 kg,42.86 kg,1.02 kg,7.14 kg,C
+A heater marked 50 W will evaporate 0.005 kg of boiling water in 50 seconds. What is the specific latent heat of vaporization of water in J/kg?,5 × 10⁵ J/kg,1.0 × 10⁶ J/kg,2.0 × 10⁶ J/kg,5 × 10⁴ J/kg,A
+"Calculate the amount of heat required to convert 2 kg of ice at −2°C to water at 0°C. [Specific heat capacity of ice = 2090 J/kg°C, specific latent heat of fusion = 333 J/kg]",666 J,8360 J,666000 J,674360 J,D
+The S.I. unit of force is,Joule,Newton,Watt,Pascal,B
+The S.I. unit of work is,Joule,Newton,Watt,Pascal,A
+The S.I. unit of power is,Joule,Newton,Watt,Pascal,C
+The S.I. unit of pressure is,Joule,Newton,Watt,Pascal,D
+The S.I. unit of energy is,Joule,Newton,Watt,Pascal,A
+Which of the following is a vector quantity?,Mass,Speed,Force,Time,C
+Which of the following is a scalar quantity?,Velocity,Acceleration,Displacement,Distance,D
+The rate of change of velocity is,Speed,Acceleration,Momentum,Force,B
+The rate of change of displacement is,Speed,Velocity,Acceleration,Momentum,B
+The rate of change of distance is,Speed,Velocity,Acceleration,Momentum,A
+A body moving with uniform velocity has,Zero acceleration,Constant acceleration,Increasing acceleration,Decreasing acceleration,A
+The slope of a distance-time graph gives,Acceleration,Velocity,Displacement,Force,B
+The slope of a velocity-time graph gives,Acceleration,Velocity,Displacement,Force,A
+The area under a velocity-time graph gives,Acceleration,Velocity,Displacement,Force,C
+The equations of motion are valid for,Uniform acceleration,Non-uniform acceleration,Zero acceleration only,Negative acceleration only,A
+A body starts from rest and accelerates at 2 m/s^2 for 5 seconds. Its final velocity is,5 m/s,10 m/s,15 m/s,20 m/s,B
+A car moving at 20 m/s decelerates uniformly to rest in 4 seconds. Its deceleration is,4 m/s^2,5 m/s^2,6 m/s^2,8 m/s^2,B
+A body falls freely from rest for 3 seconds. The distance covered is (g = 10 m/s^2),30 m,45 m,60 m,90 m,B
+A ball is thrown vertically upward with a velocity of 20 m/s. The maximum height reached is (g = 10 m/s^2),10 m,20 m,30 m,40 m,B
+A ball is thrown vertically upward with a velocity of 20 m/s. The time taken to reach the maximum height is (g = 10 m/s^2),1 s,2 s,3 s,4 s,B
+A projectile is fired at an angle of 45 degrees with a velocity of 20 m/s. The horizontal range is (g = 10 m/s^2),20 m,30 m,40 m,50 m,C
+A projectile is fired at an angle of 30 degrees with a velocity of 20 m/s. The maximum height is (g = 10 m/s^2),5 m,10 m,15 m,20 m,A
+A projectile is fired horizontally from a height of 20 m with a velocity of 10 m/s. The time of flight is (g = 10 m/s^2),1 s,2 s,3 s,4 s,B
+Newton's first law of motion is also known as the law of,Inertia,Momentum,Action and reaction,Acceleration,A
+Newton's second law of motion states that,Force is proportional to the rate of change of momentum,Action and reaction are equal and opposite,A body remains at rest unless acted upon by a force,Force is proportional to velocity,A
+Newton's third law of motion states that,Force is proportional to mass,Action and reaction are equal and opposite,A body remains at rest unless acted upon by a force,Force is proportional to velocity,B
+The tendency of a body to resist change in its state of motion is,Force,Inertia,Momentum,Acceleration,B
+The quantity of motion of a body is,Force,Inertia,Momentum,Acceleration,C
+Momentum is defined as,Mass x velocity,Mass x acceleration,Force x time,Force x distance,A
+The impulse of a force is,Force x time,Force x distance,Mass x velocity,Mass x acceleration,A
+Impulse equals,Change in momentum,Change in velocity,Change in acceleration,Change in force,A
+A force of 10 N acts on a body of mass 2 kg for 5 seconds. The impulse is,20 Ns,30 Ns,50 Ns,100 Ns,C
+A body of mass 2 kg moving at 4 m/s has momentum,2 kg m/s,4 kg m/s,6 kg m/s,8 kg m/s,D
+A force of 20 N acts on a body of mass 5 kg. The acceleration is,2 m/s^2,4 m/s^2,5 m/s^2,10 m/s^2,B
+A body of weight 100 N has a mass of (g = 10 m/s^2),1 kg,5 kg,10 kg,100 kg,C
+The weight of a body of mass 5 kg is (g = 10 m/s^2),5 N,10 N,50 N,500 N,C
+Which of the following is NOT a type of force?,Gravitational force,Electrostatic force,Magnetic force,Thermal force,D
+The force that opposes motion between two surfaces in contact is,Gravitational force,Friction,Tension,Normal force,B
+The force that acts perpendicular to a surface is,Gravitational force,Friction,Tension,Normal force,D
+The force transmitted through a string or cable is,Gravitational force,Friction,Tension,Normal force,C
+The law of universal gravitation was proposed by,Galileo,Newton,Einstein,Kepler,B
+The acceleration due to gravity on the surface of the earth is approximately,9.8 m/s^2,8.9 m/s^2,10.8 m/s^2,9.0 m/s^2,A
+The force of gravity between two bodies depends on,Their masses and distance between them,Their charges,Their temperatures,Their colours,A
+Work is defined as,Force x distance,Force x time,Mass x velocity,Mass x acceleration,A
+The work done in lifting a body of mass 5 kg through a height of 2 m is (g = 10 m/s^2),50 J,100 J,150 J,200 J,B
+Power is defined as,Work done / time,Force x distance,Mass x velocity,Mass x acceleration,A
+The power of a machine that does 500 J of work in 10 seconds is,5 W,50 W,500 W,5000 W,B
+Energy is defined as,The ability to do work,The rate of doing work,The force applied,The distance covered,A
+The kinetic energy of a body of mass 2 kg moving at 5 m/s is,10 J,15 J,25 J,50 J,C
+The potential energy of a body of mass 5 kg at a height of 4 m is (g = 10 m/s^2),50 J,100 J,150 J,200 J,D
+Work is said to be done when,A force moves a body through a distance,A force is applied to a body at rest,A body is at rest,A body moves with uniform velocity,A
+Work done is zero when,The force is perpendicular to the displacement,The force is parallel to the displacement,The force is equal to the displacement,The body moves with constant velocity,A
+One joule of work is done when,A force of 1 N moves a body through 1 m in the direction of the force,A force of 1 N acts on a body for 1 second,A force of 1 N is applied to a body,A mass of 1 kg is lifted 1 m,A
+Kinetic energy is the energy possessed by a body by virtue of its,Position,Motion,Shape,Temperature,B
+Potential energy is the energy possessed by a body by virtue of its,Position,Motion,Shape,Temperature,A
+The kinetic energy of a body of mass m moving with velocity v is,mv,1/2 mv,mv^2,1/2 mv^2,D
+The potential energy of a body of mass m at height h is,mgh,1/2 mgh,mgh^2,1/2 mgh^2,A
+The principle of conservation of energy states that,Energy can be created,Energy can be destroyed,Energy can be transformed from one form to another but cannot be created or destroyed,Energy is always lost as heat,C
+One watt is equal to,One joule per second,One joule per minute,One newton per second,One pascal per second,A
+A machine is a device that,Increases the magnitude of a force,Decreases the magnitude of a force,Changes the direction of a force,All of the above,D
+The mechanical advantage of a machine is defined as,Load / Effort,Effort / Load,Load x Effort,Load - Effort,A
+The velocity ratio of a machine is defined as,Distance moved by effort / Distance moved by load,Distance moved by load / Distance moved by effort,Load / Effort,Effort / Load,A
+The efficiency of a machine is defined as,(Mechanical advantage / Velocity ratio) x 100%,(Velocity ratio / Mechanical advantage) x 100%,(Load / Effort) x 100%,(Effort / Load) x 100%,A
+"For an ideal machine, the efficiency is",0%,50%,100%,150%,C
+"For an ideal machine, the mechanical advantage equals",Zero,The velocity ratio,The efficiency,The load,B
+A machine with a velocity ratio of 5 and an efficiency of 80% has a mechanical advantage of,2,3,4,5,C
+A lever is a simple machine that,Consists of a rigid bar pivoted at a point,Consists of a wheel and axle,Consists of a rope and pulley,Consists of an inclined plane,A
+The point about which a lever turns is called the,Load,Effort,Fulcrum,Pivot point,C
+"In a first class lever, the fulcrum is",Between the load and the effort,At one end,At the load,At the effort,A
+"In a second class lever, the load is",Between the fulcrum and the effort,At one end,At the effort,At the fulcrum,A
+"In a third class lever, the effort is",Between the fulcrum and the load,At one end,At the load,At the fulcrum,A
+A pulley system with a velocity ratio of 4 has an efficiency of 75%. The mechanical advantage is,2,3,4,5,B
+Circular motion is the motion of a body,Along a circular path,Along a straight line,Along a curved path,Along a zigzag path,A
+The force that keeps a body moving in a circular path is called,Centrifugal force,Centripetal force,Gravitational force,Frictional force,B
+The centripetal force on a body of mass m moving with velocity v in a circle of radius r is,mv/r,mv^2/r,mv^2 r,mv/r^2,B
+The direction of centripetal force is,Away from the centre,Towards the centre,Along the tangent,Opposite to the motion,B
+Angular velocity is defined as,The rate of change of angular displacement,The rate of change of linear displacement,The rate of change of velocity,The rate of change of acceleration,A
+The S.I. unit of angular velocity is,rad/s,m/s,rev/s,degrees/s,A
+The period of a body moving in a circle is the time taken to,Complete one revolution,Complete half a revolution,Complete a quarter of a revolution,Change direction,A
+The relationship between linear velocity v and angular velocity w is,v = wr,v = w/r,v = r/w,v = w^2 r,A
+The acceleration of a body moving in a circle with constant speed is,Zero,Directed towards the centre,Directed away from the centre,Along the tangent,B
+Gravitational field is a region where,A mass experiences a force,An electric charge experiences a force,A magnetic pole experiences a force,A current-carrying conductor experiences a force,A
+The gravitational field strength at a point is defined as,The gravitational force per unit mass at that point,The gravitational force per unit charge at that point,The gravitational force per unit volume at that point,The gravitational force per unit area at that point,A
+The S.I. unit of gravitational field strength is,N/kg,N/C,N/m,N/m^2,A
+The acceleration due to gravity on the surface of the earth is,9.8 m/s^2,8.9 m/s^2,10.8 m/s^2,9.0 m/s^2,A
+The acceleration due to gravity decreases with,Increasing altitude,Decreasing altitude,Increasing latitude,Decreasing longitude,A
+The weight of a body of mass 10 kg on the surface of the earth is (g = 10 m/s^2),10 N,50 N,100 N,1000 N,C
+The mass of a body is,The amount of matter in it,Its weight,Its volume,Its density,A
+The weight of a body is,The force of gravity on it,Its mass,Its volume,Its density,A
+The escape velocity from the earth is approximately,11.2 km/s,9.8 km/s,7.9 km/s,5.6 km/s,A
+A satellite orbiting the earth is kept in orbit by,Centripetal force,Centrifugal force,Gravitational force,Electromagnetic force,C
+The time period of a geostationary satellite is,12 hours,24 hours,36 hours,48 hours,B
+The force that keeps planets in orbit around the sun is,Electrostatic force,Gravitational force,Magnetic force,Nuclear force,B
+Kepler's first law states that planets move in,Circular orbits,Elliptical orbits,Parabolic orbits,Hyperbolic orbits,B
+The gravitational potential energy of a body of mass m at height h is,mgh,1/2 mgh,mgh^2,1/2 mgh^2,A
+Heat is a form of,Chemical energy,Thermal energy,Electrical energy,Nuclear energy,B
+The S.I. unit of heat is,Newton,Joule,Watt,Pascal,B
+Temperature is a measure of the,Total heat in a body,Average kinetic energy of the molecules of a body,Total kinetic energy of a body,Heat capacity of a body,B
+The S.I. unit of temperature is,Celsius,Fahrenheit,Kelvin,Joule,C
+The absolute zero of temperature is,0 degrees C,273 degrees C,-273 degrees C,100 degrees C,C
+The absolute zero of temperature is equivalent to,0 K,273 K,-273 K,100 K,A
+Convert 27 degrees C to Kelvin,300 K,273 K,246 K,327 K,A
+Convert 300 K to degrees C,27 degrees C,30 degrees C,57 degrees C,273 degrees C,A
+Heat capacity of a body is defined as,The heat required to raise the temperature of the body by 1 degree C,The heat required to raise the temperature of unit mass of the body by 1 degree C,The heat required to change the state of the body,The heat required to melt the body,A
+Specific heat capacity of a substance is defined as,The heat required to raise the temperature of the substance by 1 degree C,The heat required to raise the temperature of unit mass of the substance by 1 degree C,The heat required to change the state of the substance,The heat required to melt the substance,B
+The S.I. unit of specific heat capacity is,J/kg,J/kgK,J/K,J,B
+The heat required to raise the temperature of 2 kg of water by 10 degrees C is (c = 4200 J/kgK),42000 J,84000 J,21000 J,4200 J,B
+The specific latent heat of fusion of ice is,The heat required to change 1 kg of ice at 0 degrees C to water at 0 degrees C,The heat required to change 1 kg of water at 100 degrees C to steam at 100 degrees C,The heat required to raise the temperature of 1 kg of ice by 1 degree C,The heat required to melt ice at any temperature,A
+The specific latent heat of vaporisation of water is,The heat required to change 1 kg of ice at 0 degrees C to water at 0 degrees C,The heat required to change 1 kg of water at 100 degrees C to steam at 100 degrees C,The heat required to raise the temperature of 1 kg of water by 1 degree C,The heat required to boil water at any temperature,B
+The heat required to melt 5 kg of ice at 0 degrees C is (L = 336000 J/kg),1680000 J,168000 J,336000 J,672000 J,A
+The heat required to convert 2 kg of water at 100 degrees C to steam at 100 degrees C is (L = 2260000 J/kg),4520000 J,2260000 J,1130000 J,9040000 J,A
+Which of the following is a mode of heat transfer that does not require a medium?,Conduction,Convection,Radiation,Evaporation,C
+Which of the following is a mode of heat transfer in solids?,Conduction,Convection,Radiation,Evaporation,A
+Which of the following is a mode of heat transfer in liquids and gases?,Conduction,Convection,Radiation,Evaporation,B
+Metals are good conductors of heat because,They have free electrons,They are shiny,They are dense,They are hard,A
+Which of the following is a good insulator of heat?,Copper,Aluminium,Wood,Iron,C
+Thermal expansion is the increase in the,Volume of a substance due to an increase in temperature,Mass of a substance due to an increase in temperature,Density of a substance due to an increase in temperature,Pressure of a substance due to an increase in temperature,A
+The linear expansivity of a solid is defined as,The fractional increase in length per degree rise in temperature,The fractional increase in area per degree rise in temperature,The fractional increase in volume per degree rise in temperature,The increase in length per degree rise in temperature,A
+The S.I. unit of linear expansivity is,Per degree C,Per degree K,Per degree F,Per Kelvin,B
+The area expansivity of a solid is,Half of the linear expansivity,Twice the linear expansivity,Three times the linear expansivity,Equal to the linear expansivity,B
+The volume expansivity of a solid is,Half of the linear expansivity,Twice the linear expansivity,Three times the linear expansivity,Equal to the linear expansivity,C
+Bimetallic strips are used in,Thermostats,Barometers,Thermometers,Manometers,A
+Water has its highest density at,0 degrees C,4 degrees C,10 degrees C,100 degrees C,B
+Anomalous expansion of water refers to the behaviour of water,Between 0 degrees C and 4 degrees C,Between 4 degrees C and 100 degrees C,At 0 degrees C only,At 100 degrees C only,A
+"Boyle's law states that, for a fixed mass of gas at constant temperature",Pressure is inversely proportional to volume,Pressure is directly proportional to volume,Volume is directly proportional to temperature,Pressure is directly proportional to temperature,A
+"Charles's law states that, for a fixed mass of gas at constant pressure",Volume is directly proportional to absolute temperature,Volume is inversely proportional to absolute temperature,Pressure is directly proportional to volume,Pressure is inversely proportional to volume,A
+"The pressure law states that, for a fixed mass of gas at constant volume",Pressure is directly proportional to absolute temperature,Pressure is inversely proportional to absolute temperature,Volume is directly proportional to temperature,Pressure is directly proportional to volume,A
+The general gas equation is,PV = nRT,P/V = nRT,V/T = nRP,PT = nRV,A
+The value of the universal gas constant R is approximately,8.31 J/molK,3.81 J/molK,1.38 J/molK,6.02 J/molK,A
+"At constant temperature, if the volume of a gas is halved, its pressure will",Be halved,Be doubled,Remain the same,Be quadrupled,B
+"At constant pressure, if the absolute temperature of a gas is doubled, its volume will",Be halved,Be doubled,Remain the same,Be quadrupled,B
+"At constant volume, if the absolute temperature of a gas is doubled, its pressure will",Be halved,Be doubled,Remain the same,Be quadrupled,B
+A gas at 27 degrees C has a volume of 500 cm^3. At what temperature will its volume be 1000 cm^3 at constant pressure?,327 degrees C,300 degrees C,600 degrees C,273 degrees C,A
+The kinetic theory of gases explains,The behaviour of gases in terms of the motion of their molecules,The behaviour of solids in terms of the motion of their atoms,The behaviour of liquids in terms of the motion of their molecules,The behaviour of all matter in terms of the motion of their molecules,A
+"According to the kinetic theory of gases, the pressure exerted by a gas is due to",Collisions of gas molecules with the walls of the container,Attraction between gas molecules,Repulsion between gas molecules,The weight of gas molecules,A
+"According to the kinetic theory of gases, the average kinetic energy of gas molecules is directly proportional to",The pressure of the gas,The volume of the gas,The absolute temperature of the gas,The mass of the gas,C
+Evaporation is the process by which a liquid changes to a gas at,Any temperature,Its boiling point only,0 degrees C only,100 degrees C only,A
+Boiling occurs when,The vapour pressure of the liquid equals the external pressure,The vapour pressure of the liquid is less than the external pressure,The vapour pressure of the liquid is greater than the external pressure,The temperature of the liquid is 100 degrees C,A
+Evaporation causes cooling because,The molecules with the highest kinetic energy escape from the liquid,The molecules with the lowest kinetic energy escape from the liquid,The liquid absorbs heat from the surroundings,The liquid loses heat to the surroundings,A
+Relative humidity is,The ratio of the mass of water vapour in a given volume of air to the mass required to saturate the same volume at the same temperature,The mass of water vapour in a given volume of air,The temperature at which air becomes saturated with water vapour,The pressure of water vapour in the air,A
+The dew point is,The temperature at which the air becomes saturated with water vapour,The temperature at which water boils,The temperature at which ice melts,The temperature at which water freezes,A
+A hygrometer is used to measure,Humidity of the air,Temperature of the air,Pressure of the air,Volume of the air,A
+A thermometer is used to measure,Temperature,Pressure,Volume,Mass,A
+The clinical thermometer is used to measure,Human body temperature,Atmospheric temperature,Boiling point of water,Melting point of ice,A
+The thermometer that can measure temperatures from -10 degrees C to 110 degrees C is the,Clinical thermometer,Laboratory thermometer,Constant volume gas thermometer,Thermocouple,B
+A wave is a disturbance that transfers,Matter,Energy,Mass,Force,B
+The S.I. unit of frequency is,Hertz,Second,Metre,Metre per second,A
+The distance between two successive crests of a wave is the,Amplitude,Wavelength,Frequency,Period,B
+The maximum displacement of a wave from its equilibrium position is the,Wavelength,Amplitude,Frequency,Period,B
+The number of complete oscillations per second is the,Amplitude,Wavelength,Frequency,Period,C
+The time taken for one complete oscillation is the,Amplitude,Wavelength,Frequency,Period,D
+"The relationship between velocity, frequency, and wavelength is",v = f lambda,v = f / lambda,v = lambda / f,v = f + lambda,A
+A wave of frequency 50 Hz has a wavelength of 2 m. Its velocity is,25 m/s,50 m/s,100 m/s,200 m/s,C
+A wave of velocity 340 m/s has a frequency of 170 Hz. Its wavelength is,1 m,2 m,3 m,4 m,B
+Waves that require a material medium for propagation are,Electromagnetic waves,Mechanical waves,Light waves,Radio waves,B
+Waves that do not require a material medium for propagation are,Sound waves,Water waves,Electromagnetic waves,Seismic waves,C
+Which of the following is an electromagnetic wave?,Sound wave,Water wave,Light wave,Seismic wave,C
+Which of the following is a longitudinal wave?,Light wave,Radio wave,Sound wave,Water wave,C
+Which of the following is a transverse wave?,Sound wave,Light wave,Compression wave,Pressure wave,B
+"In a longitudinal wave, the particles of the medium vibrate",Parallel to the direction of wave propagation,Perpendicular to the direction of wave propagation,At an angle to the direction of wave propagation,In a circular path,A
+"In a transverse wave, the particles of the medium vibrate",Parallel to the direction of wave propagation,Perpendicular to the direction of wave propagation,At an angle to the direction of wave propagation,In a circular path,B
+Sound waves are,Transverse waves,Longitudinal waves,Electromagnetic waves,Stationary waves,B
+Light waves are,Transverse waves,Longitudinal waves,Mechanical waves,Stationary waves,A
+The speed of sound in air at room temperature is approximately,340 m/s,3 x 10^8 m/s,1500 m/s,5000 m/s,A
+The speed of light in a vacuum is approximately,3 x 10^8 m/s,340 m/s,1500 m/s,5000 m/s,A
+Sound travels fastest in,Solids,Liquids,Gases,Vacuum,A
+Sound cannot travel through,Solids,Liquids,Gases,Vacuum,D
+Echo is caused by,Reflection of sound,Refraction of sound,Diffraction of sound,Interference of sound,A
+Reverberation is caused by,Multiple reflections of sound,Refraction of sound,Diffraction of sound,Interference of sound,A
+Pitch of a sound depends on its,Amplitude,Frequency,Wavelength,Speed,B
+Loudness of a sound depends on its,Amplitude,Frequency,Wavelength,Speed,A
+The quality of a sound depends on its,Amplitude,Frequency,Harmonics,Speed,C
+The Doppler effect is the apparent change in the,Frequency of a wave due to relative motion between source and observer,Amplitude of a wave due to relative motion,Wavelength of a wave due to relative motion,Speed of a wave due to relative motion,A
+The apparent frequency of a sound increases when the source and observer are,Moving towards each other,Moving away from each other,Stationary,Moving perpendicular to each other,A
+The apparent frequency of a sound decreases when the source and observer are,Moving towards each other,Moving away from each other,Stationary,Moving perpendicular to each other,B
+Resonance occurs when,The frequency of a forced vibration equals the natural frequency of the body,The frequency of a forced vibration is greater than the natural frequency,The frequency of a forced vibration is less than the natural frequency,The body stops vibrating,A
+The region of a stationary wave where the amplitude is maximum is called,Node,Antinode,Wavelength,Crest,B
+The region of a stationary wave where the amplitude is zero is called,Node,Antinode,Wavelength,Crest,A
+The distance between two successive nodes in a stationary wave is,One wavelength,Half a wavelength,Quarter of a wavelength,Twice a wavelength,B
+Light is a form of,Sound energy,Electromagnetic radiation,Mechanical wave,Nuclear energy,B
+Reflection of light occurs when light,Bounces off a surface,Passes through a surface,Bends around an obstacle,Spreads out after passing through a narrow opening,A
+The angle of incidence is equal to the angle of reflection. This is the law of,Refraction,Reflection,Diffraction,Interference,B
+Refraction of light occurs when light,Passes from one medium to another of different optical density,Bounces off a surface,Bends around an obstacle,Spreads out after passing through a narrow opening,A
+The bending of light as it passes from one medium to another is due to a change in its,Frequency,Wavelength,Speed,Amplitude,C
+The refractive index of a medium is defined as,Speed of light in vacuum / Speed of light in the medium,Speed of light in the medium / Speed of light in vacuum,Wavelength of light in vacuum / Wavelength in the medium,Frequency of light in vacuum / Frequency in the medium,A
+The refractive index of water is approximately,1.33,1.5,2.42,1,A
+The refractive index of glass is approximately,1.33,1.5,2.42,1,B
+Total internal reflection occurs when,Light travels from a denser to a less dense medium and the angle of incidence exceeds the critical angle,Light travels from a less dense to a denser medium,Light travels along the normal,Light is absorbed by the medium,A
+The critical angle is the angle of incidence in the denser medium for which the angle of refraction is,0 degrees,45 degrees,90 degrees,180 degrees,C
+Optical fibres work on the principle of,Reflection,Refraction,Total internal reflection,Diffraction,C
+A convex lens is also called a,Diverging lens,Converging lens,Plane lens,Cylindrical lens,B
+A concave lens is also called a,Diverging lens,Converging lens,Plane lens,Cylindrical lens,A
+The focal length of a convex lens is the distance between the optical centre and the,Object,Image,Principal focus,Aperture,C
+The power of a lens is measured in,Metres,Dioptres,Watts,Joules,B
+The lens formula is,1/f = 1/u + 1/v,1/f = 1/u - 1/v,1/f = 1/v - 1/u,f = u + v,A
+The S.I. unit of electric charge is,Ampere,Coulomb,Volt,Ohm,B
+The S.I. unit of electric current is,Coulomb,Ampere,Volt,Ohm,B
+Electric current is defined as,The rate of flow of electric charge,The flow of electrons only,The flow of protons only,The flow of ions only,A
+One ampere is equal to,One coulomb per second,One coulomb per minute,One volt per second,One ohm per second,A
+A current of 2 A flows for 5 seconds. The quantity of charge is,2 C,5 C,10 C,20 C,C
+The S.I. unit of potential difference is,Ampere,Coulomb,Volt,Ohm,C
+Potential difference is defined as,Work done per unit charge,Charge per unit time,Resistance per unit length,Power per unit charge,A
+The S.I. unit of resistance is,Ampere,Coulomb,Volt,Ohm,D
+Ohm's law states that,Current is directly proportional to potential difference at constant temperature,Current is inversely proportional to potential difference,Resistance is directly proportional to current,Voltage is inversely proportional to current,A
+A resistor of 5 ohms has a current of 2 A flowing through it. The potential difference is,2.5 V,5 V,10 V,20 V,C
+A potential difference of 12 V is applied across a resistor of 4 ohms. The current is,3:00 AM,4:00 AM,6:00 AM,12:00 AM,A
+A potential difference of 10 V is applied across a resistor and a current of 2 A flows. The resistance is,2 ohms,5 ohms,10 ohms,20 ohms,B
+Resistors in series have the same,Current,Voltage,Power,Resistance,A
+Resistors in parallel have the same,Current,Voltage,Power,Resistance,B
+"Three resistors of 2 ohms, 3 ohms, and 5 ohms are connected in series. The total resistance is",5 ohms,10 ohms,15 ohms,30 ohms,B
+"Three resistors of 2 ohms, 3 ohms, and 6 ohms are connected in parallel. The total resistance is",1 ohm,2 ohms,3 ohms,6 ohms,A
+The equivalent resistance of two resistors R1 and R2 in series is,R1 + R2,R1 - R2,R1 x R2,(R1 x R2) / (R1 + R2),A
+The equivalent resistance of two resistors R1 and R2 in parallel is,R1 + R2,R1 - R2,R1 x R2,(R1 x R2) / (R1 + R2),D
+The electrical energy consumed by an appliance is given by,P x t,P / t,P + t,P - t,A
+The power of an electrical appliance is given by,VI,V/I,I/V,V + I,A
+An electrical appliance of power 1000 W is used for 5 hours. The energy consumed is,5 kWh,50 kWh,500 kWh,5000 kWh,A
+The resistance of a wire is directly proportional to its,Length,Cross-sectional area,Temperature,Material,A
+The resistance of a wire is inversely proportional to its,Length,Cross-sectional area,Temperature,Material,B
+Which of the following materials has the lowest resistivity?,Copper,Rubber,Glass,Wood,A
+Which of the following materials is a good insulator?,Copper,Aluminium,Rubber,Silver,C
+Electromotive force is the,Energy supplied by a source per unit charge,Work done per unit charge in a circuit,Force on a charged particle,Current in a circuit,A
+The internal resistance of a cell causes,A drop in the terminal voltage when current flows,An increase in the terminal voltage when current flows,No change in the terminal voltage,A complete loss of voltage,A
+The terminal voltage of a cell is given by,E - Ir,E + Ir,E/I,E x I,A
+A cell with an e.m.f. of 12 V and internal resistance of 1 ohm has a current of 2 A flowing. The terminal voltage is,10 V,12 V,14 V,24 V,A
+Kirchhoff's current law states that,The sum of currents entering a junction equals the sum of currents leaving it,The sum of voltages around a loop equals zero,Current is directly proportional to voltage,Current is inversely proportional to resistance,A
+Kirchhoff's voltage law states that,The algebraic sum of voltages around a closed loop is zero,The sum of currents entering a junction equals the sum of currents leaving it,Current is directly proportional to voltage,Current is inversely proportional to resistance,A
+A magnet is a substance that,Attracts iron and steel,Repels iron and steel,Attracts all metals,Repels all metals,A
+The region around a magnet where its magnetic influence is felt is the,Magnetic pole,Magnetic field,Magnetic axis,Magnetic equator,B
+A magnetic field line is a line,Along which a free north pole would move,Along which a free south pole would move,Of constant magnetic strength,Of constant magnetic direction,A
+Like magnetic poles,Attract each other,Repel each other,Have no effect on each other,Cancel each other out,B
+Unlike magnetic poles,Attract each other,Repel each other,Have no effect on each other,Cancel each other out,A
+A magnetic material is one that,Can be attracted by a magnet,Can be repelled by a magnet,Cannot be affected by a magnet,Has no magnetic properties,A
+Which of the following is a magnetic material?,Copper,Aluminium,Iron,Silver,C
+Which of the following is a non-magnetic material?,Iron,Steel,Cobalt,Copper,D
+The earth's magnetic field is caused by,Motion of molten iron in the earth's core,Motion of the earth around the sun,Solar radiation,The moon's gravitational pull,A
+The angle of dip at the magnetic equator is,0 degrees,45 degrees,90 degrees,180 degrees,A
+The angle of dip at the magnetic poles is,0 degrees,45 degrees,90 degrees,180 degrees,C
+Electromagnetic induction is the process by which,An e.m.f. is induced in a conductor moving in a magnetic field,An e.m.f. is induced in a conductor at rest,A magnetic field is produced by a current,A current is produced by a magnetic field,A
+Faraday's law of electromagnetic induction states that,The magnitude of the induced e.m.f. is proportional to the rate of change of magnetic flux,The induced e.m.f. is proportional to the magnetic field,The induced current is proportional to the magnetic field,The induced e.m.f. is independent of the rate of change of flux,A
+Lenz's law states that,The direction of the induced e.m.f. opposes the change producing it,The direction of the induced e.m.f. is in the same direction as the change producing it,The magnitude of the induced e.m.f. is proportional to the magnetic field,The induced current is independent of the resistance of the circuit,A
+A transformer works on the principle of,Electromagnetic induction,Electrostatic induction,Magnetic induction,Self induction,A
+A step-up transformer,Increases the voltage,Decreases the voltage,Increases the current,Decreases the power,A
+A step-down transformer,Increases the voltage,Decreases the voltage,Increases the current,Increases the power,B
+"For an ideal transformer, the relationship between voltage and number of turns is",V1 / V2 = N1 / N2,V1 / V2 = N2 / N1,V1 x V2 = N1 x N2,V1 + V2 = N1 + N2,A
+The smallest particle of an element that retains its chemical properties is,Molecule,Atom,Electron,Proton,B
+The nucleus of an atom contains,Protons and electrons,Protons and neutrons,Neutrons and electrons,Only protons,B
+The atomic number of an element is the number of,Neutrons in the nucleus,Protons in the nucleus,Nucleons in the nucleus,Electrons in the outer shell,B
+The mass number of an atom is the total number of,Protons only,Neutrons only,Protons and neutrons,Electrons and protons,C
+Isotopes are atoms of the same element with,Different numbers of protons,Different numbers of neutrons,Different numbers of electrons,Different chemical properties,B
+The charge of a proton is,Positive,Negative,Neutral,Variable,A
+The charge of an electron is,Positive,Negative,Neutral,Variable,B
+The charge of a neutron is,Positive,Negative,Neutral,Variable,C
+The model of the atom that described electrons orbiting the nucleus in specific energy levels was proposed by,Dalton,Thomson,Rutherford,Bohr,D
+The model of the atom that described a positive sphere with electrons embedded in it was proposed by,Dalton,Thomson,Rutherford,Bohr,B
+"The model of the atom that described a small, dense, positively charged nucleus was proposed by",Dalton,Thomson,Rutherford,Bohr,C
+The energy levels of an atom are,Continuous,Quantised,Random,Infinite,B
+An electron makes a transition from a higher to a lower energy level. The energy released is emitted as,Heat,Light,Sound,Kinetic energy,B
+An electron in the ground state of an atom has,Maximum energy,Minimum energy,Zero energy,Infinite energy,B
+The energy required to remove an electron from an atom is the,Ionisation energy,Excitation energy,Binding energy,Kinetic energy,A
+The photoelectric effect is the emission of electrons from a metal surface when,Light of suitable frequency is incident on it,Heat is applied to it,A magnetic field is applied to it,An electric field is applied to it,A
+The minimum frequency of light required to cause photoelectric emission is the,Threshold frequency,Critical frequency,Maximum frequency,Resonance frequency,A
+The minimum energy required to remove an electron from a metal surface is the,Work function,Kinetic energy,Potential energy,Ionisation energy,A
+"According to Einstein's photoelectric equation, the maximum kinetic energy of emitted photoelectrons is",hf - W,hf + W,W - hf,hf / W,A
+The energy of a photon is given by,hf,h/f,f/h,h + f,A
+Increasing the intensity of incident light on a metal surface increases the,Number of photoelectrons emitted,Kinetic energy of photoelectrons,Threshold frequency,Work function,A
+Increasing the frequency of incident light on a metal surface increases the,Number of photoelectrons emitted,Kinetic energy of photoelectrons,Work function,Threshold wavelength,B
+The particle nature of light is demonstrated by,Reflection,Refraction,Photoelectric effect,Diffraction,C
+The wave nature of light is demonstrated by,Photoelectric effect,Compton effect,Diffraction,Emission of electrons,C
+Radioactivity is the spontaneous emission of,Particles or radiation from unstable nuclei,Electrons from stable atoms,Protons from molecules,Neutrons from compounds,A
+Alpha particles are,Fast-moving electrons,Helium nuclei,High-energy photons,Neutrons,B
+Beta particles are,Fast-moving electrons,Helium nuclei,High-energy photons,Neutrons,A
+Gamma rays are,Fast-moving electrons,Helium nuclei,High-energy photons,Neutrons,C
+Which of the following has the greatest penetrating power?,Alpha particles,Beta particles,Gamma rays,Protons,C
+Which of the following has the greatest ionising power?,Alpha particles,Beta particles,Gamma rays,Neutrons,A
+The half-life of a radioactive substance is the time taken for,Half of the atoms in a sample to decay,All of the atoms in a sample to decay,A quarter of the atoms in a sample to decay,The activity to double,A
+"A radioactive substance has a half-life of 5 days. After 15 days, the fraction remaining is",2/1,4/1,8/1,16/1,C
+Radioactive decay is a,First-order process,Second-order process,Zero-order process,Third-order process,A
+Which of the following is a use of radioactivity?,Carbon dating,Medical imaging,Sterilisation of equipment,All of the above,D
+Nuclear fission is the splitting of a heavy nucleus into,Two lighter nuclei,One lighter nucleus,Three lighter nuclei,A proton and a neutron,A
+Nuclear fusion is the joining of two light nuclei to form,A heavier nucleus,Two heavier nuclei,A lighter nucleus,An electron,A
+Energy is released in nuclear reactions because,There is a loss of mass which is converted to energy,The mass increases,The nucleus becomes unstable,The electrons are removed,A
+The energy released in a nuclear reaction is given by,E = mc^2,E = mgh,E = 1/2 mv^2,E = mc,A
+Which of the following is a nuclear reactor component?,Moderator,Accelerator,Capacitor,Resistor,A
+The function of a moderator in a nuclear reactor is to,Slow down neutrons,Speed up neutrons,Absorb neutrons,Reflect neutrons,A
+The function of control rods in a nuclear reactor is to,Absorb neutrons,Emit neutrons,Slow down neutrons,Speed up neutrons,A
+Which of the following is a safety precaution in the use of radioactivity?,Wearing protective clothing,Using lead shields,Handling sources with tongs,All of the above,D
+The S.I. unit of radioactivity is,Becquerel,Curie,Gray,Sievert,A
+The S.I. unit of absorbed dose is,Becquerel,Curie,Gray,Sievert,C
+Which of the following is NOT a type of radioactive decay?,Alpha decay,Beta decay,Gamma decay,Delta decay,D
+"In alpha decay, the atomic number of the daughter nucleus",Increases by 2,Decreases by 2,Remains the same,Increases by 4,B
+"In beta decay, the atomic number of the daughter nucleus",Increases by 1,Decreases by 1,Remains the same,Increases by 2,A
+"In gamma decay, the atomic number of the daughter nucleus",Increases by 1,Decreases by 1,Remains the same,Changes by 2,C
+The strong nuclear force acts between,Protons and neutrons in the nucleus,Electrons in an atom,Protons and electrons,Molecules,A
+Which of the following particles is NOT a fundamental particle?,Electron,Proton,Neutron,Quark,CThe human eye is an optical instrument that forms a,"Real, inverted and diminished image","Virtual, erect and magnified image","Real, erect and diminished image","Virtual, inverted and magnified image",A,"The eye lens forms a real, inverted, diminished image on the retina.",General
+The part of the eye that is sensitive to light is the,Cornea,Retina,Iris,Pupil,B,The retina contains light-sensitive cells (rods and cones).,General
+The part of the eye that controls the amount of light entering is the,Cornea,Retina,Iris,Pupil,C,The iris controls the size of the pupil.,General
+The transparent front part of the eye is the,Cornea,Retina,Iris,Pupil,A,The cornea is the transparent outer layer.,General
+The ability of the eye to focus on objects at different distances is called,Accommodation,Refraction,Reflection,Diffraction,A,Accommodation involves changing the focal length of the lens.,General
+The near point of a normal human eye is approximately,25 cm,10 cm,50 cm,100 cm,A,The near point is about 25 cm.,General
+The far point of a normal human eye is,Infinity,25 cm,50 cm,100 cm,A,The far point of a normal eye is infinity.,General
+Myopia (short-sightedness) is a defect in which,Distant objects appear blurred,Near objects appear blurred,All objects appear blurred,Colours appear distorted,A,Myopia affects distant vision.,General
+Myopia is corrected using a,Convex lens,Concave lens,Cylindrical lens,Bifocal lens,B,Concave (diverging) lenses correct myopia.,General
+Hypermetropia (long-sightedness) is a defect in which,Distant objects appear blurred,Near objects appear blurred,All objects appear blurred,Colours appear distorted,B,Hypermetropia affects near vision.,General
+Hypermetropia is corrected using a,Convex lens,Concave lens,Cylindrical lens,Bifocal lens,A,Convex (converging) lenses correct hypermetropia.,General
+Astigmatism is a defect in which,The eye cannot focus on objects in different planes,Distant objects appear blurred,Near objects appear blurred,Colours appear distorted,A,Astigmatism causes blurred vision at different orientations.,General
+Astigmatism is corrected using a,Convex lens,Concave lens,Cylindrical lens,Bifocal lens,C,Cylindrical lenses correct astigmatism.,General
+Presbyopia is a defect in which,The eye loses its ability to accommodate due to aging,Distant objects appear blurred,Near objects appear blurred,Colours appear distorted,A,Presbyopia is age-related loss of accommodation.,General
+Presbyopia is corrected using a,Convex lens,Concave lens,Cylindrical lens,Bifocal lens,D,Bifocal lenses correct presbyopia.,General
+A simple microscope consists of a,Single convex lens of short focal length,Single concave lens,Two convex lenses,Two concave lenses,A,A simple microscope uses one convex lens.,General
+The magnifying power of a simple microscope is given by,1 + D/f,D/f,f/D,1 - D/f,A,"Magnification = 1 + D/f, where D is the least distance of distinct vision.",General
+A compound microscope consists of,Two convex lenses,Two concave lenses,One convex and one concave lens,A prism and a lens,A,"A compound microscope uses an objective and an eyepiece, both convex.",General
+"In a compound microscope, the objective lens has",Short focal length,Long focal length,Infinite focal length,Zero focal length,A,The objective has a short focal length for high magnification.,General
+"In a compound microscope, the eyepiece lens has",Short focal length,Long focal length,Infinite focal length,Zero focal length,A,Both lenses typically have short focal lengths.,General
+The final image formed by a compound microscope is,"Virtual, inverted and magnified","Real, inverted and magnified","Virtual, erect and magnified","Real, erect and diminished",A,"The final image is virtual, inverted, and magnified.",General
+A telescope is used to view,Distant objects,Near objects,Small objects,Transparent objects,A,Telescopes are for distant objects.,General
+A refracting telescope consists of,Two convex lenses,Two concave lenses,One convex and one concave lens,A mirror and a lens,A,A refracting telescope uses an objective and an eyepiece (both convex).,General
+"In a refracting telescope, the objective lens has",Long focal length,Short focal length,Infinite focal length,Zero focal length,A,The objective has a long focal length.,General
+"In a refracting telescope, the eyepiece lens has",Short focal length,Long focal length,Infinite focal length,Zero focal length,A,The eyepiece has a short focal length.,General
+The magnifying power of a telescope is given by,fo/fe,fe/fo,fo x fe,fo + fe,A,M = focal length of objective / focal length of eyepiece.,General
+A telescope with an objective of focal length 100 cm and eyepiece of focal length 5 cm has a magnification of,20,5,100,500,A,M = 100/5 = 20.,General
+A telescope with an objective of focal length 80 cm and eyepiece of focal length 4 cm has a magnification of,20,4,80,320,A,M = 80/4 = 20.,General
+A reflecting telescope uses a,Concave mirror as objective,Convex lens as objective,Concave lens as objective,Plane mirror as objective,A,Reflecting telescopes use a concave mirror.,General
+Which of the following is an advantage of a reflecting telescope over a refracting telescope?,No chromatic aberration,Larger size,Cheaper to make,Better for near objects,A,Mirrors do not suffer from chromatic aberration.,General
+A periscope is used to,See over obstacles,Magnify small objects,Measure angles,Measure light intensity,A,Periscopes allow viewing over walls or obstacles.,General
+A periscope uses,Two plane mirrors,Two convex lenses,One plane mirror,One concave mirror,A,Periscopes use two plane mirrors at 45°.,General
+A periscope works on the principle of,Reflection,Refraction,Dispersion,Diffraction,A,It uses reflection from plane mirrors.,General
+A sextant is used to measure,Angles,Distance,Time,Temperature,A,Sextants measure angular distances.,General
+A spectrometer is used to,Study spectra,Measure distance,Measure time,Measure temperature,A,Spectrometers analyze light spectra.,General
+A projector uses a,Convex lens,Concave lens,Cylindrical lens,Plane mirror,A,Projectors use convex lenses to form real images on a screen.,General
+"In a film projector, the film is placed",Between the focal point and twice the focal length,At the focal point,Beyond twice the focal length,At the optical centre,A,"For a real, magnified image, the object is between f and 2f.",General
+The image formed by a projector is,Real and magnified,Virtual and magnified,Real and diminished,Virtual and diminished,A,"Projectors form real, magnified images on a screen.",General
+A camera forms,"A real, inverted, diminished image on the film","A virtual, erect, magnified image","A real, erect, magnified image","A virtual, inverted, diminished image",A,"Cameras form real, inverted, diminished images.",General
+The part of a camera that controls the amount of light is the,Aperture,Lens,Film,Shutter,A,The aperture controls light entering.,General
+The part of a camera that controls the exposure time is the,Shutter,Aperture,Lens,Film,A,The shutter controls exposure time.,General
+The focal length of a camera lens is adjusted by,Moving the lens relative to the film,Changing the aperture,Changing the shutter speed,Changing the film,A,Focusing is done by moving the lens.,General
+A magnifying glass is a,Convex lens,Concave lens,Plane mirror,Prism,A,A magnifying glass is a simple microscope (convex lens).,General
+The magnification of a magnifying glass can be increased by,Using a lens of shorter focal length,Using a lens of longer focal length,Using a concave lens,Increasing the object distance,A,"Magnification = 1 + D/f, so smaller f gives greater magnification.",General
+Which optical instrument is used to measure the refractive index of a liquid?,Refractometer,Telescope,Microscope,Periscope,A,Refractometers measure refractive index.,General
+A telescope used in astronomy should have,Large objective diameter,Small objective diameter,Short focal length,Concave objective,A,Large objective diameter collects more light.,General
+The resolving power of a telescope increases with,Increasing the diameter of the objective,Decreasing the diameter of the objective,Increasing the focal length,Decreasing the focal length,A,Larger aperture gives better resolution.,General
+Binoculars consist of,Two telescopes mounted side by side,Two microscopes,Two periscopes,Two cameras,A,Binoculars are paired telescopes.,General
+An endoscope is used to,View the inside of the human body,View distant stars,Measure angles,Measure light intensity,A,Endoscopes use optical fibers to view internal organs.,General
+An optical fibre is used in,Communication,Cooking,Heating,Lighting,A,Optical fibres transmit data via light.,General
+An optical fibre works on the principle of,Total internal reflection,Refraction,Diffraction,Dispersion,A,Light is totally internally reflected within the fibre.,General
+Which of the following is a use of optical fibres?,Endoscopy,Telescopy,Microscopy,Spectroscopy,A,Optical fibres are used in endoscopes.,General
+The objective lens of a microscope has a focal length of 2 cm. The object is placed at 2.5 cm from the objective. The image is,Real and magnified,Virtual and magnified,Real and diminished,Virtual and diminished,A,"Object between f and 2f gives real, magnified image.",General
+The objective lens of a microscope has a focal length of 2 cm. The object is placed at 1.5 cm from the objective. The image is,Virtual and magnified,Real and magnified,Real and diminished,Virtual and diminished,A,"Object between f and the lens gives a virtual, magnified image.",General
+The eyepiece of a microscope acts as a,Magnifying glass,Camera,Projector,Telescope,A,The eyepiece magnifies the image formed by the objective.,General
+The focal length of the objective of a telescope is 50 cm and that of the eyepiece is 5 cm. Calculate the magnifying power.,10,5,50,250,A,M = fo/fe = 50/5 = 10.,General
+The focal length of the objective of a telescope is 100 cm and that of the eyepiece is 2 cm. Calculate the magnifying power.,50,2,100,200,A,M = 100/2 = 50.,General
+"A compound microscope has an objective of focal length 1 cm and an eyepiece of focal length 5 cm. If the tube length is 20 cm, the magnification is approximately",20,5,4,100,A,Magnification ≈ tube length / focal length of objective = 20/1 = 20.,General
+A camera with a lens of focal length 50 mm is used to photograph an object 2 m away. The image distance is approximately,50 mm,2 m,100 mm,25 mm,A,"For distant objects, image distance ≈ focal length.",General
+Which of the following instruments uses a concave mirror?,Reflecting telescope,Simple microscope,Compound microscope,Periscope,A,Reflecting telescopes use a concave mirror.,General
+The human eye is most sensitive to light of wavelength,About 550 nm,About 400 nm,About 700 nm,About 300 nm,A,Peak sensitivity is around 550 nm (green).,General
+"A radioactive substance has a half-life of 10 days. After 40 days, the fraction remaining is",1/2,1/4,1/8,1/16,D,4 half-lives → (1/2)⁴ = 1/16.,General
+"A radioactive substance has a half-life of 3 years. After 9 years, the fraction decayed is",1/8,7/8,1/2,3/4,B,"3 half-lives → fraction remaining = 1/8, decayed = 7/8.",General
+An atom of element X has atomic number 11 and mass number 23. The number of neutrons is,11,12,23,34,B,Neutrons = A - Z = 23 - 11 = 12.,General
+An atom of element Y has atomic number 17 and mass number 35. The number of electrons is,17,18,35,52,A,"In a neutral atom, electrons = protons = Z = 17.",General
+The isotope of hydrogen with one neutron is,Protium,Deuterium,Tritium,Hydronium,B,Deuterium has 1 proton and 1 neutron.,General
+The isotope of hydrogen with two neutrons is,Protium,Deuterium,Tritium,Hydronium,C,Tritium has 1 proton and 2 neutrons.,General
+Which of the following is used as a moderator in a nuclear reactor?,Graphite,Uranium,Plutonium,Lead,A,Graphite slows down neutrons.,General
+Which of the following is used as a coolant in a nuclear reactor?,Water,Uranium,Graphite,Lead,A,Water is commonly used as a coolant.,General
+Carbon dating is used to determine the age of,Organic materials,Rocks,Metals,Plastics,A,Carbon-14 dating is for organic remains.,General
+The half-life of Carbon-14 is approximately,5730 years,1000 years,50 years,10000 years,A,C-14 half-life is about 5730 years.,General
+The nuclear reaction in the sun is an example of,Fission,Fusion,Radioactive decay,Ionisation,B,The sun produces energy by fusion.,General
+Which of the following is a source of background radiation?,Cosmic rays,X-ray machines,Nuclear reactors,All of the above,D,All contribute to background radiation.,General
+A radioactive element has a half-life of 8 days. How long will it take for 7/8 of the original sample to decay?,8 days,16 days,24 days,32 days,C,7/8 decayed means 1/8 remains = 3 half-lives = 24 days.,General
+The mass defect in a nucleus is converted to,Energy,Charge,Momentum,Angular momentum,A,E = mc².,General
+"In the equation ²³⁸₉₂U → ²³⁴₉₀Th + X, particle X is",An alpha particle,A beta particle,A gamma ray,A neutron,A,"Alpha decay: A decreases by 4, Z by 2.",General
+"In the equation ¹⁴₆C → ¹⁴₇N + X, particle X is",An alpha particle,A beta particle,A gamma ray,A neutron,B,Beta decay: Z increases by 1.,General
+Which of the following statements about nuclear fission is correct?,It produces energy and more neutrons,It produces energy and fewer neutrons,It absorbs energy,It does not produce neutrons,A,Fission releases energy and neutrons (chain reaction).,General
+The chain reaction in a nuclear reactor is controlled by,Control rods,Moderator,Coolant,Shielding,A,Control rods absorb excess neutrons.,General
+Which of the following is a thermionic emission?,Emission of electrons from a heated metal surface,Emission of light from a heated object,Emission of alpha particles from a nucleus,Emission of beta particles from a nucleus,A,Thermionic emission is electron emission from hot metals.,General
+Magnetic field lines outside a magnet run from,North pole to South pole,South pole to North pole,East to West,West to East,A,"Outside the magnet, field lines go from North to South.",General
+"Inside a magnet, magnetic field lines run from",North pole to South pole,South pole to North pole,East to West,West to East,B,"Inside the magnet, field lines go from South to North to complete the loop.",General
+A freely suspended magnet always comes to rest pointing,North-South,East-West,North-East,South-West,A,It aligns with the Earth's magnetic field.,General
+The horizontal component of the earth's magnetic field is maximum at the,Magnetic equator,Magnetic poles,Geographic poles,Geographic north pole,A,The horizontal component is maximum where the angle of dip is zero.,General
+Which of the following is a method of magnetizing a material?,Stroking with a magnet,Electrical method,Induction,All of the above,D,All these methods can magnetize a material.,General
+The process of demagnetizing a magnet by heating is called,Magnetic induction,Magnetic saturation,Demagnetization,Magnetic shielding,C,"Heating a magnet randomly aligns its domains, demagnetizing it.",General
+The magnetic effect of an electric current was discovered by,Faraday,Oersted,Ampere,Maxwell,B,Oersted discovered that a current deflects a compass needle.,General
+A wire carrying a current produces a,Magnetic field,Electric field only,Gravitational field,Thermal field,A,A current-carrying conductor produces a magnetic field.,General
+The magnetic field lines around a straight current-carrying conductor are,Concentric circles around the wire,Straight lines parallel to the wire,Radial lines from the wire,Elliptical,A,The field lines form concentric circles around the wire.,General
+The direction of the magnetic field around a current-carrying conductor is given by,Fleming's left-hand rule,Fleming's right-hand rule,The right-hand grip rule,Lenz's law,C,The right-hand grip rule (thumb in direction of current).,General
+The magnetic field inside a solenoid is,Uniform and strong,Zero,Weak and non-uniform,Circular,A,"Inside a long solenoid, the field is uniform and strong.",General
+An electromagnet is made by,Winding a coil around a soft iron core,Winding a coil around a copper core,Winding a coil around a plastic core,Winding a coil around a wooden core,A,Soft iron core increases the magnetic field.,General
+The strength of an electromagnet can be increased by,Increasing the current,Decreasing the number of turns,Removing the core,Decreasing the current,A,More current means a stronger magnetic field.,General
+The force on a current-carrying conductor in a magnetic field is maximum when the angle between the conductor and the field is,0°,45°,90°,180°,C,"F = BIL sin θ, maximum when θ = 90°.",General
+The direction of the force on a current-carrying conductor in a magnetic field is given by,Fleming's left-hand rule,Fleming's right-hand rule,Lenz's law,Ohm's law,A,Fleming's left-hand rule is for motors.,General
+An electric motor converts,Electrical energy to mechanical energy,Mechanical energy to electrical energy,Chemical energy to electrical energy,Electrical energy to chemical energy,A,Motors convert electrical energy to mechanical energy.,General
+The principle of operation of an electric motor is based on,The force on a current-carrying conductor in a magnetic field,Electromagnetic induction,Thermionic emission,Photoelectric effect,A,Motors use the magnetic force on a current-carrying coil.,General
+"In a moving-coil galvanometer, the coil is placed in a",Magnetic field,Electric field,Gravitational field,Thermal field,A,Galvanometers use a magnetic field to deflect the coil.,General
+A galvanometer is used to,Detect small electric currents,Measure high voltages,Measure resistance,Measure power,A,Galvanometers detect small currents.,General
+Lenz's law is a consequence of the law of conservation of,Charge,Energy,Momentum,Mass,B,The induced current creates a field opposing the change to conserve energy.,General
+"A step-down transformer has 1000 turns in the primary and 100 turns in the secondary. If the primary voltage is 240 V, calculate the secondary voltage.",24 V,240 V,2400 V,2.4 V,A,Vs = (Ns/Np) x Vp = (100/1000) x 240 = 24 V.,General
+"A step-up transformer has 200 turns in the primary and 1000 turns in the secondary. If the primary voltage is 50 V, calculate the secondary voltage.",250 V,50 V,10 V,500 V,A,Vs = (1000/200) x 50 = 250 V.,General
+The efficiency of a transformer is the ratio of,Output power to input power,Input power to output power,Output voltage to input voltage,Output current to input current,A,Efficiency = (Output power / Input power) x 100%.,General
+The main reason for energy loss in a transformer is,Eddy currents,Magnetic saturation,High voltage,Low current,A,Eddy currents in the core cause heating.,General
+Energy loss due to eddy currents in a transformer can be reduced by,Laminating the core,Using a solid core,Increasing the voltage,Decreasing the number of turns,A,Laminations break up eddy current paths.,General
+Energy loss due to hysteresis in a transformer can be reduced by using,Soft iron core,Steel core,Copper core,Aluminium core,A,Soft iron has a narrow hysteresis loop.,General
+An induction coil is used to,Produce high voltage from a low voltage source,Produce low voltage from a high voltage source,Measure current,Measure resistance,A,Induction coils produce high voltage sparks.,General
+The magnetic flux density at a distance r from a long straight conductor carrying current I is proportional to,I/r,I x r,r/I,I + r,A,B = μ₀I/(2πr).,General
+The S.I. unit of magnetic flux is,Weber,Tesla,Henry,Farad,A,Magnetic flux is measured in Webers (Wb).,General
+The S.I. unit of magnetic flux density is,Weber,Tesla,Henry,Farad,B,Magnetic flux density is measured in Teslas (T).,General
+The force on a wire of length L carrying current I in a magnetic field B is given by,BIL sin θ,BIL cos θ,BIL tan θ,BIL,A,F = BIL sin θ.,General
+"A wire of length 0.5 m carrying a current of 2 A is placed in a magnetic field of flux density 0.4 T. If the wire is perpendicular to the field, calculate the force.",0.4 N,0.2 N,0.8 N,4 N,A,F = BIL = 0.4 x 2 x 0.5 = 0.4 N.,General
+The magnetic field due to a current-carrying solenoid is similar to that of a,Bar magnet,Straight wire,Circular loop,Toroid,A,A solenoid acts like a bar magnet.,General
+The core of an electromagnet is usually made of,Soft iron,Steel,Copper,Aluminium,A,Soft iron is easily magnetized and demagnetized.,General
+Which of the following is an application of electromagnets?,Electric bell,Electric heater,Electric bulb,Electric kettle,A,Electric bells use electromagnets.,General
+Which of the following is an application of electromagnetic induction?,Generator,Motor,Electric heater,Electric bulb,A,Generators use electromagnetic induction.,General
+A generator converts,Mechanical energy to electrical energy,Electrical energy to mechanical energy,Chemical energy to electrical energy,Electrical energy to chemical energy,A,Generators convert mechanical energy to electrical energy.,General
+The principle of operation of a generator is based on,Electromagnetic induction,The force on a current-carrying conductor,Thermionic emission,Photoelectric effect,A,Generators use electromagnetic induction.,General
+The direction of induced current is given by,Fleming's left-hand rule,Fleming's right-hand rule,Lenz's law,Ohm's law,B,Fleming's right-hand rule is for generators.,General
+The magnetic field of the earth is important for,Navigation,Cooking,Heating,Lighting,A,Compasses use the earth's magnetic field for navigation.,General
+Which of the following is NOT a magnetic material?,Iron,Nickel,Cobalt,Copper,D,Copper is not ferromagnetic.,General
+A current of 2 A flows for 10 seconds. Calculate the quantity of charge that passes a point.,20 C,5 C,0.2 C,12 C,A,Q = It = 2 x 10 = 20 C.,General
+A current of 0.5 A flows for 2 minutes. Calculate the quantity of charge.,60 C,1 C,4 C,120 C,A,t = 2 min = 120 s. Q = 0.5 x 120 = 60 C.,General
+One volt is equal to,One joule per coulomb,One coulomb per joule,One ampere per second,One ohm per second,A,1 V = 1 J/C.,General
+A resistor of 5 Ω has a current of 2 A flowing through it. Calculate the potential difference.,10 V,2.5 V,0.4 V,7 V,A,V = IR = 2 x 5 = 10 V.,General
+A potential difference of 12 V is applied across a resistor of 4 Ω. Calculate the current.,3 A,48 A,0.33 A,16 A,A,I = V/R = 12/4 = 3 A.,General
+A potential difference of 10 V is applied across a resistor and a current of 2 A flows. Calculate the resistance.,5 Ω,20 Ω,0.2 Ω,12 Ω,A,R = V/I = 10/2 = 5 Ω.,General
+Which of the following is a conductor?,Copper,Rubber,Glass,Wood,A,Copper is a good conductor.,General
+Which of the following is an insulator?,Copper,Silver,Rubber,Aluminium,C,Rubber is a good insulator.,General
+Two resistors of 4 Ω and 6 Ω are connected in series. Calculate the total resistance.,10 Ω,2.4 Ω,24 Ω,1.5 Ω,A,Series: R = R1 + R2 = 4 + 6 = 10 Ω.,General
+"Three resistors of 2 Ω, 3 Ω, and 5 Ω are connected in series. Calculate the total resistance.",10 Ω,5 Ω,1 Ω,30 Ω,A,Series: R = 2 + 3 + 5 = 10 Ω.,General
+Two resistors of 4 Ω and 6 Ω are connected in parallel. Calculate the equivalent resistance.,2.4 Ω,10 Ω,24 Ω,1.5 Ω,A,Parallel: R = (4 x 6)/(4 + 6) = 24/10 = 2.4 Ω.,General
+"Three resistors of 2 Ω, 3 Ω, and 6 Ω are connected in parallel. Calculate the total resistance.",1 Ω,11 Ω,2 Ω,6 Ω,A,1/R = 1/2 + 1/3 + 1/6 = 3/6 + 2/6 + 1/6 = 6/6 = 1. R = 1 Ω.,General
+An electrical appliance of power 1000 W is used for 5 hours. Calculate the energy consumed in kWh.,5 kWh,5000 kWh,200 kWh,0.2 kWh,A,Energy = 1 kW x 5 h = 5 kWh.,General
+An electrical appliance of power 500 W is used for 10 hours. Calculate the energy consumed in kWh.,5 kWh,50 kWh,5000 kWh,0.5 kWh,A,Energy = 0.5 kW x 10 h = 5 kWh.,General
+A cell with an e.m.f. of 12 V and internal resistance of 1 Ω has a current of 2 A flowing. Calculate the terminal voltage.,10 V,12 V,14 V,24 V,A,V = E - Ir = 12 - 2(1) = 10 V.,General
+A cell of e.m.f. 6 V and internal resistance 0.5 Ω is connected to a 2.5 Ω resistor. Calculate the current.,2 A,3 A,1 A,4 A,A,I = E/(R+r) = 6/(2.5+0.5) = 6/3 = 2 A.,General
+Which of the following is a unit of electrical energy?,Kilowatt-hour,Newton,Watt,Pascal,A,kWh is a practical unit of electrical energy.,General
+One kilowatt-hour is equal to,3.6 x 10⁶ J,3.6 x 10³ J,1000 J,3600 J,A,1 kWh = 1000 W x 3600 s = 3.6 x 10⁶ J.,General
+The heating effect of an electric current is used in,Electric iron,Electric fan,Electric bell,Electric motor,A,Electric irons use the heating effect.,General
+The heating effect of current is given by,I²Rt,IRt,I²R,IR,A,Heat = I²Rt (Joule's law).,General
+A current of 2 A flows through a resistor of 5 Ω for 10 seconds. Calculate the heat produced.,200 J,100 J,50 J,20 J,A,H = I²Rt = 4 x 5 x 10 = 200 J.,General
+A current of 3 A flows through a resistor of 4 Ω for 5 seconds. Calculate the heat produced.,180 J,60 J,120 J,90 J,A,H = 9 x 4 x 5 = 180 J.,General
+Which of the following is a source of e.m.f.?,Battery,Resistor,Capacitor,Inductor,A,A battery provides electromotive force.,General
+The e.m.f. of a cell is defined as,The work done per unit charge by the cell,The work done per unit charge by the external circuit,The potential difference across the cell terminals,The current in the cell,A,EMF is the energy per unit charge supplied by the cell.,General
+The potential difference across the terminals of a cell is,Less than the e.m.f. when current is flowing,Greater than the e.m.f. when current is flowing,Equal to the e.m.f. when current is flowing,Always equal to the e.m.f.,A,V = E - Ir.,General
+An ammeter is used to measure,Current,Voltage,Resistance,Power,A,Ammeters measure current.,General
+A voltmeter is used to measure,Current,Voltage,Resistance,Power,B,Voltmeters measure voltage.,General
+An ammeter is connected in,Series with the circuit,Parallel with the circuit,Series and parallel,Neither,A,Ammeters are connected in series.,General
+A voltmeter is connected in,Series with the circuit,Parallel with the circuit,Series and parallel,Neither,B,Voltmeters are connected in parallel.,General
+An ammeter should have,Low resistance,High resistance,Infinite resistance,Zero resistance,A,Ammeters should have low resistance to avoid affecting the circuit.,General
+A voltmeter should have,Low resistance,High resistance,Infinite resistance,Zero resistance,B,Voltmeters should have high resistance to avoid drawing current.,General
+The resistivity of a material is defined as,The resistance of a unit cube of the material,The resistance of a wire of unit length,The resistance of a wire of unit area,The resistance of a wire of unit length and unit area,A,ρ = RA/l.,General
+The S.I. unit of resistivity is,Ohm,Ohm metre,Ohm per metre,Ohm per square metre,B,Resistivity is measured in Ohm metres (Ωm).,General
+A wire of length 2 m and resistance 10 Ω is cut into two equal halves. The resistance of each half is,5 Ω,10 Ω,20 Ω,2.5 Ω,A,R ∝ l. Half length gives half resistance.,General
+"The resistance of a wire is 20 Ω. If it is stretched to twice its original length, its new resistance is",80 Ω,40 Ω,10 Ω,20 Ω,A,"When stretched to double length, area halves. R ∝ l/A, so R becomes 4 times.",General
+"Three resistors of 2 Ω, 3 Ω, and 5 Ω are connected in series to a 10 V battery. Calculate the current in the circuit.",1 A,2 A,0.5 A,5 A,A,Total R = 10 Ω. I = V/R = 10/10 = 1 A.,General
+Two resistors of 3 Ω and 6 Ω are connected in parallel. Calculate the equivalent resistance.,2 Ω,9 Ω,18 Ω,4.5 Ω,A,R = (3 x 6)/(3 + 6) = 18/9 = 2 Ω.,General
+A 12 V battery is connected to two resistors of 4 Ω and 6 Ω in series. Calculate the current.,1.2 A,2 A,0.5 A,12 A,A,R = 10 Ω. I = 12/10 = 1.2 A.,General
+The power dissipated in a resistor of 5 Ω carrying a current of 2 A is,20 W,10 W,40 W,5 W,A,P = I²R = 4 x 5 = 20 W.,General
+The resistance of a conductor increases with,Increase in temperature,Decrease in temperature,Increase in length,Decrease in length,A,"For most metals, resistance increases with temperature.",General
+Electrical power is defined as,The rate at which electrical energy is transferred,The total electrical energy consumed,The resistance of a circuit,The voltage across a circuit,A,Power = Energy / Time.,General
+The S.I. unit of electrical power is,Joule,Watt,Volt,Ampere,B,Power is measured in Watts (W).,General
+The electrical power of an appliance is given by,VI,V/I,I/V,V + I,A,Power = Voltage x Current.,General
+The power dissipated in a resistor can also be calculated using,I²R,I/R,R/I,I + R,A,P = I²R.,General
+An electric bulb rated 100 W is used for 10 hours. Calculate the energy consumed in kWh.,1 kWh,10 kWh,100 kWh,0.1 kWh,A,Energy = 0.1 kW x 10 h = 1 kWh.,General
+An electric iron rated 2000 W is used for 2 hours. Calculate the energy consumed in kWh.,4 kWh,2 kWh,40 kWh,0.4 kWh,A,Energy = 2 kW x 2 h = 4 kWh.,General
+A 100 W bulb is used for 5 hours. Calculate the energy consumed in joules.,1.8 x 10⁶ J,1.8 x 10³ J,1.8 x 10⁵ J,1.8 x 10⁷ J,A,Energy = P x t = 100 x 5 x 3600 = 1.8 x 10⁶ J.,General
+A 60 W bulb is used for 10 hours. Calculate the energy consumed in joules.,2.16 x 10⁶ J,2.16 x 10³ J,2.16 x 10⁵ J,2.16 x 10⁷ J,A,Energy = 60 x 10 x 3600 = 2.16 x 10⁶ J.,General
+"The power of an appliance is 500 W. If it is used for 4 hours, the energy consumed is",2 kWh,20 kWh,200 kWh,0.2 kWh,A,Energy = 0.5 kW x 4 h = 2 kWh.,General
+An electric heater is rated 1500 W. Calculate the current if the voltage is 240 V.,6.25 A,0.16 A,360000 A,240 A,A,I = P/V = 1500/240 = 6.25 A.,General
+"An electric bulb is rated 60 W, 240 V. Calculate the current.",0.25 A,4 A,14400 A,240 A,A,I = P/V = 60/240 = 0.25 A.,General
+"An electric bulb is rated 100 W, 240 V. Calculate its resistance.",576 Ω,2.4 Ω,24000 Ω,100 Ω,A,R = V²/P = (240²)/100 = 57600/100 = 576 Ω.,General
+"An electric heater is rated 1000 W, 240 V. Calculate its resistance.",57.6 Ω,0.24 Ω,240000 Ω,1000 Ω,A,R = V²/P = (240²)/1000 = 57600/1000 = 57.6 Ω.,General
+The power dissipated in a resistor of 10 Ω carrying a current of 3 A is,90 W,30 W,900 W,10 W,A,P = 9 x 10 = 90 W.,General
+The power dissipated in a resistor of 4 Ω with a voltage of 12 V across it is,36 W,48 W,3 W,12 W,A,P = V²/R = 144/4 = 36 W.,General
+The power dissipated in a resistor of 8 Ω with a voltage of 16 V across it is,32 W,128 W,2 W,16 W,A,P = 256/8 = 32 W.,General
+A current of 0.5 A flows through a resistor of 10 Ω for 20 seconds. Calculate the heat produced.,50 J,5 J,100 J,25 J,A,H = (0.5)² x 10 x 20 = 0.25 x 200 = 50 J.,General
+The heating element of an electric kettle is made of,Nichrome,Copper,Aluminium,Silver,A,Nichrome has high resistivity and high melting point.,General
+The filament of an electric bulb is made of,Tungsten,Copper,Nichrome,Aluminium,A,Tungsten has a high melting point.,General
+Which of the following is a safety device used in electrical circuits?,Fuse,Resistor,Capacitor,Inductor,A,Fuses protect against overcurrent.,General
+A fuse works on the,Heating effect of current,Magnetic effect of current,Chemical effect of current,Photoelectric effect,A,Fuse wire melts due to heating.,General
+The fuse wire should have,Low melting point,High melting point,High resistance,Low resistance,A,Fuse wires melt easily to break the circuit.,General
+The main purpose of a fuse is to,Protect the circuit from excessive current,Increase the current,Decrease the voltage,Store energy,A,Fuses prevent damage from overcurrent.,General
+Which of the following is a source of electrical energy?,Battery,Resistor,Capacitor,Inductor,A,Batteries provide electrical energy.,General
+A motor converts,Electrical energy to mechanical energy,Mechanical energy to electrical energy,Chemical energy to electrical energy,Electrical energy to chemical energy,A,Motors convert electrical to mechanical.,General
+A battery converts,Chemical energy to electrical energy,Electrical energy to chemical energy,Mechanical energy to electrical energy,Electrical energy to mechanical energy,A,Batteries convert chemical to electrical.,General
+Which of the following is a secondary cell?,Lead-acid accumulator,Dry cell,Leclanche cell,Daniel cell,A,Lead-acid accumulators are rechargeable.,General
+Which of the following is a primary cell?,Dry cell,Lead-acid accumulator,Nickel-cadmium cell,Lithium-ion cell,A,Dry cells are not rechargeable.,General
+The e.m.f. of a cell is measured in,Volts,Amperes,Coulombs,Ohms,A,EMF is measured in Volts.,General
+A battery of e.m.f. 12 V and internal resistance 1 Ω is connected to a 5 Ω resistor. Calculate the current.,2 A,3 A,1 A,4 A,A,I = E/(R+r) = 12/(5+1) = 2 A.,General
+A battery of e.m.f. 6 V and internal resistance 0.5 Ω is connected to a 2.5 Ω resistor. Calculate the current.,2 A,3 A,1 A,4 A,A,I = 6/(2.5+0.5) = 6/3 = 2 A.,General
+A battery of e.m.f. 9 V and internal resistance 1 Ω is connected to a 8 Ω resistor. Calculate the terminal voltage.,8 V,9 V,10 V,7 V,A,I = 9/(8+1) = 1 A. V = E - Ir = 9 - 1(1) = 8 V.,General
+The power output of a battery is maximum when,The external resistance equals the internal resistance,The external resistance is zero,The external resistance is infinite,The internal resistance is zero,A,Maximum power transfer theorem.,General
+"A 12 V battery delivers a current of 2 A to an external circuit. If the internal resistance is 1 Ω, calculate the power wasted inside the battery.",4 W,2 W,8 W,12 W,A,P = I²r = 4 x 1 = 4 W.,General
+Which of the following is a renewable source of electrical energy?,Solar,Coal,Natural gas,Petroleum,A,Solar is renewable.,General
+Which of the following is a non-renewable source of electrical energy?,Coal,Wind,Solar,Hydroelectric,A,Coal is non-renewable.,General
+Electrical energy is transmitted over long distances at,High voltage,Low voltage,High current,Low current,A,High voltage reduces energy loss.,General
+High voltage transmission reduces energy loss because,"Power loss = I²R, and high voltage means low current",High voltage means high current,High voltage increases resistance,High voltage decreases resistance,A,"For the same power, higher voltage means lower current, hence lower I²R loss.",General
+The transformer is used in power transmission to,Step up or step down voltage,Convert AC to DC,Convert DC to AC,Store energy,A,Transformers change voltage levels.,General
+A step-up transformer is used at the,Power station,Distribution point,Consumer end,Substation,A,Step-up at the power station before transmission.,General
+A step-down transformer is used at the,Consumer end,Power station,Transmission line,Generator,A,Step-down near the consumer.,General
+The heating effect of current is used in,Electric heaters,Electric motors,Generators,Transformers,A,Electric heaters use the heating effect.,General
+Which of the following is a disadvantage of the heating effect of current?,Energy loss in transmission lines,Heating of electric iron,Heating of electric kettle,Heating of electric bulb,A,Energy loss in transmission lines is a disadvantage.,General
+Electrostatics is the study of,Charges at rest,Charges in motion,Magnetic fields,Electric circuits,A,Electrostatics deals with stationary electric charges.,General
+Which of the following is a fundamental unit of charge?,Coulomb,Ampere,Volt,Ohm,A,The Coulomb is the S.I. unit of charge.,General
+The charge on an electron is,-1.6 x 10⁻¹⁹ C,+1.6 x 10⁻¹⁹ C,-9.1 x 10⁻³¹ C,+9.1 x 10⁻³¹ C,A,Electrons carry a negative charge of 1.6 x 10⁻¹⁹ C.,General
+The charge on a proton is,-1.6 x 10⁻¹⁹ C,+1.6 x 10⁻¹⁹ C,0,+9.1 x 10⁻³¹ C,B,Protons carry a positive charge of 1.6 x 10⁻¹⁹ C.,General
+Like charges,Attract each other,Repel each other,Have no effect on each other,Neutralize each other,B,Like charges repel.,General
+Unlike charges,Attract each other,Repel each other,Have no effect on each other,Neutralize each other,A,Unlike charges attract.,General
+Which of the following is a method of charging a body?,Friction,Induction,Conduction,All of the above,D,"Charging can occur by friction, induction, or conduction.",General
+Charging by friction involves,Transfer of electrons between two bodies,Transfer of protons between two bodies,Transfer of neutrons between two bodies,Transfer of whole atoms,A,Friction transfers electrons.,General
+"When a glass rod is rubbed with silk, the rod becomes",Positively charged,Negatively charged,Neutral,Uncharged,A,"Glass loses electrons to silk, becoming positive.",General
+"When a plastic rod is rubbed with fur, the rod becomes",Positively charged,Negatively charged,Neutral,Uncharged,B,"Plastic gains electrons from fur, becoming negative.",General
+Charging by induction involves,Bringing a charged body near an uncharged body without contact,Direct contact between two bodies,Rubbing two bodies together,Heating a body,A,Induction occurs without direct contact.,General
+An electroscope is an instrument used to,Detect electric charge,Measure current,Measure voltage,Measure resistance,A,An electroscope detects the presence of charge.,General
+The leaf of a gold-leaf electroscope diverges when,It is charged,It is discharged,It is earthed,It is heated,A,The leaf diverges due to repulsion of like charges.,General
+"If a negatively charged rod is brought near the cap of an electroscope, the leaf will",Diverge,Collapse,Remain unchanged,Fall off,A,"Electrons are repelled to the leaf, causing divergence.",General
+A conductor is a material that,Allows electric charge to flow easily,Does not allow electric charge to flow,Is always charged,Is always neutral,A,Conductors allow charge flow.,General
+An insulator is a material that,Allows electric charge to flow easily,Does not allow electric charge to flow,Is always charged,Is always neutral,B,Insulators do not allow charge flow.,General
+Which of the following is a good conductor of electricity?,Copper,Rubber,Glass,Plastic,A,Copper is a good conductor.,General
+Which of the following is a good insulator?,Copper,Silver,Rubber,Aluminium,C,Rubber is a good insulator.,General
+Coulomb's law states that the force between two point charges is,Directly proportional to the product of the charges and inversely proportional to the square of the distance between them,Directly proportional to the distance between them,Inversely proportional to the product of the charges,Independent of the distance between them,A,F = k(q1q2)/r².,General
+The force between two charges of 2 C and 3 C separated by a distance of 1 m is (k = 9 x 10⁹ Nm²/C²),54 x 10⁹ N,6 x 10⁹ N,18 x 10⁹ N,9 x 10⁹ N,A,F = k(q1q2)/r² = 9 x 10⁹ x (2 x 3)/1² = 54 x 10⁹ N.,General
+"If the distance between two charges is doubled, the force between them becomes",One-quarter of the original,One-half of the original,Twice the original,Four times the original,A,"F ∝ 1/r², so doubling r reduces F by a factor of 4.",General
+"If the distance between two charges is halved, the force between them becomes",Four times the original,Two times the original,Half the original,One-quarter of the original,A,"F ∝ 1/r², so halving r increases F by a factor of 4.",General
+The electric field intensity at a point is defined as,The force per unit positive charge at that point,The force per unit negative charge at that point,The work done per unit charge,The potential energy per unit charge,A,E = F/q.,General
+The S.I. unit of electric field intensity is,N/C,C/N,N/C²,C²/N,A,Electric field intensity is measured in N/C or V/m.,General
+The electric potential at a point is defined as,The work done per unit positive charge in bringing a charge from infinity to that point,The force per unit charge at that point,The potential energy of a unit charge,The charge per unit area,A,V = W/q.,General
+The S.I. unit of electric potential is,Volt,Ampere,Coulomb,Ohm,A,Electric potential is measured in Volts.,General
+Electric potential difference between two points is,The work done in moving a unit positive charge from one point to the other,The force between two charges,The product of charge and distance,The ratio of charge to distance,A,V = W/q.,General
+A capacitor is a device used to,Store electric charge,Store magnetic energy,Measure current,Measure voltage,A,Capacitors store charge.,General
+The S.I. unit of capacitance is,Farad,Ohm,Henry,Tesla,A,Capacitance is measured in Farads (F).,General
+The capacitance of a capacitor is defined as,The ratio of charge on one plate to the potential difference between the plates,The product of charge and potential difference,The ratio of potential difference to charge,The product of current and time,A,C = Q/V.,General
+A capacitor of 10 μF is connected across a 100 V supply. Calculate the charge stored.,1 x 10⁻³ C,1 x 10⁻⁴ C,1 x 10⁻⁵ C,1 x 10⁻⁶ C,A,Q = CV = 10 x 10⁻⁶ x 100 = 1 x 10⁻³ C.,General
+"Three capacitors of 2 μF, 3 μF, and 6 μF are connected in series. Calculate the total capacitance.",1 μF,11 μF,2 μF,6 μF,A,1/C = 1/2 + 1/3 + 1/6 = 3/6 + 2/6 + 1/6 = 6/6 = 1. C = 1 μF.,General
+Two capacitors of 4 μF and 6 μF are connected in parallel. Calculate the total capacitance.,10 μF,2.4 μF,24 μF,1.5 μF,A,Parallel: C = C1 + C2 = 4 + 6 = 10 μF.,General
+Two capacitors of 4 μF and 6 μF are connected in series. Calculate the total capacitance.,2.4 μF,10 μF,24 μF,1.5 μF,A,Series: C = (C1 x C2)/(C1 + C2) = 24/10 = 2.4 μF.,General
+The energy stored in a capacitor is given by,½CV²,CV²,½C²V,C²V,A,Energy = ½CV².,General
+The energy stored in a capacitor of 10 μF charged to 100 V is,0.05 J,0.5 J,5 J,50 J,A,E = ½CV² = ½(10 x 10⁻⁶)(100²) = ½(10⁻⁵)(10⁴) = 0.05 J.,General
+Capacitors in parallel have the same,Voltage,Charge,Energy,Capacitance,A,The same voltage is across each capacitor in parallel.,General
+Capacitors in series have the same,Charge,Voltage,Energy,Capacitance,A,The same charge is on each capacitor in series.,General
+A dielectric material inserted between the plates of a capacitor,Increases the capacitance,Decreases the capacitance,Has no effect on the capacitance,Increases the voltage,A,Dielectric increases capacitance: C = kC₀.,General
+The capacitance of a parallel plate capacitor is directly proportional to,The area of the plates,The distance between the plates,The voltage across the plates,The charge on the plates,A,C = εA/d.,General
+The capacitance of a parallel plate capacitor is inversely proportional to,The distance between the plates,The area of the plates,The dielectric constant,The charge on the plates,A,C = εA/d.,General
+"A parallel plate capacitor has an area of 0.01 m² and a separation of 1 mm. If the permittivity of free space is 8.85 x 10⁻¹² F/m, calculate the capacitance.",8.85 x 10⁻¹¹ F,8.85 x 10⁻¹² F,8.85 x 10⁻¹⁰ F,8.85 x 10⁻⁹ F,A,C = ε₀A/d = (8.85 x 10⁻¹² x 0.01)/(0.001) = 8.85 x 10⁻¹¹ F.,General
+Electric field lines,Start from positive charges and end on negative charges,Start from negative charges and end on positive charges,Start and end on positive charges,Start and end on negative charges,A,Field lines go from positive to negative.,General
+Electric field lines are closer together where the electric field is,Stronger,Weaker,Zero,Constant,A,Closer lines indicate a stronger field.,General
+The electric field inside a hollow conductor is,Zero,Maximum,Equal to the field outside,Infinite,A,"Inside a hollow conductor, the electric field is zero.",General
+Lightning is an example of,Electrostatic discharge,Electric current,Magnetic force,Induction,A,Lightning is a massive electrostatic discharge.,General
+The earth is used as a reference point in electrostatics because it,Can absorb or supply electrons without significant change in potential,Has a strong magnetic field,Is positively charged,Is negatively charged,A,The earth acts as an infinite reservoir of charge.,General
+Earthing a charged body,Removes the excess charge,Adds more charge,Increases the charge,Does not affect the charge,A,Earthing neutralizes the charge.,General
+A lightning conductor is used to,Protect buildings from lightning,Attract lightning,Generate electricity,Measure lightning,A,It provides a safe path for lightning to the ground.,General
+Which of the following is a practical application of electrostatics?,Photocopying,Electroplating,Electromagnetic induction,Transformers,A,Photocopiers use electrostatic attraction.,General
+An electric field of 200 N/C acts on a charge of 2 C. Calculate the force.,400 N,100 N,200 N,4 N,A,F = qE = 2 x 200 = 400 N.,General
+The potential difference between two points is 12 V. Calculate the work done in moving a charge of 2 C between the two points.,24 J,6 J,12 J,2 J,A,W = qV = 2 x 12 = 24 J.,General
+A charge of 4 μC is placed in an electric field of 500 N/C. Calculate the force.,2 x 10⁻³ N,2 x 10⁻⁶ N,2 x 10⁻⁹ N,2 x 10⁻¹² N,A,F = qE = 4 x 10⁻⁶ x 500 = 2 x 10⁻³ N.,General
+Which of the following statements about electric field lines is correct?,They cannot cross each other,They can cross each other,They are always straight lines,They start from negative charges,A,"Field lines cannot cross; if they did, the field at the crossing point would be in two directions.",General
+A point charge of 5 μC is placed at a distance of 10 cm from a point charge of 10 μC. Calculate the force between them. (k = 9 x 10⁹ Nm²/C²),45 N,4.5 N,450 N,0.45 N,A,F = k(q1q2)/r² = 9 x 10⁹ x (5 x 10⁻⁶)(10 x 10⁻⁶)/(0.1)² = 45 N.,General
+The capacitance of a capacitor increases when,The area of the plates is increased,The area of the plates is decreased,The distance between the plates is increased,The voltage across the plates is increased,A,C ∝ A.,General
+Which of the following is a type of capacitor?,Electrolytic,Mica,Ceramic,All of the above,D,All are types of capacitors.,General
+A body is said to be in equilibrium when,The net force acting on it is zero,It is at rest,It is moving with constant velocity,It is accelerating,A,Equilibrium means the resultant force is zero.,General
+Which of the following is a condition for equilibrium?,Sum of clockwise moments = sum of anticlockwise moments,Sum of forces = maximum,Sum of moments = zero only,Net force is non-zero,A,The principle of moments applies.,General
+The centre of gravity of a uniform meter rule is at the,0 cm mark,50 cm mark,100 cm mark,25 cm mark,B,A uniform meter rule balances at its midpoint (50 cm).,General
+The centre of gravity of a uniform triangular lamina is at,The midpoint of the base,The centroid (intersection of medians),The apex,Any point on the triangle,B,The centre of gravity of a triangle is at the centroid.,General
+The moment of a force about a point is defined as,Force x perpendicular distance from the point,Force x distance,Force / distance,Force + distance,A,Moment = Force x perpendicular distance.,General
+The S.I. unit of moment is,Newton,Joule,Newton metre,Watt,C,Moment is measured in Newton metres (Nm).,General
+A force of 10 N acts at a perpendicular distance of 2 m from a pivot. Calculate the moment.,20 Nm,5 Nm,12 Nm,0.2 Nm,A,Moment = F x d = 10 x 2 = 20 Nm.,General
+A force of 20 N acts at a perpendicular distance of 3 m from a pivot. Calculate the moment.,60 Nm,23 Nm,6.67 Nm,0.15 Nm,A,Moment = 20 x 3 = 60 Nm.,General
+A uniform metre rule is pivoted at the 50 cm mark. A mass of 20 g is placed at the 10 cm mark. Where should a mass of 40 g be placed to balance it?,30 cm mark,20 cm mark,40 cm mark,60 cm mark,A,"Clockwise moment = Anticlockwise moment. 20 x 40 = 40 x d, d = 20. Position = 50 - 20 = 30 cm mark.",General
+A uniform metre rule of weight 100 N is balanced by a knife edge at the 10 cm mark and a cord attached at the 85 cm mark. What is the tension in the string?,53.33 N,23.62 N,35.74 N,78.68 N,A,Taking moments about the pivot (10 cm): 100(50-10) = T(85-10) → 4000 = 75T → T = 53.33 N.,General
+A machine has a velocity ratio of 4 and a mechanical advantage of 3. Calculate its efficiency.,75%,133%,12%,1.33%,A,Efficiency = (3/4) x 100 = 75%.,General
+Which of the following is a first class lever?,Scissors,Wheelbarrow,Fishing rod,Nutcracker,A,Scissors have the fulcrum between the effort and the load.,General
+Which of the following is a second class lever?,Wheelbarrow,Scissors,Fishing rod,Pliers,A,Wheelbarrow has the load between the fulcrum and the effort.,General
+Which of the following is a third class lever?,Fishing rod,Scissors,Wheelbarrow,Nutcracker,A,Fishing rod has the effort between the fulcrum and the load.,General
+The velocity ratio of a pulley system with 4 ropes supporting the load is,4,2,8,1,A,VR = number of supporting ropes.,General
+"A screw jack has a velocity ratio of 50. If its efficiency is 40%, calculate the mechanical advantage.",20,125,0.8,40,A,"40 = (MA/50) x 100, MA = 20.",General
+The efficiency of a machine can be increased by,Reducing friction,Increasing friction,Increasing the load beyond capacity,Using less effort,A,Reducing friction reduces energy loss.,General
+Which of the following is NOT a simple machine?,Lever,Pulley,Screw,Electric motor,D,Electric motor is not a simple machine.,General
+"In an inclined plane, the velocity ratio is given by",Length of incline / Height of incline,Height / Length of incline,Load / Effort,Effort / Load,A,VR = length/height for an inclined plane.,General
+An inclined plane of length 10 m and height 2 m has a velocity ratio of,5,0.2,8,12,A,VR = 10/2 = 5.,General
+The efficiency of a machine is usually less than 100% because of,Friction,Gravity,Inertia,Momentum,A,Friction causes energy loss.,General
+A body is in stable equilibrium if,"When slightly displaced, it returns to its original position","When slightly displaced, it remains in the new position","When slightly displaced, it moves further away",It is at rest,A,Stable equilibrium means it returns to its original position.,General
+A body is in unstable equilibrium if,"When slightly displaced, it moves further away","When slightly displaced, it returns to its original position","When slightly displaced, it remains in the new position",It is at rest,A,Unstable equilibrium means it moves further away.,General
+A body is in neutral equilibrium if,"When slightly displaced, it remains in the new position","When slightly displaced, it returns to its original position","When slightly displaced, it moves further away",It is at rest,A,Neutral equilibrium means it remains in the new position.,General
+A cone resting on its base is in,Stable equilibrium,Unstable equilibrium,Neutral equilibrium,No equilibrium,A,The centre of gravity is low and the base is wide.,General
+A cone resting on its apex is in,Unstable equilibrium,Stable equilibrium,Neutral equilibrium,No equilibrium,A,The centre of gravity is high and the base is a point.,General
+A sphere resting on a horizontal surface is in,Neutral equilibrium,Stable equilibrium,Unstable equilibrium,No equilibrium,A,A sphere is in neutral equilibrium on a flat surface.,General
+The centre of gravity of a body is the point through which,The entire weight of the body acts,The entire mass of the body acts,The entire volume of the body acts,The entire force acts,A,The centre of gravity is where the total weight acts.,General
+The centre of gravity of a uniform circular lamina is at,Its centre,Its edge,Any point on the circumference,The top,A,The centre of gravity of a uniform circular lamina is at its centre.,General
+The principle of moments states that for a body in equilibrium,Sum of clockwise moments = sum of anticlockwise moments about any point,Sum of forces = zero,Sum of moments = maximum,Net force is non-zero,A,The principle of moments.,General
+A uniform metre rule of mass 100 g is balanced at the 50 cm mark. A mass of 20 g is placed at the 20 cm mark. Where should a mass of 30 g be placed to balance it?,40 cm mark,30 cm mark,50 cm mark,60 cm mark,A,"Clockwise moment = 30 x d. Anticlockwise moment = 20 x 30 = 600. d = 600/30 = 20. Position = 50 + 20 = 70 cm mark. Wait: 20g is at 20cm, so distance from pivot is 30cm. Anticlockwise moment = 20 x 30 = 600. Balance: 30 x d = 600, d = 20 cm to the right of pivot = 70 cm mark.",General
+A body of weight 60 N is suspended from a rope. The tension in the rope is,60 N,30 N,120 N,0 N,A,The tension must balance the weight.,General
+The resultant of two forces of 3 N and 4 N acting at right angles is,5 N,7 N,1 N,12 N,A,R = √(3² + 4²) = 5 N.,General
+The resultant of two forces of 6 N and 8 N acting at right angles is,10 N,14 N,2 N,48 N,A,R = √(6² + 8²) = 10 N.,General
+Two forces of 10 N and 10 N act at an angle of 120° to each other. The magnitude of the resultant is,10 N,20 N,0 N,17.3 N,A,R = √(10² + 10² + 2(10)(10)cos 120°) = √(200 - 100) = 10 N.,General
+"If a body is in equilibrium under the action of three forces, the forces must be",Concurrent and coplanar,Parallel only,Equal in magnitude,Opposite in direction,A,Three forces in equilibrium must be concurrent and coplanar.,General
+The moment of a force of 50 N acting at a perpendicular distance of 4 m is,200 Nm,54 Nm,12.5 Nm,0.08 Nm,A,Moment = 50 x 4 = 200 Nm.,General
+A uniform beam of length 10 m and weight 200 N is supported at both ends. A load of 400 N is placed at the midpoint. Calculate the reaction at each support.,300 N,400 N,200 N,600 N,A,Total load = 200 + 400 = 600 N. Each support carries 600/2 = 300 N.,General
+A uniform beam of length 6 m and weight 100 N is supported at both ends. A load of 200 N is placed 2 m from one end. Calculate the reaction at the support nearer the load.,150 N,200 N,100 N,250 N,A,Taking moments about the other support: R1 x 6 = 100(3) + 200(2). R1 = (300 + 400)/6 = 116.7 N. Wait: R1 + R2 = 300. Moments about R2: R1 x 6 = 100(3) + 200(4) = 300 + 800 = 1100. R1 = 183.3 N. Correct answer: 183.3 N.,General
+The condition for a body to be in equilibrium under the action of parallel forces is that,The sum of forces in any direction is zero and the sum of moments about any point is zero,The sum of forces is maximum,The sum of moments is maximum,Net force is non-zero,A,Both conditions are required.,General
+A body of mass 10 kg hangs from a spring balance. The reading on the balance is (g = 10 m/s²),100 N,10 N,1 N,1000 N,A,The balance reads weight = mg = 10 x 10 = 100 N.,General
+A uniform metre rule of mass 200 g is balanced at the 50 cm mark. A mass of 40 g is placed at the 10 cm mark. Where should a mass of 50 g be placed to balance it?,34 cm mark,40 cm mark,50 cm mark,60 cm mark,A,"Moment of 40 g about 50 cm = 40(40) = 1600. Moment of 50 g = 50(x). 50x = 1600, x = 32. Position = 50 + 32 = 82 cm mark. Wait: 40 g is at 10 cm, distance from pivot = 40 cm. Anticlockwise moment = 40 x 40 = 1600. Balance: 50 x d = 1600, d = 32 cm to the right of pivot = 82 cm mark.",General
+"At constant temperature, if the volume of a gas is doubled, its pressure will",Be halved,Be doubled,Remain the same,Be quadrupled,A,Boyle's law: P ∝ 1/V.,General
+"At constant pressure, if the absolute temperature of a gas is halved, its volume will",Be halved,Be doubled,Remain the same,Be quadrupled,A,Charles's law: V ∝ T.,General
+"At constant volume, if the absolute temperature of a gas is halved, its pressure will",Be halved,Be doubled,Remain the same,Be quadrupled,A,Pressure law: P ∝ T.,General
+A gas at 27°C has a volume of 500 cm³. At what temperature will its volume be 1000 cm³ at constant pressure?,327°C,300°C,600°C,273°C,A,V1/T1 = V2/T2. 500/300 = 1000/T2. T2 = 600 K = 327°C.,General
+A gas has a volume of 200 cm³ at 300 K. What is its volume at 600 K at constant pressure?,400 cm³,100 cm³,300 cm³,600 cm³,A,V ∝ T. V2 = 200 x (600/300) = 400 cm³.,General
+A gas occupies 2 m³ at a pressure of 3 atm. What volume will it occupy at 6 atm at constant temperature?,1 m³,4 m³,6 m³,0.5 m³,A,Boyle's law: P1V1 = P2V2. 3x2 = 6xV2. V2 = 1 m³.,General
+A gas occupies 4 m³ at a pressure of 2 atm. What volume will it occupy at 8 atm at constant temperature?,1 m³,2 m³,4 m³,8 m³,A,P1V1 = P2V2. 2x4 = 8xV2. V2 = 1 m³.,General
+The pressure of a gas is 100 kPa at 200 K. What is its pressure at 400 K at constant volume?,200 kPa,50 kPa,100 kPa,400 kPa,A,P ∝ T. P2 = 100 x (400/200) = 200 kPa.,General
+The pressure of a gas is 80 kPa at 300 K. What is its pressure at 600 K at constant volume?,160 kPa,40 kPa,80 kPa,320 kPa,A,P ∝ T. P2 = 80 x (600/300) = 160 kPa.,General
+A gas at 27°C has a volume of 300 cm³. At what temperature will its volume be 600 cm³ at constant pressure?,327°C,300°C,600°C,273°C,A,V1/T1 = V2/T2. 300/300 = 600/T2. T2 = 600 K = 327°C.,General
+A gas at 27°C and 1 atm occupies 500 cm³. What volume will it occupy at 2 atm and 27°C?,250 cm³,1000 cm³,500 cm³,125 cm³,A,P1V1 = P2V2. 1x500 = 2xV2. V2 = 250 cm³.,General
+"According to the kinetic theory of gases, gas molecules are",In constant random motion,At rest,Vibrating in fixed positions,Attracted to each other strongly,A,Gas molecules move randomly.,General
+"According to the kinetic theory of gases, the volume of the gas molecules themselves is",Negligible compared to the volume of the container,Equal to the volume of the container,Greater than the volume of the container,Not considered,A,Gas molecules occupy negligible volume.,General
+"According to the kinetic theory of gases, the forces of attraction between gas molecules are",Negligible,Very strong,Equal to the forces in solids,Stronger than in liquids,A,"In ideal gases, intermolecular forces are negligible.",General
+An ideal gas is one that,Obeys the gas laws exactly at all temperatures and pressures,Obeys the gas laws only at high pressure,Obeys the gas laws only at low temperature,Does not obey any gas law,A,Ideal gases obey PV = nRT exactly.,General
+A real gas behaves like an ideal gas at,Low pressure and high temperature,High pressure and low temperature,High pressure and high temperature,Low pressure and low temperature,A,"At low P and high T, real gases approximate ideal behaviour.",General
+Which of the following is NOT a gas law?,Boyle's law,Charles's law,Pressure law,Ohm's law,D,Ohm's law relates to electricity.,General
+"The pressure of a gas is increased from 1 atm to 4 atm at constant temperature. If the initial volume was 8 L, the final volume is",2 L,4 L,8 L,32 L,A,P1V1 = P2V2. 1x8 = 4xV2. V2 = 2 L.,General
+The volume of a gas is 2 L at 1 atm. What is the pressure if the volume is reduced to 0.5 L at constant temperature?,4 atm,2 atm,1 atm,0.5 atm,A,P1V1 = P2V2. 1x2 = P2 x 0.5. P2 = 4 atm.,General
+A gas occupies 500 cm³ at 0°C. What is its volume at 273°C at constant pressure?,1000 cm³,500 cm³,250 cm³,1500 cm³,A,V1/T1 = V2/T2. 500/273 = V2/546. V2 = 1000 cm³.,General
+A gas occupies 400 cm³ at 300 K. What is its volume at 150 K at constant pressure?,200 cm³,400 cm³,800 cm³,100 cm³,A,V ∝ T. V2 = 400 x (150/300) = 200 cm³.,General
+The pressure of a gas is 2 atm at 300 K. What is its pressure at 150 K at constant volume?,1 atm,2 atm,4 atm,0.5 atm,A,P ∝ T. P2 = 2 x (150/300) = 1 atm.,General
+A gas has a volume of 300 cm³ at 27°C and 1 atm. What is its volume at 27°C and 3 atm?,100 cm³,300 cm³,900 cm³,200 cm³,A,P1V1 = P2V2. 1x300 = 3xV2. V2 = 100 cm³.,General
+The number of moles of a gas can be calculated using the formula,n = PV/RT,n = RT/PV,n = PV x RT,n = P/RT,A,"From PV = nRT, n = PV/RT.",General
+"If 2 moles of a gas occupy 44.8 L at s.t.p., the volume occupied by 1 mole is",22.4 L,11.2 L,44.8 L,5.6 L,A,Molar volume at s.t.p. is 22.4 L.,General
+"At s.t.p., 1 mole of any gas occupies",22.4 L,11.2 L,44.8 L,2.24 L,A,Molar volume at s.t.p.,General
+"At r.t.p., 1 mole of any gas occupies",24.0 L,22.4 L,11.2 L,44.8 L,A,Molar volume at room temperature and pressure.,General
+The combined gas law is expressed as,P1V1/T1 = P2V2/T2,P1V1 x T1 = P2V2 x T2,P1/V1 = P2/V2,V1/T1 = P2/T2,A,Combined gas law.,General
+A gas occupies 600 cm³ at 27°C and 1 atm. What volume will it occupy at 27°C and 0.5 atm?,1200 cm³,600 cm³,300 cm³,900 cm³,A,P1V1 = P2V2. 1x600 = 0.5xV2. V2 = 1200 cm³.,General
+A gas at 27°C and 1 atm occupies 500 cm³. What volume will it occupy at 27°C and 2 atm?,250 cm³,500 cm³,1000 cm³,125 cm³,A,P1V1 = P2V2. 1x500 = 2xV2. V2 = 250 cm³.,General
+The pressure of a fixed mass of gas is doubled at constant volume. The temperature,Is doubled,Is halved,Remains the same,Becomes zero,A,P ∝ T at constant V.,General
+The volume of a fixed mass of gas is doubled at constant pressure. The temperature,Is doubled,Is halved,Remains the same,Becomes zero,A,V ∝ T at constant P.,General
+The pressure of a fixed mass of gas is halved at constant temperature. The volume,Is doubled,Is halved,Remains the same,Becomes zero,A,P ∝ 1/V at constant T.,General
+The volume of a fixed mass of gas is halved at constant temperature. The pressure,Is doubled,Is halved,Remains the same,Becomes zero,A,P ∝ 1/V at constant T.,General
+Which of the following graphs represents Boyle's law?,A hyperbola of P against V,A straight line through the origin of V against T,A straight line through the origin of P against T,A parabola,A,P vs V is a hyperbola.,General
+Which of the following graphs represents Charles's law?,A straight line through the origin of V against T,A hyperbola of P against V,A straight line through the origin of P against T,A parabola,A,V vs T is a straight line through the origin.,General
+Which of the following graphs represents the pressure law?,A straight line through the origin of P against T,A hyperbola of P against V,A straight line through the origin of V against T,A parabola,A,P vs T is a straight line through the origin.,General
+The kinetic theory of gases assumes that gas molecules,Collide elastically with each other and with the walls,Collide inelastically,Are stationary,Attract each other strongly,A,Elastic collisions are assumed.,General
+The kinetic theory of gases assumes that the gas molecules are,Identical and in random motion,Different and stationary,Attracted to each other,In fixed positions,A,Molecules are identical and randomly moving.,General
+"At constant temperature, the product of pressure and volume of a fixed mass of gas is",Constant,Variable,Zero,Infinite,A,PV = constant (Boyle's law).,General
+"At constant pressure, the ratio of volume to absolute temperature of a fixed mass of gas is",Constant,Variable,Zero,Infinite,A,V/T = constant (Charles's law).,General
+"At constant volume, the ratio of pressure to absolute temperature of a fixed mass of gas is",Constant,Variable,Zero,Infinite,A,P/T = constant (pressure law).,General
+The pressure of a gas is 750 mmHg at 27°C. What is its pressure at 127°C at constant volume?,1000 mmHg,750 mmHg,500 mmHg,1500 mmHg,A,P1/T1 = P2/T2. 750/300 = P2/400. P2 = 1000 mmHg.,General
+A gas occupies 1.5 m³ at 300 K. What is its volume at 400 K at constant pressure?,2.0 m³,1.5 m³,1.0 m³,2.5 m³,A,V ∝ T. V2 = 1.5 x (400/300) = 2.0 m³.,General
+"An ideal gas equation is PV = nRT. If n and T are constant, then",P1V1 = P2V2,P1/V1 = P2/V2,V1/T1 = V2/T2,P1/T1 = P2/T2,A,Boyle's law.,General
+Which of the following is NOT an assumption of the kinetic theory of gases?,Gas molecules attract each other strongly,Gas molecules are in random motion,Gas molecules occupy negligible volume,Collisions between gas molecules are elastic,A,The theory assumes negligible intermolecular forces.,General
+The reflection of light occurs when light,Bounces off a surface,Passes through a surface,Bends around an obstacle,Spreads out after passing through a narrow opening,A,Reflection is the bouncing back of light.,General
+The image formed by a plane mirror is,Virtual and laterally inverted,Real and inverted,Virtual and erect,Real and erect,A,"Plane mirrors form virtual, laterally inverted images.",General
+The image formed by a plane mirror is the same distance behind the mirror as the object is,In front of the mirror,Above the mirror,Below the mirror,Beside the mirror,A,The image distance equals the object distance.,General
+"When light travels from a less dense medium to a denser medium, it bends",Towards the normal,Away from the normal,Along the normal,At 90° to the normal,A,"Entering a denser medium slows light, bending it towards the normal.",General
+"When light travels from a denser medium to a less dense medium, it bends",Towards the normal,Away from the normal,Along the normal,At 90° to the normal,B,"Entering a less dense medium speeds light up, bending it away from the normal.",General
+The refractive index of diamond is approximately,1.33,1.50,2.42,1.00,C,Diamond has n ≈ 2.42.,General
+"If the refractive index of a medium is 1.5, the speed of light in the medium is",2.0 x 10⁸ m/s,1.5 x 10⁸ m/s,3.0 x 10⁸ m/s,4.5 x 10⁸ m/s,A,v = c/n = (3 x 10⁸)/1.5 = 2.0 x 10⁸ m/s.,General
+Snell's law states that,n1 sin i = n2 sin r,n1 cos i = n2 cos r,n1 tan i = n2 tan r,n1 sin r = n2 sin i,A,Snell's law of refraction.,General
+"If the refractive index of a medium is 1.5, the critical angle is approximately",41.8°,30°,60°,48.6°,A,sin C = 1/n = 1/1.5 = 0.667. C = 41.8°.,General
+The critical angle for a medium of refractive index 2 is,30°,45°,60°,90°,A,"sin C = 1/2, so C = 30°.",General
+The power of a lens is given by,1/f (in metres),f (in metres),1/f (in cm),f (in cm),A,Power P = 1/f (f in metres).,General
+A lens of focal length 0.5 m has a power of,2 D,0.5 D,5 D,20 D,A,P = 1/0.5 = 2 D.,General
+An object is placed 20 cm from a converging lens of focal length 10 cm. Calculate the image distance.,20 cm,10 cm,30 cm,40 cm,A,1/f = 1/u + 1/v. 1/10 = 1/20 + 1/v. 1/v = 1/10 - 1/20 = 1/20. v = 20 cm.,General
+An object is placed 30 cm from a converging lens of focal length 10 cm. Calculate the image distance.,15 cm,10 cm,30 cm,20 cm,A,1/f = 1/u + 1/v. 1/10 = 1/30 + 1/v. 1/v = 1/10 - 1/30 = 2/30. v = 15 cm.,General
+An object is placed 15 cm from a converging lens of focal length 10 cm. Calculate the image distance.,30 cm,15 cm,10 cm,20 cm,A,1/10 = 1/15 + 1/v. 1/v = 1/10 - 1/15 = 1/30. v = 30 cm.,General
+An object is placed 5 cm from a converging lens of focal length 10 cm. The image formed is,"Virtual, erect and magnified","Real, inverted and magnified","Real, inverted and diminished","Virtual, inverted and magnified",A,"When u < f, the image is virtual, erect and magnified.",General
+The image formed by a concave lens is always,"Virtual, erect and diminished","Real, inverted and magnified","Real, erect and diminished","Virtual, inverted and magnified",A,"Concave lenses always form virtual, erect, diminished images.",General
+The magnification of a lens is given by,v/u,u/v,v x u,v + u,A,Magnification m = v/u.,General
+An object is placed 10 cm from a converging lens of focal length 5 cm. Calculate the magnification.,1,2,0.5,5,A,1/f = 1/u + 1/v. 1/5 = 1/10 + 1/v. 1/v = 1/10. v = 10 cm. m = v/u = 10/10 = 1.,General
+An object 2 cm high is placed 20 cm from a converging lens of focal length 10 cm. Calculate the image height.,2 cm,4 cm,1 cm,10 cm,A,v = 20 cm (from earlier). m = v/u = 20/20 = 1. Image height = 2 cm.,General
+The human eye focuses light on the,Cornea,Retina,Iris,Pupil,B,The retina is the light-sensitive screen at the back of the eye.,General
+The defect of the eye in which distant objects are blurred is,Myopia (short-sightedness),Hypermetropia (long-sightedness),Astigmatism,Presbyopia,A,Myopia: distant objects blurred.,General
+The defect of the eye in which near objects are blurred is,Myopia (short-sightedness),Hypermetropia (long-sightedness),Astigmatism,Presbyopia,B,Hypermetropia: near objects blurred.,General
+The dispersion of white light into its component colours is called,Reflection,Refraction,Dispersion,Diffraction,C,Dispersion separates white light into colours.,General
+A rainbow is formed by the,"Refraction, dispersion and reflection of sunlight in water droplets",Reflection of sunlight in a mirror,Refraction of sunlight in a prism,Diffraction of sunlight around obstacles,A,"Rainbows involve refraction, dispersion, and internal reflection.",General
+The colour of light with the longest wavelength is,Red,Violet,Green,Blue,A,Red has the longest wavelength in the visible spectrum.,General
+The colour of light with the shortest wavelength is,Red,Violet,Green,Blue,B,Violet has the shortest wavelength in the visible spectrum.,General
+Which of the following colours of light has the highest frequency?,Red,Violet,Green,Yellow,B,Violet has the highest frequency.,General
+Which of the following colours of light is deviated most by a prism?,Red,Violet,Green,Yellow,B,Violet is deviated most due to highest refractive index.,General
+Which of the following colours of light is deviated least by a prism?,Red,Violet,Green,Yellow,A,Red is deviated least.,General
+An object appears red in white light because it,Reflects red light and absorbs other colours,Absorbs red light and reflects other colours,Reflects all colours,Absorbs all colours,A,A red object reflects red and absorbs other colours.,General
+An object appears white in white light because it,Reflects all colours,Absorbs all colours,Reflects only white,Absorbs only white,A,A white object reflects all colours.,General
+An object appears black in white light because it,Reflects all colours,Absorbs all colours,Reflects only black,Absorbs only black,B,A black object absorbs all colours.,General
+A primary colour of light is one that,Cannot be produced by mixing other colours,Is produced by mixing other colours,Is always red,Is always blue,A,"The primary colours of light are red, green, and blue.",General
+Which of the following is a primary colour of light?,Yellow,Cyan,Magenta,Red,D,"Primary colours of light are red, green, blue.",General
+The mixing of red and green light produces,Yellow,Magenta,Cyan,White,A,Red + green = yellow.,General
+The mixing of red and blue light produces,Yellow,Magenta,Cyan,White,B,Red + blue = magenta.,General
+The mixing of blue and green light produces,Yellow,Magenta,Cyan,White,C,Blue + green = cyan.,General
+"The mixing of red, green, and blue light produces",White,Yellow,Magenta,Cyan,A,All three primary colours give white.,General
+A secondary colour of light is one that,Is produced by mixing two primary colours,Cannot be produced by mixing other colours,Is always white,Is always black,A,Secondary colours are made from two primaries.,General
+The S.I. unit of mass is,kilogram,gram,pound,ounce,A,The standard SI unit for mass is the kilogram (kg).,General
+The S.I. unit of length is,centimetre,metre,kilometre,millimetre,B,The standard SI unit for length is the metre (m).,General
+The S.I. unit of time is,hour,minute,second,day,C,The standard SI unit for time is the second (s).,General
+Which of the following is a fundamental quantity?,Force,Velocity,Mass,Pressure,C,"Mass is a fundamental quantity, while the others are derived.",General
+Which of the following is a derived quantity?,Length,Time,Temperature,Force,D,"Force is derived from mass, length, and time.",General
+Which of the following is a fundamental S.I. unit?,Newton,Joule,Kilogram,Watt,C,The kilogram is a base unit; the others are derived units.,General
+Which of the following is NOT a fundamental S.I. unit?,Ampere,Kelvin,Mole,Volt,D,"The Volt is a derived unit. Ampere, Kelvin, and Mole are base units.",General
+The dimension of velocity is,LT⁻¹,LT,LT⁻²,L²T,A,"Velocity = distance/time, so dimension is length/time (LT⁻¹).",General
+The dimension of acceleration is,LT⁻¹,LT,LT⁻²,L²T,C,"Acceleration = velocity/time, so dimension is length/time² (LT⁻²).",General
+The dimension of force is,MLT⁻¹,MLT⁻²,ML²T⁻²,ML²T⁻³,B,"Force = mass x acceleration, so dimension is MLT⁻².",General
+The dimension of work is,MLT⁻¹,MLT⁻²,ML²T⁻²,ML²T⁻³,C,"Work = force x distance, so dimension is ML²T⁻².",General
+The dimension of power is,ML²T⁻³,MLT⁻²,ML²T⁻²,MLT⁻¹,A,"Power = work/time, so dimension is ML²T⁻³.",General
+The dimension of pressure is,MLT⁻²,ML⁻¹T⁻²,ML²T⁻²,MLT⁻¹,B,"Pressure = force/area, so dimension is ML⁻¹T⁻².",General
+Which instrument is most suitable for measuring the internal diameter of a test tube?,Metre rule,Tape rule,Vernier caliper,Micrometer screw gauge,C,Vernier calipers are used for internal dimensions.,General
+Which instrument is most suitable for measuring the thickness of a sheet of paper?,Metre rule,Vernier caliper,Micrometer screw gauge,Measuring tape,C,Micrometer screw gauges measure very small thicknesses accurately.,General
+The smallest reading on a metre rule is usually,1 cm,1 mm,0.1 mm,0.01 mm,B,Standard metre rules have millimetre markings.,General
+"The main scale of a vernier caliper is graduated in millimetres. If the vernier has 10 divisions, the least count is",0.1 mm,0.01 mm,1 mm,10 mm,A,Least count = 1 mm / 10 = 0.1 mm.,General
+"A vernier caliper reads 2.3 cm on the main scale and the 4th vernier division coincides. If the least count is 0.01 cm, the total reading is",2.34 cm,2.4 cm,2.03 cm,2.43 cm,A,Reading = main scale + (vernier division x least count) = 2.3 + (4 x 0.01) = 2.34 cm.,General
+A micrometer screw gauge has a pitch of 0.5 mm and 50 divisions on its circular scale. The least count is,0.01 mm,0.1 mm,0.05 mm,0.5 mm,A,Least count = pitch / number of divisions = 0.5 / 50 = 0.01 mm.,General
+The pitch of a micrometer screw gauge is,The distance moved by the spindle per complete revolution,The smallest measurement it can take,The number of divisions on the circular scale,The length of the main scale,A,Pitch is the distance moved per revolution.,General
+A zero error in a measuring instrument occurs when,The instrument reads zero when the true measurement is zero,The instrument reads a value when the true measurement is zero,The instrument is used incorrectly,The instrument is broken,B,Zero error is a false reading when the actual value is zero.,General
+"If a vernier caliper has a positive zero error of 0.02 cm and reads 3.45 cm, the correct measurement is",3.43 cm,3.47 cm,3.45 cm,3.02 cm,A,Correct reading = observed reading - zero error = 3.45 - 0.02 = 3.43 cm.,General
+"If a micrometer screw gauge has a negative zero error of 0.03 mm and reads 2.45 mm, the correct measurement is",2.48 mm,2.42 mm,2.45 mm,2.03 mm,A,Correct reading = observed + zero error = 2.45 + 0.03 = 2.48 mm.,General
+Which of the following pairs consists of vectors?,Mass and weight,Speed and velocity,Distance and displacement,Work and energy,B,"Speed is scalar, but velocity is a vector.",General
+Which of the following pairs consists of scalars?,Force and pressure,Energy and power,Velocity and acceleration,Momentum and impulse,B,Energy and power are scalars.,General
+A quantity that has both magnitude and direction is called a,Scalar,Vector,Fundamental quantity,Derived quantity,B,Vectors have magnitude and direction.,General
+"If a body moves 3 m North and then 4 m East, its total displacement is",7 m,5 m,1 m,12 m,B,Displacement = √(3² + 4²) = 5 m.,General
+"If a body moves 5 m North and then 5 m South, its total displacement is",10 m,5 m,0 m,25 m,C,Displacement is zero because it returns to the start.,General
+"If a body moves 5 m North and then 5 m South, the total distance covered is",10 m,5 m,0 m,25 m,A,Distance is total path covered = 5 + 5 = 10 m.,General
+Which of the following is a unit of energy?,Newton,Joule,Watt,Pascal,B,Joule is the unit of energy.,General
+Which of the following instruments is used to measure atmospheric pressure?,Thermometer,Barometer,Hygrometer,Ammeter,B,Barometer measures atmospheric pressure.,General
+"The pressure at the bottom of a tank of water 5 m deep is (density = 1000 kg/m³, g = 10 m/s²)",50000 Pa,5000 Pa,500 Pa,500000 Pa,A,P = ρgh = 1000 x 10 x 5 = 50000 Pa.,General
+"A hydraulic press has a small piston of area 10 cm² and a large piston of area 100 cm². If a force of 50 N is applied to the small piston, calculate the force on the large piston.",500 N,5 N,100 N,50 N,A,"Pascal's principle: F1/A1 = F2/A2. 50/10 = F2/100, F2 = 500 N.",General
+A body of mass 2 kg is moving with a velocity of 5 m/s. Calculate its momentum.,10 kg m/s,2.5 kg m/s,7 kg m/s,0.4 kg m/s,A,p = mv = 2 x 5 = 10 kg m/s.,General
+A force of 10 N acts on a body for 3 seconds. Calculate the change in momentum.,30 kg m/s,3.33 kg m/s,13 kg m/s,0.3 kg m/s,A,Change in momentum = impulse = F x t = 10 x 3 = 30 kg m/s.,General
+"The acceleration due to gravity on the moon is about 1/6 of that on earth. If the weight of a body on earth is 600 N, its weight on the moon is",100 N,600 N,3600 N,60 N,A,Weight on moon = 600/6 = 100 N.,General
+A stone is thrown horizontally from a height of 20 m with a velocity of 10 m/s. Calculate the time of flight. (g = 10 m/s²),2 s,1 s,3 s,4 s,A,"Time of flight depends only on height: h = ½gt². 20 = 5t², t² = 4, t = 2 s.",General
+The horizontal range of a projectile fired at an angle of 30° with a velocity of 20 m/s is (g = 10 m/s²),20√3 m,20 m,40 m,10√3 m,A,R = (u² sin 2θ)/g = (400 x sin 60°)/10 = 40 x (√3/2) = 20√3 m.,General
+The maximum height reached by a projectile fired at an angle of 45° with a velocity of 20 m/s is (g = 10 m/s²),10 m,20 m,40 m,5 m,A,H = (u² sin²θ)/(2g) = (400 x ½)/(20) = 10 m.,General
+A car accelerates uniformly from rest at 4 m/s² for 5 seconds. Calculate its final velocity.,20 m/s,10 m/s,24 m/s,16 m/s,A,v = u + at = 0 + 4(5) = 20 m/s.,General
+A body moving with a constant velocity of 10 m/s for 5 seconds covers a distance of,50 m,2 m,15 m,100 m,A,Distance = speed x time = 10 x 5 = 50 m.,General
+A car starting from rest accelerates uniformly and covers 100 m in 5 s. Calculate its acceleration.,8 m/s²,4 m/s²,20 m/s²,10 m/s²,A,"s = ut + ½at². 100 = 0 + ½(a)(25) = 12.5a, a = 8 m/s².",General
+A train moving at 20 m/s decelerates uniformly and stops in 10 s. Calculate its deceleration.,2 m/s²,4 m/s²,10 m/s²,20 m/s²,A,a = (v - u)/t = (0 - 20)/10 = -2 m/s². Deceleration = 2 m/s².,General
+A stone is dropped from a height of 80 m. Calculate the time taken to reach the ground. (g = 10 m/s²),4 s,8 s,2 s,16 s,A,"h = ½gt². 80 = 5t², t² = 16, t = 4 s.",General
+A ball is thrown vertically upward with a velocity of 30 m/s. Calculate the time to reach maximum height. (g = 10 m/s²),3 s,6 s,10 s,15 s,A,"At max height, v = 0. v = u - gt. 0 = 30 - 10t, t = 3 s.",General
+A ball is thrown vertically upward with a velocity of 30 m/s. Calculate the total time of flight. (g = 10 m/s²),6 s,3 s,10 s,15 s,A,Total time = 2 x time to max height = 2 x 3 = 6 s.,General
+A ball is thrown vertically upward with a velocity of 20 m/s. Calculate the maximum height reached. (g = 10 m/s²),20 m,40 m,10 m,5 m,A,"v² = u² - 2gh. 0 = 400 - 20h, h = 20 m.",General
+A car moving at 15 m/s is brought to rest in 3 seconds. Calculate the distance covered during deceleration.,22.5 m,45 m,11.25 m,30 m,A,s = ((u+v)/2)t = ((15+0)/2)(3) = 22.5 m.,General
+The slope of a distance-time graph represents,Acceleration,Velocity,Displacement,Force,B,The slope of a distance-time graph is speed/velocity.,General
+The slope of a velocity-time graph represents,Acceleration,Velocity,Displacement,Force,A,The slope of a velocity-time graph is acceleration.,General
+The area under a velocity-time graph represents,Acceleration,Velocity,Displacement,Force,C,The area under a v-t graph is the displacement.,General
+A force of 10 N acts on a body of mass 2 kg for 5 seconds. Calculate the impulse.,50 Ns,20 Ns,30 Ns,100 Ns,A,Impulse = F x t = 10 x 5 = 50 Ns.,General
+A force of 20 N acts on a body of mass 5 kg. Calculate the acceleration.,4 m/s²,2 m/s²,5 m/s²,10 m/s²,A,a = F/m = 20/5 = 4 m/s².,General
+A body of weight 100 N has a mass of (g = 10 m/s²),10 kg,1 kg,5 kg,100 kg,A,m = W/g = 100/10 = 10 kg.,General
+The weight of a body of mass 5 kg is (g = 10 m/s²),50 N,5 N,10 N,500 N,A,W = mg = 5 x 10 = 50 N.,General
+A body moves in a circular path of radius 5 m with a constant speed of 10 m/s. Calculate the centripetal acceleration.,20 m/s²,2 m/s²,50 m/s²,0.5 m/s²,A,a = v²/r = 100/5 = 20 m/s².,General
+The relationship between linear velocity v and angular velocity ω is,v = ωr,v = ω/r,v = r/ω,v = ω²r,A,v = ωr.,General
+"A ball of mass 0.1 kg is thrown vertically upwards with a speed of 10 m/s from the top of a tower 10 m high. Neglecting air resistance, its total energy just before hitting the ground is (Take g = 10 m/s²)",15 J,5 J,10 J,20 J,A,Total energy at top = KE + PE = ½(0.1)(100) + 0.1(10)(10) = 5 + 10 = 15 J.,General
+A car of mass 800 kg attains a speed of 25 m/s in 20 s. The power developed in the engine is,1.25 x 10⁴ W,2.50 x 10⁴ W,1.25 x 10⁶ W,2.50 x 10⁶ W,A,a = 25/20 = 1.25 m/s². F = ma = 800 x 1.25 = 1000 N. P = Fv = 1000 x 25 = 25000 W.,General
+A boy of mass 50 kg climbs a flight of stairs 6 m high in 5 seconds. Calculate his power output. (Take g = 10 m/s²),600 W,300 W,1500 W,250 W,A,Work = mgh = 50(10)(6) = 3000 J. Power = 3000/5 = 600 W.,General
+"A ball of mass 0.5 kg moving at 10 m/s collides with another ball of equal mass at rest. If the two balls move off together after the impact, calculate their common velocity.",5.0 m/s,0.2 m/s,0.5 m/s,5.5 m/s,A,0.5(10) = 1.0(v) → v = 5 m/s.,General
+A body of mass 12 kg traveling at 4.2 m/s collides with a second body of mass 18 kg at rest. Calculate their common velocity if the two bodies coalesce after collision.,1.7 m/s,1.5 m/s,1.4 m/s,2.1 m/s,A,12(4.2) = 30(v) → 50.4 = 30v → v = 1.68 ≈ 1.7 m/s.,General
+A gun of mass 5 kg fires a bullet of mass 0.02 kg with a muzzle velocity of 400 m/s. Calculate the recoil velocity of the gun.,1.6 m/s,0.8 m/s,2.0 m/s,4.0 m/s,A,0.02(400) = 5(v) → 8 = 5v → v = 1.6 m/s.,General
+Energy quantisation means that energy is,Emitted or absorbed in discrete packets called quanta,Emitted continuously,Absorbed continuously,Always constant,A,Max Planck proposed that energy is quantised.,General
+The quantum of electromagnetic radiation is called a,Photon,Electron,Proton,Neutron,A,A photon is a quantum of light.,General
+"In the equation E = hf, h represents",Planck's constant,Heisenberg's constant,Avogadro's constant,Boltzmann's constant,A,h = 6.63 x 10⁻³⁴ Js.,General
+The value of Planck's constant is approximately,6.63 x 10⁻³⁴ Js,6.63 x 10⁻³¹ Js,3.0 x 10⁸ Js,1.6 x 10⁻¹⁹ Js,A,Planck's constant h = 6.63 x 10⁻³⁴ Js.,General
+The electrons emitted in the photoelectric effect are called,Photoelectrons,Protons,Neutrons,Ions,A,Emitted electrons are called photoelectrons.,General
+"In the photoelectric equation, W₀ represents the",Work function of the metal,Wavelength of the light,Frequency of the light,Maximum kinetic energy,A,W₀ is the work function.,General
+"If the frequency of incident light is less than the threshold frequency,",No photoelectrons are emitted,Photoelectrons are emitted with high energy,Photoelectrons are emitted with low energy,The metal melts,A,Frequency must be at least the threshold frequency.,General
+The stopping potential is the potential required to,Stop the most energetic photoelectrons from reaching the anode,Stop all electrons in the circuit,Start the photoelectric effect,Increase the photoelectric current,A,Stopping potential is the reverse voltage needed to stop photoelectrons.,General
+"At the stopping potential, the maximum kinetic energy of photoelectrons is equal to",eV,hf,W₀,Zero,A,eV = KEmax.,General
+Which of the following statements is true about the photoelectric effect?,The kinetic energy of photoelectrons depends on the frequency of light,The kinetic energy depends on the intensity of light,The number of photoelectrons depends on the frequency of light,The work function depends on the intensity of light,A,"KE depends on frequency, not intensity.",General
+The threshold wavelength λ₀ is related to the work function W₀ by,λ₀ = hc/W₀,λ₀ = W₀/hc,λ₀ = h/W₀c,λ₀ = hcW₀,A,"At threshold, hc/λ₀ = W₀.",General
+"A metal has a work function of 2 eV. What is its threshold frequency? (h = 6.63 x 10⁻³⁴ Js, 1 eV = 1.6 x 10⁻¹⁹ J)",4.83 x 10¹⁴ Hz,2.0 x 10¹⁴ Hz,6.63 x 10¹⁴ Hz,3.0 x 10¹⁴ Hz,A,W₀ = 2 x 1.6 x 10⁻¹⁹ = 3.2 x 10⁻¹⁹ J. f₀ = W₀/h = 3.2 x 10⁻¹⁹ / 6.63 x 10⁻³⁴ = 4.83 x 10¹⁴ Hz.,General
+"A metal has a work function of 3 eV. Light of frequency 1 x 10¹⁵ Hz is incident on it. Calculate the maximum kinetic energy of the emitted photoelectrons. (h = 6.63 x 10⁻³⁴ Js, 1 eV = 1.6 x 10⁻¹⁹ J)",1.14 eV,3.0 eV,4.14 eV,2.0 eV,A,E = hf = 6.63 x 10⁻¹⁹ J = 4.14 eV. KEmax = 4.14 - 3 = 1.14 eV.,General
+The energy of a photon is directly proportional to its,Frequency,Wavelength,Amplitude,Speed,A,E = hf.,General
+The energy of a photon is inversely proportional to its,Frequency,Wavelength,Amplitude,Speed,B,E = hc/λ.,General
+"A photon of wavelength 500 nm has an energy of approximately (h = 6.63 x 10⁻³⁴ Js, c = 3 x 10⁸ m/s)",3.98 x 10⁻¹⁹ J,2.0 x 10⁻¹⁹ J,5.0 x 10⁻¹⁹ J,1.0 x 10⁻¹⁹ J,A,E = hc/λ = (6.63 x 10⁻³⁴ x 3 x 10⁸)/(500 x 10⁻⁹) = 3.98 x 10⁻¹⁹ J.,General
+Which of the following is a practical application of the photoelectric effect?,Solar cells,Electric heaters,Electric motors,Transformers,A,Solar cells use the photoelectric effect.,General
+Photocells are used in,Automatic door openers,Electric heaters,Electric motors,Transformers,A,Photocells detect light for automation.,General
+"The work function of a metal is 2.5 eV. What is the minimum frequency of light required to emit photoelectrons? (h = 6.63 x 10⁻³⁴ Js, 1 eV = 1.6 x 10⁻¹⁹ J)",6.03 x 10¹⁴ Hz,2.5 x 10¹⁴ Hz,6.63 x 10¹⁴ Hz,1.0 x 10¹⁴ Hz,A,W₀ = 4.0 x 10⁻¹⁹ J. f₀ = 4.0 x 10⁻¹⁹ / 6.63 x 10⁻³⁴ = 6.03 x 10¹⁴ Hz.,General
+The photoelectric effect provides evidence for the,Particle nature of light,Wave nature of light,Dual nature of light only,Magnetic nature of light,A,It supports the photon (particle) model.,General
+The energy of an electron in a hydrogen atom is quantized. This means the electron can,Only have certain specific energy values,Have any energy value,Have zero energy only,Have infinite energy only,A,Bohr model: discrete energy levels.,General
+"When an electron in an atom moves from a higher to a lower energy level, it",Emits a photon,Absorbs a photon,Emits an electron,Absorbs an electron,A,Transition to lower level emits energy as a photon.,General
+"When an electron in an atom moves from a lower to a higher energy level, it",Emits a photon,Absorbs a photon,Emits an electron,Absorbs an electron,B,Transition to higher level absorbs energy.,General
+The energy of the emitted photon when an electron falls from energy level E₂ to E₁ is,E₂ - E₁,E₁ - E₂,E₂ + E₁,E₂ / E₁,A,Energy difference = hf.,General
+The line spectrum of an element is produced when,Electrons transition between quantized energy levels,Atoms are heated continuously,Atoms are cooled,Electrons are removed from atoms,A,Line spectra arise from electron transitions.,General
+"An electron falls from an energy level of -5.44 eV to another energy level, E. If the emitted photon is of wavelength 5.68 x 10⁻⁶ m, calculate the energy change. (h = 6.63 x 10⁻³⁴ Js, c = 3.0 x 10⁸ m/s)",3.49 x 10⁻²⁰ J,1.49 x 10⁻¹⁹ J,1.49 x 10⁻²⁰ J,3.49 x 10⁻¹⁹ J,A,E = hc/λ = (6.63 x 10⁻³⁴ x 3 x 10⁸)/(5.68 x 10⁻⁶) = 3.49 x 10⁻²⁰ J.,General
+Which of the following is NOT a valid energy level in the hydrogen atom?,n = 1,n = 2,n = 3,n = 0,D,n must be a positive integer.,General
+The ionisation energy of hydrogen in the ground state is,13.6 eV,3.4 eV,1.51 eV,0 eV,A,The energy needed to remove an electron from n=1.,General
+"An electron makes a transition from a certain energy level Ek to the ground state E0. If the frequency of emission is 8.0 x 10¹⁴ Hz, the energy emitted is (h = 6.63 x 10⁻³⁴ Js)",5.28 x 10⁻¹⁹ J,8.25 x 10⁻¹⁹ J,5.28 x 10¹⁹ J,8.25 x 10¹⁹ J,A,E = hf = 6.63 x 10⁻³⁴ x 8.0 x 10¹⁴ = 5.30 x 10⁻¹⁹ J.,General
+The photoelectric effect can be explained by assuming that light consists of,Particles called photons,Continuous waves,Neutrons,Protons,A,The photon theory.,General
+The energy required to remove an electron from the surface of a metal is called the,Work function,Ionisation energy,Excitation energy,Binding energy,A,Work function is specific to the metal surface.,General
+The photoelectric current is directly proportional to the,Intensity of the incident light,Frequency of the incident light,Wavelength of the incident light,Work function of the metal,A,More photons = more electrons.,General
+The maximum kinetic energy of photoelectrons increases with,Increasing frequency of incident light,Increasing intensity of incident light,Increasing wavelength of incident light,Increasing work function,A,Higher frequency gives higher photon energy.,General
+Which of the following statements is true about the threshold frequency?,It is different for different metals,It is the same for all metals,It depends on the intensity of light,It depends on the speed of light,A,"Different metals have different work functions, hence different threshold frequencies.",General
+A photocell is a device that,Converts light energy to electrical energy,Converts electrical energy to light energy,Converts heat energy to electrical energy,Converts mechanical energy to electrical energy,A,Photocells generate current when light falls on them.,General
+Which of the following is a feature of the photoelectric effect that cannot be explained by the wave theory of light?,The existence of a threshold frequency,The reflection of light,The refraction of light,The interference of light,A,Wave theory cannot explain the threshold frequency.,General
+"An electron in the n=5 energy level of hydrogen undergoes a transition to the n=3 energy level. Determine the wavelength of the photon the atom emits in this process. (h = 6.63 x 10⁻³⁴ Js, c = 3 x 10⁸ m/s)",1.28 x 10⁻⁶ m,2.37 x 10⁻⁶ m,4.22 x 10⁻⁷ m,3.04 x 10⁻⁶ m,A,E = -13.6/25 + 13.6/9 = -0.544 + 1.511 = 0.967 eV = 1.55 x 10⁻¹⁹ J. λ = hc/E = 1.28 x 10⁻⁶ m.,General
+Which of the following is NOT an application of the photoelectric effect?,Solar cells,Light meters,Automatic doors,Electric heaters,D,Electric heaters use the heating effect.,General
+"According to Planck, energy is emitted or absorbed in discrete units called",Quanta,Photons,Electrons,Protons,A,Planck proposed quanta.,General
+The quantum theory of light was proposed by,Max Planck,Albert Einstein,Niels Bohr,Isaac Newton,A,Planck proposed the quantum theory.,General
+The photoelectric effect was explained by,Max Planck,Albert Einstein,Niels Bohr,Isaac Newton,B,Einstein explained it using photons.,General
+Which of the following is true about the work function?,It is the minimum energy needed to remove an electron from a metal surface,It is the maximum energy of a photoelectron,It is the energy of a photon,It is the stopping potential,A,Definition of work function.,General
+A metal has a threshold frequency of 5 x 10¹⁴ Hz. What is the work function of the metal? (h = 6.63 x 10⁻³⁴ Js),3.32 x 10⁻¹⁹ J,1.33 x 10⁻¹⁹ J,5.00 x 10⁻¹⁹ J,6.63 x 10⁻¹⁹ J,A,W₀ = hf₀ = 6.63 x 10⁻³⁴ x 5 x 10¹⁴ = 3.32 x 10⁻¹⁹ J.,General
+"If the work function of a metal is 2.0 eV, what is the threshold wavelength? (h = 6.63 x 10⁻³⁴ Js, c = 3 x 10⁸ m/s, 1 eV = 1.6 x 10⁻¹⁹ J)",6.22 x 10⁻⁷ m,3.11 x 10⁻⁷ m,1.24 x 10⁻⁶ m,4.97 x 10⁻⁷ m,A,W₀ = 2 x 1.6 x 10⁻¹⁹ = 3.2 x 10⁻¹⁹ J. λ₀ = hc/W₀ = (6.63 x 10⁻³⁴ x 3 x 10⁸)/(3.2 x 10⁻¹⁹) = 6.22 x 10⁻⁷ m.,General
+The photoelectric effect is instantaneous. This means,Photoelectrons are emitted as soon as light hits the metal (if frequency is sufficient),Photoelectrons take time to be emitted,Photoelectrons are emitted only after heating,Photoelectrons are never emitted,A,Emission is immediate if frequency is above threshold.,General
+"In the photoelectric equation, eVₛ = hf - W₀, the term eVₛ represents",The maximum kinetic energy of the photoelectrons,The work function,The photon energy,The threshold frequency,A,Stopping potential energy equals maximum kinetic energy.,General
+Which of the following is a correct statement about the photoelectric effect?,The maximum kinetic energy of photoelectrons is independent of the intensity of light,The maximum kinetic energy depends on the intensity of light,The number of photoelectrons is independent of the intensity of light,The work function depends on the intensity of light,A,KE depends only on frequency.,General
+The energy of a photon of light with frequency 6 x 10¹⁴ Hz is (h = 6.63 x 10⁻³⁴ Js),3.98 x 10⁻¹⁹ J,1.0 x 10⁻¹⁹ J,2.0 x 10⁻¹⁹ J,4.0 x 10⁻²⁰ J,A,E = hf = 6.63 x 10⁻³⁴ x 6 x 10¹⁴ = 3.98 x 10⁻¹⁹ J.,General
+Pressure is defined as,Force per unit area,Force per unit volume,Force per unit length,Force per unit mass,A,Pressure = Force / Area (P = F/A).,General
+One Pascal is equal to,One Newton per square metre,One Newton per metre,One Joule per second,One Watt per square metre,A,1 Pa = 1 N/m².,General
+A force of 100 N acts on an area of 2 m². Calculate the pressure.,50 Pa,200 Pa,0.02 Pa,2 Pa,A,P = F/A = 100/2 = 50 Pa.,General
+A force of 50 N acts on an area of 5 m². Calculate the pressure.,10 Pa,250 Pa,0.1 Pa,55 Pa,A,P = 50/5 = 10 Pa.,General
+The pressure at a depth h in a liquid of density ρ is given by,ρgh,ρg/h,ρh/g,g/ρh,A,P = ρgh (hydrostatic pressure).,General
+"The pressure at a depth of 10 m in water is (density = 1000 kg/m³, g = 10 m/s²)","100,000 Pa","10,000 Pa","1,000 Pa",100 Pa,A,"P = ρgh = 1000 x 10 x 10 = 100,000 Pa.",General
+The pressure at a depth of 5 m in a liquid of density 800 kg/m³ is (g = 10 m/s²),"40,000 Pa","4,000 Pa",400 Pa,"80,000 Pa",A,"P = 800 x 10 x 5 = 40,000 Pa.",General
+Pressure in a liquid depends on,Depth and density of the liquid,Shape of the container,Volume of the liquid,Surface area of the liquid,A,"P = ρgh, so it depends on depth and density.",General
+Pressure at a given depth in a liquid is the same in all directions. This is known as,Pascal's principle,Archimedes' principle,Bernoulli's principle,Newton's principle,A,Pascal's principle (or the principle of transmission of fluid pressure).,General
+Pascal's principle states that,Pressure applied to an enclosed fluid is transmitted undiminished to all parts of the fluid,Pressure in a fluid decreases with depth,Pressure in a fluid increases with velocity,Pressure in a fluid depends on the shape of the container,A,This is the basis of hydraulic machines.,General
+"A hydraulic press has a small piston of area 5 cm² and a large piston of area 200 cm². If a force of 20 N is applied to the small piston, calculate the force on the large piston.",800 N,400 N,100 N,200 N,A,F2 = (A2/A1) x F1 = (200/5) x 20 = 800 N.,General
+Archimedes' principle states that,The upthrust on a body immersed in a fluid is equal to the weight of the fluid displaced,The pressure in a fluid increases with depth,Pressure applied to an enclosed fluid is transmitted undiminished,The volume of a gas is inversely proportional to its pressure,A,The buoyant force equals the weight of displaced fluid.,General
+A body of weight 60 N is immersed in water and experiences an upthrust of 20 N. Calculate its apparent weight.,40 N,80 N,3 N,0.33 N,A,Apparent weight = Actual weight - Upthrust = 60 - 20 = 40 N.,General
+A body of weight 100 N is immersed in a liquid and experiences an upthrust of 30 N. Calculate its apparent weight.,70 N,130 N,3.33 N,0.3 N,A,Apparent weight = 100 - 30 = 70 N.,General
+"A body of mass 0.5 kg and volume 200 cm³ is immersed in water. Calculate the upthrust. (density of water = 1000 kg/m³, g = 10 m/s²)",2 N,5 N,0.5 N,20 N,A,Volume = 200 cm³ = 2 x 10⁻⁴ m³. Upthrust = ρVg = 1000 x 2 x 10⁻⁴ x 10 = 2 N.,General
+A body floats in a liquid if its weight is,Equal to the upthrust,Greater than the upthrust,Less than the upthrust,Zero,A,Floating occurs when weight equals upthrust.,General
+A body sinks in a liquid if its weight is,Greater than the upthrust,Equal to the upthrust,Less than the upthrust,Zero,A,Sinking occurs when weight exceeds upthrust.,General
+The relative density of a substance is the ratio of its density to the density of,Water,Mercury,Air,Alcohol,A,Relative density = density of substance / density of water.,General
+"The relative density of a substance is 0.8. If the density of water is 1000 kg/m³, calculate the density of the substance.",800 kg/m³,1250 kg/m³,1000 kg/m³,1800 kg/m³,A,"0.8 = ρ/1000, ρ = 800 kg/m³.",General
+A body of mass 500 g and volume 100 cm³. Calculate its density.,5 g/cm³,0.2 g/cm³,50000 g/cm³,50 g/cm³,A,Density = mass/volume = 500/100 = 5 g/cm³.,General
+The pressure of a gas in a container is due to,Collisions of gas molecules with the walls,Attraction between gas molecules,Repulsion between gas molecules,The weight of gas molecules,A,Kinetic theory of gases.,General
+Atmospheric pressure is measured using a,Thermometer,Barometer,Hygrometer,Ammeter,B,A barometer measures atmospheric pressure.,General
+The standard atmospheric pressure is approximately,1.013 x 10⁵ Pa,1.013 x 10³ Pa,1.013 x 10⁷ Pa,1.013 x 10² Pa,A,"Standard atmospheric pressure is about 101,325 Pa.",General
+One atmosphere is equivalent to,760 mmHg,100 mmHg,500 mmHg,1000 mmHg,A,1 atm = 760 mmHg.,General
+"A mercury barometer reads 750 mmHg. If the atmospheric pressure increases, the mercury column will",Rise,Fall,Remain the same,Disappear,A,Higher atmospheric pressure pushes mercury up the tube.,General
+The height of the mercury column in a barometer at sea level is approximately,76 cm,10 cm,100 cm,760 cm,A,Standard barometer height is 76 cm (760 mm).,General
+"The pressure at a depth of 20 m in water is (density = 1000 kg/m³, g = 10 m/s²)","200,000 Pa","20,000 Pa","2,000 Pa",200 Pa,A,"P = ρgh = 1000 x 10 x 20 = 200,000 Pa.",General
+"The pressure due to a column of water of height 10 m is (density = 1000 kg/m³, g = 10 m/s²)","100,000 Pa","10,000 Pa","1,000 Pa",100 Pa,A,"P = 1000 x 10 x 10 = 100,000 Pa.",General
+"If the density of a liquid is 1.2 g/cm³, what is its density in kg/m³?",1200 kg/m³,12 kg/m³,120 kg/m³,12000 kg/m³,A,1 g/cm³ = 1000 kg/m³. So 1.2 g/cm³ = 1200 kg/m³.,General
+A block of wood floats in water with 1/3 of its volume submerged. What is its relative density?,1/3,2/3,1,3,A,Relative density = fraction submerged = 1/3.,General
+A block of wood floats in water with 2/5 of its volume above water. What is its relative density?,3/5,2/5,1,5/3,A,Fraction submerged = 1 - 2/5 = 3/5. Relative density = 3/5.,General
+A hydrometer is used to measure,Relative density of liquids,Atmospheric pressure,Temperature,Humidity,A,Hydrometers measure liquid density.,General
+A manometer is used to measure,Gas pressure,Atmospheric pressure,Temperature,Volume,A,Manometers measure gas pressure.,General
+The pressure of a gas in a closed container is increased. The volume of the gas will,Decrease,Increase,Remain the same,Become zero,A,Boyle's law: P ∝ 1/V at constant temperature.,General
+Boyle's law states that,The volume of a fixed mass of gas is inversely proportional to its pressure at constant temperature,The volume of a gas is directly proportional to its pressure,The pressure of a gas is directly proportional to its volume,The volume of a gas is independent of pressure,A,P1V1 = P2V2 at constant T.,General
+Charles's law states that,The volume of a fixed mass of gas is directly proportional to its absolute temperature at constant pressure,The volume of a gas is inversely proportional to its temperature,The pressure of a gas is directly proportional to its volume,The volume of a gas is independent of temperature,A,V1/T1 = V2/T2 at constant P.,General
+The pressure law states that,The pressure of a fixed mass of gas is directly proportional to its absolute temperature at constant volume,The pressure of a gas is inversely proportional to its temperature,The volume of a gas is directly proportional to its temperature,The pressure of a gas is independent of temperature,A,P1/T1 = P2/T2 at constant V.,General
+An object weighs 50 N in air and 30 N in water. Calculate the upthrust.,20 N,80 N,30 N,50 N,A,Upthrust = weight in air - weight in water = 50 - 30 = 20 N.,General
+An object weighs 100 N in air and 60 N in a liquid. Calculate the relative density of the liquid if the density of water is 1000 kg/m³.,1.0,0.4,2.5,0.6,A,Upthrust = 100 - 60 = 40 N. Relative density = upthrust in liquid / upthrust in water (assuming equal volumes) = 40/40 = 1.0.,General
+A block of mass 2 kg floats in water. The upthrust on the block is (g = 10 m/s²),20 N,2 N,10 N,200 N,A,"For a floating body, upthrust = weight = mg = 2 x 10 = 20 N.",General
+Absolute zero is equivalent to,0 K,273 K,-273 K,100 K,A,0 K = -273°C.,General
+Convert 27°C to Kelvin,300 K,273 K,246 K,327 K,A,T = 27 + 273 = 300 K.,General
+Convert 300 K to degrees Celsius,27°C,30°C,57°C,273°C,A,T = 300 - 273 = 27°C.,General
+Convert 100°C to Kelvin,373 K,273 K,173 K,473 K,A,T = 100 + 273 = 373 K.,General
+Convert 0 K to degrees Celsius,-273°C,0°C,273°C,-100°C,A,T = 0 - 273 = -273°C.,General
+The heat required to raise the temperature of 2 kg of water by 10°C is (c = 4200 J/kgK),42000 J,84000 J,21000 J,4200 J,B,Q = mcΔθ = 2 x 4200 x 10 = 84000 J.,General
+The heat required to raise the temperature of 5 kg of a substance by 20°C is (c = 400 J/kgK),40000 J,4000 J,400 J,400000 J,A,Q = 5 x 400 x 20 = 40000 J.,General
+The heat required to melt 5 kg of ice at 0°C is (L = 336000 J/kg),1680000 J,168000 J,336000 J,672000 J,A,Q = mL = 5 x 336000 = 1680000 J.,General
+The heat required to convert 2 kg of water at 100°C to steam at 100°C is (L = 2260000 J/kg),4520000 J,2260000 J,1130000 J,9040000 J,A,Q = 2 x 2260000 = 4520000 J.,General
+The heat required to melt 2 kg of ice at 0°C is (L = 336000 J/kg),672000 J,336000 J,168000 J,1344000 J,A,Q = 2 x 336000 = 672000 J.,General
+The heat required to vaporise 3 kg of water at 100°C is (L = 2260000 J/kg),6780000 J,2260000 J,3390000 J,4520000 J,A,Q = 3 x 2260000 = 6780000 J.,General
+Which of the following is a property of water that is different from most substances?,It contracts when heated from 0°C to 4°C,It expands when heated from 0°C to 4°C,It has a low specific heat capacity,It is a poor solvent,A,Water exhibits anomalous expansion.,General
+Which of the following factors increases the rate of evaporation?,Increasing the temperature,Decreasing the surface area,Increasing humidity,Decreasing wind speed,A,Higher temperature increases evaporation.,General
+Which of the following factors decreases the rate of evaporation?,Increasing humidity,Increasing temperature,Increasing surface area,Increasing wind speed,A,High humidity reduces evaporation.,General
+The thermometer that can measure temperatures from -10°C to 110°C is the,Clinical thermometer,Laboratory thermometer,Constant volume gas thermometer,Thermocouple,B,Laboratory thermometers cover a wider range.,General
+The thermometric property of a liquid-in-glass thermometer is,The expansion of the liquid,The pressure of the gas,The resistance of a wire,The emf of a thermocouple,A,Liquid expands with temperature.,General
+The thermometric property of a resistance thermometer is,The expansion of the liquid,The pressure of the gas,The resistance of a wire,The emf of a thermocouple,C,Resistance changes with temperature.,General
+The thermometric property of a thermocouple is,The expansion of the liquid,The pressure of the gas,The resistance of a wire,The emf generated,D,Thermocouples generate emf with temperature.,General
+The heat required to change the state of a substance without changing its temperature is called,Specific heat capacity,Latent heat,Thermal capacity,Heat capacity,B,Latent heat is involved in state changes.,General
+"During melting, the temperature of the substance",Remains constant,Increases,Decreases,Fluctuates,A,"During state change, temperature is constant.",General
+"During boiling, the temperature of the substance",Remains constant,Increases,Decreases,Fluctuates,A,"During boiling, temperature is constant.",General
+Which of the following statements about heat and temperature is correct?,"Heat is a form of energy, temperature is a measure of average kinetic energy",Heat and temperature are the same,"Heat is measured in degrees, temperature in joules",Temperature is a form of energy,A,Heat is energy; temperature measures average molecular KE.,General
+The transfer of heat by convection involves,The movement of the heated fluid itself,The transfer of energy by molecular collisions,The transfer of energy by electromagnetic waves,The change of state of the fluid,A,Convection involves bulk fluid movement.,General
+Convection currents in the atmosphere are caused by,Uneven heating of the earth's surface,The rotation of the earth,The moon's gravitational pull,The earth's magnetic field,A,Uneven heating creates convection.,General
+Which of the following is a practical application of thermal expansion?,Bimetallic strip in a thermostat,Electric heater,Electric bulb,Electric motor,A,Bimetallic strips use thermal expansion.,General
+Which of the following is a practical application of latent heat?,Cooling by evaporation,Heating by electric current,Lighting by electric bulb,Communication by radio waves,A,Evaporative cooling uses latent heat.,General
+The heat required to raise the temperature of 0.5 kg of water from 20°C to 80°C is (c = 4200 J/kgK),126000 J,63000 J,252000 J,42000 J,A,Q = 0.5 x 4200 x 60 = 126000 J.,General
+The heat required to melt 500 g of ice at 0°C is (L = 336000 J/kg),168000 J,336000 J,84000 J,672000 J,A,Q = 0.5 x 336000 = 168000 J.,General
+The heat required to vaporise 0.2 kg of water at 100°C is (L = 2260000 J/kg),452000 J,226000 J,904000 J,1130000 J,A,Q = 0.2 x 2260000 = 452000 J.,General
+One hertz is equal to,One cycle per second,One second per cycle,One metre per second,One wavelength per second,A,1 Hz = 1 cycle/s.,General
+A wave of velocity 300 m/s has a wavelength of 3 m. Its frequency is,100 Hz,900 Hz,1 Hz,300 Hz,A,f = v/λ = 300/3 = 100 Hz.,General
+The distance between a node and the next antinode in a stationary wave is,Half a wavelength,Quarter of a wavelength,One wavelength,Twice a wavelength,B,Node to antinode = λ/4.,General
+"In a closed pipe, the fundamental frequency is given by",v/4L,v/2L,v/L,2v/L,A,Closed pipe: f₁ = v/(4L).,General
+"In an open pipe, the fundamental frequency is given by",v/4L,v/2L,v/L,2v/L,B,Open pipe: f₁ = v/(2L).,General
+A pipe closed at one end has a fundamental frequency of 100 Hz. What is the frequency of the first overtone?,300 Hz,200 Hz,400 Hz,100 Hz,A,Closed pipe overtones are odd harmonics: 3f₁ = 300 Hz.,General
+A pipe open at both ends has a fundamental frequency of 200 Hz. What is the frequency of the first overtone?,400 Hz,200 Hz,600 Hz,800 Hz,A,Open pipe overtones are integer multiples: 2f₁ = 400 Hz.,General
+Beats are produced when two sound waves of slightly different frequencies,Interfere constructively and destructively,Have the same frequency,Are completely out of phase,Travel in opposite directions,A,Beat frequency = |f1 - f2|.,General
+The beat frequency of two sounds of frequencies 256 Hz and 260 Hz is,4 Hz,516 Hz,2 Hz,8 Hz,A,Beat frequency = |260 - 256| = 4 Hz.,General
+The beat frequency of two sounds of frequencies 500 Hz and 505 Hz is,5 Hz,1005 Hz,2.5 Hz,10 Hz,A,Beat frequency = |505 - 500| = 5 Hz.,General
+"An echo is heard 2 seconds after a sound is produced. If the speed of sound is 340 m/s, the distance to the reflecting surface is",340 m,680 m,170 m,1360 m,A,Distance = (v x t)/2 = (340 x 2)/2 = 340 m.,General
+"An echo is heard 0.5 seconds after a sound is produced. If the speed of sound is 340 m/s, the distance to the reflecting surface is",85 m,170 m,340 m,42.5 m,A,Distance = (340 x 0.5)/2 = 85 m.,General
+The loudness of a sound is measured in,Decibels,Hertz,Metres,Seconds,A,Loudness is measured in decibels (dB).,General
+The frequency range of audible sound for humans is,"20 Hz to 20,000 Hz",1 Hz to 100 Hz,"20,000 Hz to 40,000 Hz",0 Hz to 20 Hz,A,Human hearing range is about 20 Hz to 20 kHz.,General
+Sound waves with frequency below 20 Hz are called,Infrasonic,Ultrasonic,Audible,Supersonic,A,Below 20 Hz = infrasonic.,General
+"Sound waves with frequency above 20,000 Hz are called",Infrasonic,Ultrasonic,Audible,Supersonic,B,Above 20 kHz = ultrasonic.,General
+A wave with a period of 0.02 s has a frequency of,50 Hz,20 Hz,0.02 Hz,100 Hz,A,f = 1/T = 1/0.02 = 50 Hz.,General
+A wave with a frequency of 500 Hz has a period of,0.002 s,0.5 s,2 s,500 s,A,T = 1/f = 1/500 = 0.002 s.,General
+An object moving faster than the speed of sound is said to be,Supersonic,Subsonic,Ultrasonic,Infrasonic,A,Supersonic = above speed of sound.,General
+The speed of sound in water is approximately,1500 m/s,340 m/s,3 x 10⁸ m/s,5000 m/s,A,Speed of sound in water is about 1500 m/s.,General
+The speed of sound in steel is approximately,5000 m/s,340 m/s,1500 m/s,3 x 10⁸ m/s,A,Sound travels at about 5000 m/s in steel.,General
+Which of the following properties of sound is affected by the medium?,Speed,Pitch,Loudness,Quality,A,Speed of sound depends on the medium.,General
+"The frequency of a sound wave does not change when it travels from one medium to another, but its",Wavelength and speed change,Amplitude changes only,Pitch changes,Quality changes,A,Frequency is constant; speed and wavelength change.,General
+Diffraction of sound is more pronounced than diffraction of light because sound,Has a longer wavelength,Has a higher frequency,Travels faster,Is a longitudinal wave,A,Longer wavelength means more diffraction.,General
+Sound is a form of,Mechanical energy,Electrical energy,Chemical energy,Nuclear energy,A,Sound is mechanical wave energy.,General
+Calculate the work done when a force of 50 N moves a body through a distance of 4 m in the direction of the force.,200 J,54 J,12.5 J,0.08 J,A,W = F x d = 50 x 4 = 200 J.,General
+Calculate the work done when a force of 20 N moves a body through a distance of 5 m in the direction of the force.,100 J,25 J,4 J,200 J,A,W = 20 x 5 = 100 J.,General
+A force of 10 N is applied to a body but the body does not move. The work done is,10 J,0 J,5 J,100 J,B,No displacement means no work done.,General
+A man carries a load of 200 N on his head and walks a distance of 10 m. The work done against gravity is,2000 J,0 J,20 J,100 J,B,"The force (weight) is vertical while displacement is horizontal, so no work is done against gravity.",General
+The kinetic energy of a body of mass 4 kg moving at 3 m/s is,18 J,6 J,36 J,12 J,A,KE = ½(4)(3²) = 18 J.,General
+The potential energy of a body of mass 3 kg at a height of 4 m is (g = 10 m/s²),120 J,12 J,30 J,60 J,A,PE = 3 x 10 x 4 = 120 J.,General
+The potential energy of a body of mass 5 kg at a height of 2 m is (g = 10 m/s²),100 J,50 J,10 J,200 J,A,PE = 5 x 10 x 2 = 100 J.,General
+A body of mass 10 kg is lifted to a height of 5 m. Calculate the work done against gravity. (g = 10 m/s²),500 J,50 J,100 J,250 J,A,W = mgh = 10 x 10 x 5 = 500 J.,General
+A stone is dropped from a height of 20 m. Calculate its velocity just before hitting the ground. (g = 10 m/s²),20 m/s,40 m/s,10 m/s,5 m/s,A,v² = 2gh = 2(10)(20) = 400. v = 20 m/s.,General
+A stone is dropped from a height of 45 m. Calculate its velocity just before hitting the ground. (g = 10 m/s²),30 m/s,20 m/s,40 m/s,15 m/s,A,v² = 2gh = 2(10)(45) = 900. v = 30 m/s.,General
+"A body of mass 0.1 kg is thrown vertically upwards with a speed of 10 m/s from the top of a tower 10 m high. Neglecting air resistance, its total energy just before hitting the ground is (Take g = 10 m/s²)",15 J,5 J,10 J,20 J,A,Total energy at top = KE + PE = ½(0.1)(100) + 0.1(10)(10) = 5 + 10 = 15 J.,General
+A machine does 600 J of work in 20 seconds. Calculate its power.,30 W,12000 W,0.03 W,620 W,A,P = W/t = 600/20 = 30 W.,General
+A machine does 1000 J of work in 10 seconds. Calculate its power.,100 W,10 W,1000 W,10000 W,A,P = 1000/10 = 100 W.,General
+A lift of mass 500 kg is raised through a height of 20 m in 10 s. Calculate the power developed. (g = 10 m/s²),10000 W,1000 W,2000 W,5000 W,A,"W = mgh = 500 x 10 x 20 = 100,000 J. P = W/t = 100,000/10 = 10,000 W.",General
+The energy possessed by a body due to its position in a gravitational field is,Kinetic energy,Potential energy,Chemical energy,Nuclear energy,B,PE = mgh.,General
+The energy possessed by a moving body is,Kinetic energy,Potential energy,Chemical energy,Nuclear energy,A,KE = ½mv².,General
+A force of 20 N stretches a spring by 4 cm. Calculate the elastic potential energy stored in the spring.,0.4 J,0.8 J,1.2 J,2.0 J,A,k = F/e = 20/0.04 = 500 N/m. PE = ½(500)(0.04²) = 0.4 J.,General
+The elastic potential energy stored in a stretched spring is given by,½ke²,½mv²,mgh,½kx,A,PE = ½ke².,General
+A machine raises a load of 300 N through a distance of 2 m using an effort of 100 N. Calculate the work done by the effort. (Assume effort moves 8 m),800 J,600 J,200 J,400 J,A,Work done by effort = Effort x Effort distance = 100 x 8 = 800 J.,General
+A machine raises a load of 300 N through a distance of 2 m using an effort of 100 N. Calculate the useful work done. (Assume effort moves 8 m),600 J,800 J,200 J,400 J,A,Useful work = Load x Load distance = 300 x 2 = 600 J.,General
+A machine raises a load of 300 N through a distance of 2 m using an effort of 100 N. Calculate the efficiency. (Assume effort moves 8 m),75%,80%,60%,90%,A,Efficiency = (Useful work / Total work) x 100% = (600/800) x 100 = 75%.,General
+Which of the following is NOT a source of energy?,Solar energy,Wind energy,Geothermal energy,Friction,D,Friction is not a source of energy; it dissipates energy.,General
+Which of the following is a renewable source of energy?,Coal,Petroleum,Solar,Natural gas,C,Solar energy is renewable.,General
+Which of the following is a non-renewable source of energy?,Wind,Solar,Coal,Hydroelectric,C,Coal is a fossil fuel and is non-renewable.,General
+"Energy can be converted from one form to another. In a hydroelectric power station, the energy conversion is",Potential energy → Kinetic energy → Electrical energy,Kinetic energy → Potential energy → Electrical energy,Chemical energy → Electrical energy,Heat energy → Electrical energy,A,Water at height (PE) flows down (KE) to turn turbines (electrical).,General
+Energy conversion in an electric bulb is,Electrical energy → Light energy + Heat energy,Light energy → Electrical energy,Chemical energy → Light energy,Heat energy → Electrical energy,A,Bulbs convert electrical to light and heat.,General
+Energy conversion in a microphone is,Sound energy → Electrical energy,Electrical energy → Sound energy,Light energy → Electrical energy,Electrical energy → Light energy,A,Microphones convert sound to electrical signals.,General
+Energy conversion in a loudspeaker is,Electrical energy → Sound energy,Sound energy → Electrical energy,Light energy → Sound energy,Sound energy → Light energy,A,Loudspeakers convert electrical to sound.,General

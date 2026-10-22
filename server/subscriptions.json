@@ -1,0 +1,12 @@
+[
+  {
+    "userId": "user_1792096916116",
+    "email": "dredd992001@gmail.com",
+    "reference": "T872191647372897",
+    "amount": 1500,
+    "amountKobo": 150000,
+    "paidAt": "2026-10-16T21:57:51.517Z",
+    "expiresAt": "2026-11-15T21:57:51.517Z",
+    "status": "active"
+  }
+]

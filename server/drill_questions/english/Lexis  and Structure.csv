@@ -1,0 +1,69 @@
+question_text,option_a,option_b,option_c,option_d,correct,explanation
+"She is coming to the party, _______?",isn't she,is she,doesn't she,does she,A,"The main clause is affirmative with 'is', so the tag is negative 'isn't she'."
+"They have finished their work, _______?",haven't they,have they,didn't they,did they,A,"The main clause uses 'have', so the tag is 'haven't they'."
+"He doesn't like coffee, _______?",does he,doesn't he,is he,isn't he,A,"The main clause is negative with 'doesn't', so the tag is positive 'does he'."
+"You will call me, _______?",won't you,will you,don't you,do you,A,"The main clause uses 'will', so the tag is 'won't you'."
+"Let's go for a walk, _______?",shall we,will we,don't we,do we,A,'Let's' takes the tag 'shall we'.
+"Nobody came to the meeting, _______?",did they,didn't they,did he,didn't he,A,"'Nobody' is negative, so the tag is positive 'did they'."
+"Everything is ready, _______?",isn't it,is it,aren't they,are they,A,"'Everything' is singular, so the tag is 'isn't it'."
+"Nothing was said about it, _______?",was it,wasn't it,were they,weren't they,A,"'Nothing' is negative, so the tag is positive 'was it'."
+"I am late, _______?",aren't I,am I,isn't it,am not I,A,'I am' takes the tag 'aren't I' in standard English.
+"She hardly speaks in class, _______?",does she,doesn't she,is she,isn't she,A,"'Hardly' makes the clause negative, so the tag is positive."
+"You rarely eat meat, _______?",do you,don't you,are you,aren't you,A,"'Rarely' makes the clause negative, so the tag is positive."
+"He never comes late, _______?",does he,doesn't he,is he,isn't he,A,"'Never' makes the clause negative, so the tag is positive."
+"Peter and Paul are brothers, _______?",aren't they,are they,isn't he,is he,A,Plural subject 'Peter and Paul' takes 'aren't they'.
+"The children can swim, _______?",can't they,can they,don't they,do they,A,'Can' takes 'can't they'.
+"Your father bought a car, _______?",didn't he,did he,doesn't he,does he,A,Past tense affirmative takes 'didn't he'.
+"The book was interesting, _______?",wasn't it,was it,didn't it,did it,A,Affirmative past 'was' takes 'wasn't it'.
+"You had better leave now, _______?",hadn't you,had you,didn't you,did you,A,'Had better' takes 'hadn't you'.
+"She used to live here, _______?",didn't she,usedn't she,doesn't she,isn't she,A,'Used to' takes 'didn't she'.
+"He would rather stay, _______?",wouldn't he,would he,didn't he,did he,A,'Would rather' takes 'wouldn't he'.
+"I suppose you know the answer, _______?",don't you,do you,isn't it,aren't you,A,The tag matches the main clause 'you know'.
+He gave up smoking last year. Choose the correct meaning of the phrasal verb.,stopped,started,continued,enjoyed,A,'Give up' means to stop.
+The meeting was called off.,cancelled,postponed,arranged,attended,A,'Call off' means to cancel.
+She broke down during the interview.,laughed,cried,shouted,sang,B,'Break down' means to lose control emotionally.
+The car broke down on the highway.,stopped working,speeded up,turned around,caught fire,A,'Break down' for a machine means to stop working.
+I need to look up the word in the dictionary.,search for,ignore,write down,pronounce,A,'Look up' means to search for information.
+Please put off the lights before leaving.,turn off,turn on,fix,buy,A,'Put off' means to switch off.
+The teacher pointed out my mistakes.,explained,ignored,made,hid,A,'Point out' means to identify or explain.
+He takes after his father.,resembles,obeys,dislikes,follows,A,'Take after' means to resemble.
+We need to come up with a plan.,invent,destroy,reject,follow,A,'Come up with' means to produce or invent.
+She ran into an old friend at the mall.,met unexpectedly,fought with,ignored,avoided,A,'Run into' means to meet unexpectedly.
+I can't put up with this noise anymore.,tolerate,enjoy,stop,increase,A,'Put up with' means to tolerate.
+The plane took off on time.,departed,landed,delayed,stopped,A,'Take off' means to depart.
+He turned down the job offer.,rejected,accepted,postponed,discussed,A,'Turn down' means to reject.
+I need to work out the solution.,calculate,ignore,write,discuss,A,'Work out' means to solve or calculate.
+She gave in to the pressure.,surrendered,resisted,ignored,fought,A,'Give in' means to surrender or yield.
+The burglar got away before the police arrived.,escaped,was caught,was arrested,confessed,A,'Get away' means to escape.
+I'm looking forward to seeing you.,anticipating,ignoring,avoiding,remembering,A,'Look forward to' means to anticipate eagerly.
+He came across an old photograph.,found by chance,searched for,lost,hid,A,'Come across' means to find by chance.
+You should carry out the instructions carefully.,execute,ignore,change,write,A,'Carry out' means to execute or perform.
+I will take care of the problem.,handle,ignore,create,report,A,'Take care of' means to handle.
+She made up the whole story.,invented,verified,forgot,wrote,A,'Make up' means to invent a story.
+He is good _______ Mathematics.,at,in,on,with,A,'Good at' is the correct collocation.
+She is interested _______ learning French.,in,at,on,for,A,'Interested in' is correct.
+They are afraid _______ dogs.,of,from,at,with,A,'Afraid of' is correct.
+He is married _______ my sister.,to,with,by,for,A,'Married to' is correct.
+The film is similar _______ the book.,to,with,as,like,A,'Similar to' is correct.
+I am accustomed _______ getting up early.,to,with,for,at,A,'Accustomed to' is correct.
+She is capable _______ doing the work.,of,to,in,for,A,'Capable of' is correct.
+He insisted _______ paying the bill.,on,in,at,for,A,'Insist on' is correct.
+We congratulated him _______ his success.,on,for,at,with,A,'Congratulate on' is correct.
+She apologised _______ being late.,for,to,at,with,A,'Apologise for' is correct.
+He is not capable to do the work. What is the correct version?,He is not capable of doing the work.,He is not capable to doing the work.,He is not capable do the work.,He is not capable of do the work.,A,'Capable' is followed by 'of + gerund'.
+I prefer tea than coffee. What is the correct version?,I prefer tea to coffee.,I prefer tea over coffee.,I prefer tea from coffee.,I prefer tea with coffee.,A,'Prefer' is followed by 'to'.
+She is more taller than her sister. What is the correct version?,She is taller than her sister.,She is more tall than her sister.,She is most taller than her sister.,She is tallest than her sister.,A,'Taller' is already comparative; 'more' is unnecessary.
+Neither John nor his friends is coming. What is the correct version?,Neither John nor his friends are coming.,Neither John nor his friends is coming.,Neither John nor his friends was coming.,Neither John nor his friends be coming.,A,The verb agrees with the nearer subject 'friends' (plural).
+Each of the students have a book. What is the correct version?,Each of the students has a book.,Each of the students have a book.,Each of the student have a book.,Each of the student has books.,A,"'Each' is singular, so 'has' is correct."
+He gave me an advice. What is the correct version?,He gave me a piece of advice.,He gave me an advice.,He gave me some advices.,He gave me advices.,A,'Advice' is uncountable; we say 'a piece of advice'.
+The news are good. What is the correct version?,The news is good.,The news are good.,The news were good.,The news have been good.,A,'News' is singular despite ending in 's'.
+She don't like going to the market. What is the correct version?,She doesn't like going to the market.,She don't like going to the market.,She not like going to the market.,She doesn't likes going to the market.,A,Third person singular takes 'doesn't'.
+I have went to the bank. What is the correct version?,I have gone to the bank.,I have went to the bank.,I has gone to the bank.,I had went to the bank.,A,The past participle of 'go' is 'gone'.
+She can sings very well. What is the correct version?,She can sing very well.,She can sings very well.,She can singing very well.,She can sung very well.,A,"After modal 'can', use the base form of the verb."
+We discussed about the matter. What is the correct version?,We discussed the matter.,We discussed about the matter.,We discussed on the matter.,We discussed for the matter.,A,'Discuss' is a transitive verb and does not take 'about'.
+He entered into the room. What is the correct version?,He entered the room.,He entered into the room.,He entered in the room.,He entered at the room.,A,'Enter' is transitive and does not take 'into'.
+She said me the truth. What is the correct version?,She told me the truth.,She said me the truth.,She said to me the truth.,She told to me the truth.,A,'Tell' takes an indirect object; 'say' does not (without 'to').
+The reason is because he was late. What is the correct version?,The reason is that he was late.,The reason is because he was late.,The reason is why he was late.,The reason is for he was late.,A,'The reason is that' is the correct structure.
+"Despite of the rain, we went out. What is the correct version?","Despite the rain, we went out.","Despite of the rain, we went out.","In spite the rain, we went out.","Despite of the rains, we went out.",A,'Despite' is not followed by 'of'.
+She is senior than me. What is the correct version?,She is senior to me.,She is senior than me.,She is senior from me.,She is senior over me.,A,"'Senior' is followed by 'to', not 'than'."
+I am looking forward to meet you. What is the correct version?,I am looking forward to meeting you.,I am looking forward to meet you.,I am looking forward to met you.,I am looking forward to have met you.,A,'Look forward to' is followed by a gerund.

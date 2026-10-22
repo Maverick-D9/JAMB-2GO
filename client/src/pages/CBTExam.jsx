@@ -213,6 +213,10 @@ export default function CBTExam() {
         timeTaken,
         jambScore: Math.round((score / (total || 1)) * 400),
         attemptId,
+        answers: answers,
+        questions: questionsBySubject,
+        userAnswers: answers,
+        questionsSnapshot: questionsBySubject,
       };
       localStorage.setItem("cbt_result", JSON.stringify(finalResult));
       window.location.href = "/cbt-result";

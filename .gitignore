@@ -7,3 +7,6 @@ auth-users.json
 users.json
 subscriptions.json
 cbt-results.json
+client/.env
+server/.env
+.env

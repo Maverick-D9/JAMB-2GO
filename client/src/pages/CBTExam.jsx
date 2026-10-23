@@ -3,26 +3,6 @@ import { VITALS } from "../config/vitals";
 
 const API_BASE = VITALS.SYSTEM.API_BASE;
 
-function strongShuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    let j;
-    if (
-      typeof window !== "undefined" &&
-      window.crypto &&
-      window.crypto.getRandomValues
-    ) {
-      const rand = new Uint32Array(1);
-      window.crypto.getRandomValues(rand);
-      j = rand[0] % (i + 1);
-    } else {
-      j = Math.floor(Math.random() * (i + 1));
-    }
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
 export default function CBTExam() {
   const [examData, setExamData] = useState(null);
   const [currentSubject, setCurrentSubject] = useState("english");
@@ -41,41 +21,21 @@ export default function CBTExam() {
       window.location.href = "/cbt-setup";
       return;
     }
-    const data = JSON.parse(saved);
-    const reshuffledQuestions = {};
-    Object.keys(data.questions || data.papers || {}).forEach((sub) => {
-      let qs = data.questions[sub] || data.papers[sub] || [];
-      qs = strongShuffle(qs);
-      qs = qs.map((q) => {
-        const correctLetter = (q.correct_answer || "A").toUpperCase();
-        const opts = [
-          { letter: "A", text: q.option_a },
-          { letter: "B", text: q.option_b },
-          { letter: "C", text: q.option_c },
-          { letter: "D", text: q.option_d },
-        ];
-        const correctText =
-          opts.find((o) => o.letter === correctLetter)?.text || opts[0].text;
-        const shuffledOpts = strongShuffle(opts);
-        let newCorrect = "A";
-        const newMap = {};
-        ["A", "B", "C", "D"].forEach((newL, idx) => {
-          newMap[`option_${newL.toLowerCase()}`] = shuffledOpts[idx].text;
-          if (shuffledOpts[idx].text === correctText) newCorrect = newL;
-        });
-        return { ...q, ...newMap, correct_answer: newCorrect };
-      });
-      reshuffledQuestions[sub] = qs;
-    });
-    data.questions = reshuffledQuestions;
-    if (data.papers) data.papers = reshuffledQuestions;
-    setExamData(data);
-    setCurrentSubject(data.subjects?.[0] || "english");
-    const duration =
-      (data.durationMinutes || data.config?.durationMinutes || 120) * 60;
-    setTotalDuration(duration);
-    setTimeLeft(duration);
-    localStorage.setItem("cbt_timeTaken", "0");
+    try {
+      const data = JSON.parse(saved);
+      // DO NOT RE-SHUFFLE HERE - backend already shuffled with anti-cheat
+      // Using as-is ensures cbt_exam == what review will read
+      setExamData(data);
+      setCurrentSubject(data.subjects?.[0] || "english");
+      const duration =
+        (data.durationMinutes || data.config?.durationMinutes || 120) * 60;
+      setTotalDuration(duration);
+      setTimeLeft(duration);
+      localStorage.setItem("cbt_timeTaken", "0");
+    } catch (e) {
+      alert("Corrupt exam file. Go to setup.");
+      window.location.href = "/cbt-setup";
+    }
   }, []);
 
   useEffect(() => {
@@ -124,6 +84,7 @@ export default function CBTExam() {
     setIsSubmitting(true);
     const timeTaken = totalDuration - timeLeft;
     localStorage.setItem("cbt_timeTaken", String(timeTaken));
+
     let score = 0,
       total = 0;
     const breakdown = {};
@@ -153,9 +114,9 @@ export default function CBTExam() {
       localStorage.getItem("cbt_name") ||
       JSON.parse(localStorage.getItem("jambite_user") || "{}").username ||
       "JAMBite";
-
     const attemptId = examData.examId || examData._id || Date.now().toString();
 
+    // === LIGHT PAYLOAD FOR MONGO - 0 heavy data ===
     const payloadLeaderboard = {
       userId,
       name: userName,
@@ -167,8 +128,6 @@ export default function CBTExam() {
       timeTaken,
       date: new Date().toISOString(),
       attemptId,
-      userAnswers: answers,
-      questionsSnapshot: questionsBySubject,
     };
 
     fetch(`${API_BASE}/api/cbt/save-result`, {
@@ -184,58 +143,36 @@ export default function CBTExam() {
 
     localStorage.setItem("lastAttemptId", attemptId);
 
-    const payload = {
-      attemptId,
-      userAnswers: answers,
-      questionsSnapshot: questionsBySubject,
-      examId: examData.examId || examData._id,
-      subjects: subjectList,
-      isAutoSubmit: isAuto,
+    const finalResult = {
       score,
       total,
       breakdown,
       timeTaken,
-      totalScore: Math.round((score / (total || 1)) * 400),
+      jambScore: Math.round((score / (total || 1)) * 400),
+      attemptId,
+      answers: answers,
+      questions: questionsBySubject,
+      userAnswers: answers,
+      questionsSnapshot: questionsBySubject,
     };
 
     try {
-      const res = await fetch(`${API_BASE}/api/cbt/submit`, {
+      // Optional: keep submit for stats but no heavy data
+      await fetch(`${API_BASE}/api/cbt/submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const result = await res.json();
-      const finalResult = {
-        ...result,
-        score,
-        total,
-        breakdown,
-        timeTaken,
-        jambScore: Math.round((score / (total || 1)) * 400),
-        attemptId,
-        answers: answers,
-        questions: questionsBySubject,
-        userAnswers: answers,
-        questionsSnapshot: questionsBySubject,
-      };
-      localStorage.setItem("cbt_result", JSON.stringify(finalResult));
-      window.location.href = "/cbt-result";
-    } catch (e) {
-      localStorage.setItem(
-        "cbt_result",
-        JSON.stringify({
-          score,
-          total,
-          breakdown,
+        body: JSON.stringify({
           answers,
           questions: questionsBySubject,
-          timeTaken,
-          jambScore: Math.round((score / (total || 1)) * 400),
           attemptId,
+          timeTaken,
         }),
-      );
-      window.location.href = "/cbt-result";
-    }
+      });
+    } catch (e) {}
+
+    // Save full exam for local review (0 Mongo cost)
+    localStorage.setItem("cbt_result", JSON.stringify(finalResult));
+    window.location.href = "/cbt-result";
   };
 
   if (!examData)
@@ -250,9 +187,8 @@ export default function CBTExam() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Cinzel:wght@700;800&display=swap');
         @keyframes aurora{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-15px) scale(1.08)}}
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.55}}
-      .opt-card{transition:all 0.22s cubic-bezier(0.2,0.8,0.2,1)}
-      .opt-card:hover{transform:translateY(-2px); border-color:rgba(251,191,36,0.5)!important; background:rgba(30,41,59,0.9)!important}
+        .opt-card{transition:all 0.22s cubic-bezier(0.2,0.8,0.2,1)}
+        .opt-card:hover{transform:translateY(-2px); border-color:rgba(251,191,36,0.5)!important; background:rgba(30,41,59,0.9)!important}
       `}</style>
 
       <div className="absolute inset-0 pointer-events-none">
@@ -261,18 +197,11 @@ export default function CBTExam() {
           style={{ animation: "aurora 10s infinite" }}
         />
         <div className="absolute w-[600px] h-[600px] bottom-0 right-0 bg-[radial-gradient(ellipse_at_center,_rgba(251,191,36,0.12),_transparent_65%)] blur-[40px]" />
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: `linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)`,
-            backgroundSize: "36px 36px",
-          }}
-        />
       </div>
 
       {isSubmitting && (
         <div className="fixed inset-0 bg-[#080C18]/85 backdrop-blur-[10px] z-[9999] grid place-items-center">
-          <div className="bg-[#121A2E]/90 backdrop-blur-xl border border-white/10 p-7 rounded-[20px] text-center max-w-[320px] shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+          <div className="bg-[#121A2E]/90 backdrop-blur-xl border border-white/10 p-7 rounded-[20px] text-center max-w-[320px]">
             <div className="text-[38px] mb-2">👑⏳</div>
             <h2 className="font-extrabold text-[18px] text-white">
               {timeLeft === 0
@@ -319,7 +248,7 @@ export default function CBTExam() {
         <div className="flex gap-2 items-center">
           <button
             onClick={() => setShowCalc(!showCalc)}
-            className={`px-3 py-1.5 rounded-full font-bold text-[12px] border backdrop-blur-xl transition ${showCalc ? "bg-amber-400 text-black border-amber-400" : "bg-white/5 text-slate-300 border-white/10 hover:border-white/20"}`}
+            className={`px-3 py-1.5 rounded-full font-bold text-[12px] border ${showCalc ? "bg-amber-400 text-black border-amber-400" : "bg-white/5 text-slate-300 border-white/10"}`}
           >
             🧮 Calc
           </button>
@@ -331,7 +260,7 @@ export default function CBTExam() {
           <button
             onClick={() => handleSubmit(false)}
             disabled={isSubmitting}
-            className="px-3.5 py-1.5 rounded-full font-extrabold text-[12px] bg-gradient-to-br from-amber-400 to-amber-500 text-black border-none cursor-pointer hover:scale-[1.02] transition"
+            className="px-3.5 py-1.5 rounded-full font-extrabold text-[12px] bg-gradient-to-br from-amber-400 to-amber-500 text-black"
           >
             Submit 👑
           </button>
@@ -351,7 +280,7 @@ export default function CBTExam() {
                 setCurrentSubject(sub);
                 setCurrentIndex(0);
               }}
-              className={`px-4 py-2 rounded-full font-extrabold text-[11px] tracking-wide uppercase whitespace-nowrap border transition-all hover:-translate-y-0.5 ${active ? "bg-amber-400 text-black border-amber-400 shadow-[0_6px_18px_rgba(251,191,36,0.25)]" : "bg-[#121A2E]/70 text-slate-400 border-white/10 hover:border-white/20 hover:text-white"}`}
+              className={`px-4 py-2 rounded-full font-extrabold text-[11px] uppercase border ${active ? "bg-amber-400 text-black border-amber-400" : "bg-[#121A2E]/70 text-slate-400 border-white/10"}`}
             >
               {sub} • {done}/{count} {active ? "👑" : ""}
             </button>
@@ -361,16 +290,22 @@ export default function CBTExam() {
 
       <div className="flex-1 grid grid-cols-[1fr_310px] overflow-hidden relative z-10">
         <div className="p-4 overflow-y-auto">
-          <div className="bg-[#121A2E]/80 backdrop-blur-xl border border-white/10 rounded-[24px] p-6 relative shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.05)_inset] overflow-hidden">
-            <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/30 to-transparent" />
+          <div className="bg-[#121A2E]/80 backdrop-blur-xl border border-white/10 rounded-[24px] p-6">
             {currentQ ? (
               <>
-                <div
-                  className="text-[17px] font-semibold leading-[1.6] text-white"
-                  dangerouslySetInnerHTML={{
-                    __html: `<span style="color:#FBBF24; font-weight:800; font-family:Cinzel; margin-right:8px;">Q${currentIndex + 1}.</span> ${currentQ.question_text || currentQ.question}`,
-                  }}
-                />
+                <div className="text-[17px] font-semibold leading-[1.6] text-white">
+                  <span
+                    style={{
+                      color: "#FBBF24",
+                      fontWeight: 800,
+                      fontFamily: "Cinzel",
+                      marginRight: 8,
+                    }}
+                  >
+                    Q{currentIndex + 1}.
+                  </span>
+                  {currentQ.question_text || currentQ.question}
+                </div>
                 <div className="grid gap-2.5 mt-6">
                   {["A", "B", "C", "D"].map((k) => {
                     const optKey = `option_${k.toLowerCase()}`;
@@ -383,16 +318,14 @@ export default function CBTExam() {
                       <label
                         key={k}
                         onClick={() => handleOption(k)}
-                        className={`opt-card flex gap-3 p-3.5 rounded-2xl cursor-pointer border ${isSelected ? "bg-amber-400/10 border-amber-400 shadow-[0_0_0_3px_rgba(251,191,36,0.15)]" : "bg-[#0F172A] border-white/10"}`}
+                        className={`opt-card flex gap-3 p-3.5 rounded-2xl cursor-pointer border ${isSelected ? "bg-amber-400/10 border-amber-400" : "bg-[#0F172A] border-white/10"}`}
                       >
                         <div
-                          className={`w-7 h-7 rounded-full grid place-items-center font-extrabold text-[12px] flex-shrink-0 ${isSelected ? "bg-amber-400 text-black" : "bg-[#1e293b] text-slate-500"}`}
+                          className={`w-7 h-7 rounded-full grid place-items-center font-extrabold text-[12px] ${isSelected ? "bg-amber-400 text-black" : "bg-[#1e293b] text-slate-500"}`}
                         >
                           {k}
                         </div>
-                        <span className="text-[14px] leading-[1.4] text-white">
-                          {val}
-                        </span>
+                        <span className="text-[14px] text-white">{val}</span>
                       </label>
                     );
                   })}
@@ -401,7 +334,7 @@ export default function CBTExam() {
                   <button
                     disabled={currentIndex === 0}
                     onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
-                    className="px-4 py-2 rounded-full border border-white/10 bg-[#0F172A] text-slate-400 text-[12px] font-bold disabled:opacity-40 cursor-pointer hover:border-white/20"
+                    className="px-4 py-2 rounded-full border border-white/10 bg-[#0F172A] text-slate-400 text-[12px] font-bold disabled:opacity-40"
                   >
                     ← Previous
                   </button>
@@ -412,7 +345,7 @@ export default function CBTExam() {
                         Math.min(currentQuestions.length - 1, i + 1),
                       )
                     }
-                    className="px-4 py-2 rounded-full bg-gradient-to-br from-sky-400 to-sky-500 text-black text-[12px] font-extrabold border-none disabled:opacity-40 cursor-pointer hover:scale-[1.02] transition"
+                    className="px-4 py-2 rounded-full bg-gradient-to-br from-sky-400 to-sky-500 text-black text-[12px] font-extrabold disabled:opacity-40"
                   >
                     Next →
                   </button>
@@ -432,7 +365,7 @@ export default function CBTExam() {
               <input
                 value={calcVal}
                 onChange={(e) => setCalcVal(e.target.value)}
-                className="w-full p-2 mb-2 border border-white/10 rounded-lg bg-[#020617] text-white text-[13px] outline-none"
+                className="w-full p-2 mb-2 border border-white/10 rounded-lg bg-[#020617] text-white text-[13px]"
                 placeholder="0"
               />
               <div className="grid grid-cols-4 gap-1.5">
@@ -471,14 +404,14 @@ export default function CBTExam() {
                         }
                       } else setCalcVal((v) => v + c);
                     }}
-                    className="p-2.5 rounded-lg border border-white/10 bg-[#141E2F] text-white cursor-pointer text-[13px] hover:border-amber-400/30"
+                    className="p-2.5 rounded-lg border border-white/10 bg-[#141E2F] text-white text-[13px]"
                   >
                     {c}
                   </button>
                 ))}
                 <button
                   onClick={() => setCalcVal("")}
-                  className="col-span-4 p-2 bg-red-500 text-white border-none rounded-lg cursor-pointer font-bold text-[12px]"
+                  className="col-span-4 p-2 bg-red-500 text-white rounded-lg font-bold text-[12px]"
                 >
                   Clear
                 </button>
@@ -500,7 +433,7 @@ export default function CBTExam() {
                   <button
                     key={i}
                     onClick={() => setCurrentIndex(i)}
-                    className={`h-9 rounded-[10px] font-extrabold text-[12px] border transition-all hover:scale-[1.05] ${isCurrent ? "border-amber-400 shadow-[0_0_0_3px_rgba(251,191,36,0.2)]" : "border-white/10"} ${answered ? "bg-amber-400 text-black" : isCurrent ? "bg-white text-black" : "bg-[#0F172A] text-slate-500"}`}
+                    className={`h-9 rounded-[10px] font-extrabold text-[12px] border ${isCurrent ? "border-amber-400" : "border-white/10"} ${answered ? "bg-amber-400 text-black" : isCurrent ? "bg-white text-black" : "bg-[#0F172A] text-slate-500"}`}
                   >
                     {i + 1}
                   </button>
@@ -526,29 +459,11 @@ export default function CBTExam() {
                 )}
               </span>
             </div>
-            <div className="mt-2.5 h-1.5 bg-[#1e293b] rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-amber-400 to-sky-400 transition-all"
-                style={{
-                  width: `${
-                    (Object.keys(answers).length /
-                      Math.max(
-                        1,
-                        Object.values(questionsBySubject).reduce(
-                          (a, b) => a + b.length,
-                          0,
-                        ),
-                      )) *
-                    100
-                  }%`,
-                }}
-              />
-            </div>
           </div>
           <button
             onClick={() => handleSubmit(false)}
             disabled={isSubmitting}
-            className="w-full p-3 bg-gradient-to-br from-amber-400 to-amber-500 text-black rounded-xl font-extrabold border-none cursor-pointer tracking-wide hover:scale-[1.01] transition"
+            className="w-full p-3 bg-gradient-to-br from-amber-400 to-amber-500 text-black rounded-xl font-extrabold"
           >
             FINISH & SEAL SCROLL 👑
           </button>

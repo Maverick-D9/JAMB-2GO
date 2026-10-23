@@ -1,11 +1,16 @@
 {
   "name": "jamb-2go",
   "version": "1.0.0",
-  "description": "JAMB 2GO CBT Backend",
+  "description": "JAMB 2GO CBT Backend + Frontend",
   "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",
-    "dev": "nodemon server/index.js"
+    "dev": "concurrently \"nodemon server/index.js\" \"npm run dev --prefix client\"",
+    "dev:back": "nodemon server/index.js",
+    "dev:front": "npm run dev --prefix client",
+    "build": "npm run build --prefix client",
+    "rebuild": "npm install && npm install --prefix client && npm run build --prefix client",
+    "clean": "node -e \"const fs=require('fs'); const p='cbt-results.json'; if(fs.existsSync(p)){ let d=JSON.parse(fs.readFileSync(p,'utf8')); let c=d.filter(r=>r.questionsSnapshot&&Object.keys(r.questionsSnapshot).length>0); fs.writeFileSync(p,JSON.stringify(c,null,2)); console.log('Cleaned '+(d.length-c.length)+' broken'); } else { console.log('No results file yet'); }\""
   },
   "dependencies": {
     "express": "^4.18.2",
@@ -20,5 +25,9 @@
     "nodemailer": "^6.9.4",
     "cookie-parser": "^1.4.6",
     "axios": "^1.5.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "concurrently": "^8.2.2"
   }
 }

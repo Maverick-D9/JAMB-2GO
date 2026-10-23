@@ -1,6 +1,5 @@
 const express = require("express");
 const fs = require("fs");
-const fsp = fs.promises;
 const path = require("path");
 const crypto = require("crypto");
 const router = express.Router();
@@ -8,9 +7,7 @@ const CbtResult = require("../models/CbtResult");
 const User = require("../models/User");
 const VITALS = require("../config/vitals");
 
-// === FIXED: SINGLE CANONICAL CONFIG FILE ONLY - NO HYPHEN/UNDERSCORE DUAL ===
 const CONFIG_PATH = path.join(__dirname, `../${VITALS.SYSTEM.CBT_CONFIG_FILE}`);
-
 let CONFIG = { enabled: true, durationMinutes: 120, questionsPerSubject: 40 };
 try {
   if (fs.existsSync(CONFIG_PATH)) {
@@ -21,22 +18,19 @@ try {
 } catch (e) {
   console.log("Config load error, using default");
 }
-
 function saveConfig() {
-  fs.writeFileSync(CONFIG_PATH, JSON.stringify(CONFIG, null, 2));
+  try {
+    fs.writeFileSync(CONFIG_PATH, JSON.stringify(CONFIG, null, 2));
+  } catch (e) {}
 }
-
 function checkAdminPassword(req) {
   const passHeader =
     req.headers["x-admin-password"] ||
     req.body.adminPassword ||
     req.query?.adminPassword;
-  const expected = VITALS.ADMIN.PASSWORD;
-  if (!passHeader) return false;
-  return passHeader === expected;
+  return passHeader === VITALS.ADMIN.PASSWORD;
 }
 
-// === FIXED SUB CHECK - MONGO ONLY - ALIGNED WITH /payment/access ===
 async function checkSubscription(req, res, next) {
   if (checkAdminPassword(req)) return next();
   const userId =
@@ -44,54 +38,39 @@ async function checkSubscription(req, res, next) {
     req.body.username ||
     req.query.userId ||
     req.headers["x-user-id"] ||
-    req.headers["x-user-email"] ||
-    req.headers["x-user-id"];
-
-  if (!userId) {
+    req.headers["x-user-email"];
+  if (!userId)
     return res.status(401).json({ error: "Login required", code: "NO_USER" });
-  }
   try {
     const user = await User.findOne({
-      $or: [
-        { email: userId },
-        { username: userId },
-        { userId: userId },
-        { _id: userId.length === 24 ? userId : null },
-      ].filter(Boolean),
+      $or: [{ email: userId }, { username: userId }, { userId: userId }].filter(
+        Boolean,
+      ),
     });
-
     if (!user)
-      return res.status(403).json({
-        error: "SUBSCRIPTION_REQUIRED",
-        code: "SUBSCRIPTION_REQUIRED",
-      });
-
+      return res
+        .status(403)
+        .json({
+          error: "SUBSCRIPTION_REQUIRED",
+          code: "SUBSCRIPTION_REQUIRED",
+        });
     const now = new Date();
-
-    // Check ANY valid expiry - same logic as /payment/access
     const subExpiry = user.subscriptionExpiresAt
       ? new Date(user.subscriptionExpiresAt)
       : null;
     const trialExpiry = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
-
-    const hasActiveSub = subExpiry && subExpiry > now;
-    const hasActiveTrial = trialExpiry && trialExpiry > now;
     const isActive =
-      hasActiveSub || hasActiveTrial || user.subscriptionStatus === "active";
-
-    console.log(
-      `CBT CHECK for ${userId}: subExpiry=${subExpiry}, now=${now}, active=${isActive}`,
-    );
-
-    if (!isActive) {
-      return res.status(403).json({
-        error: "SUBSCRIPTION_REQUIRED",
-        message: "Your ₦2000 pass expired. Please renew to continue CBT.",
-        code: "SUBSCRIPTION_REQUIRED",
-        debug: { subExpiry, now, status: user.subscriptionStatus },
-      });
-    }
-    req.mongoUser = user; // pass to next handler
+      (subExpiry && subExpiry > now) ||
+      (trialExpiry && trialExpiry > now) ||
+      user.subscriptionStatus === "active";
+    if (!isActive)
+      return res
+        .status(403)
+        .json({
+          error: "SUBSCRIPTION_REQUIRED",
+          code: "SUBSCRIPTION_REQUIRED",
+        });
+    req.mongoUser = user;
     next();
   } catch (e) {
     console.error("checkSubscription error:", e);
@@ -99,9 +78,7 @@ async function checkSubscription(req, res, next) {
   }
 }
 
-// === CBT QUESTION BANK CACHE - LOAD ONCE ===
-let cbtBankCache = {}; // { subject: [questions] }
-
+let cbtBankCache = {};
 function parseCSV(txt) {
   const lines = txt.trim().split("\n").slice(1);
   return lines
@@ -124,19 +101,15 @@ function parseCSV(txt) {
     })
     .filter(Boolean);
 }
-
 function findFileSync(sub) {
   const tries = [
     path.join(__dirname, `../${VITALS.SYSTEM.QUESTIONS_FOLDER}/${sub}.csv`),
     path.join(__dirname, `../data/${sub}.csv`),
     path.join(__dirname, `../${sub}.csv`),
-    path.join(__dirname, `../uploads/${sub}.csv`),
-    path.join(__dirname, `../../questions/${sub}.csv`),
   ];
   for (const p of tries) if (fs.existsSync(p)) return p;
   return null;
 }
-
 function loadAllCbtBanks() {
   cbtBankCache = {};
   const subjects = [
@@ -155,30 +128,22 @@ function loadAllCbtBanks() {
     "irs",
     "geography",
     "agric",
-    "marketing",
-    "yoruba",
-    "history",
   ];
   subjects.forEach((sub) => {
     const file = findFileSync(sub);
     if (file) {
       try {
-        const bank = parseCSV(fs.readFileSync(file, "utf8"));
-        cbtBankCache[sub] = bank;
-        console.log(`CBT CACHE: ${bank.length} Qs for ${sub}`);
-      } catch (e) {
-        console.log(`CBT load err ${sub}:`, e.message);
-      }
+        cbtBankCache[sub] = parseCSV(fs.readFileSync(file, "utf8"));
+        console.log(`CBT CACHE: ${cbtBankCache[sub].length} Qs for ${sub}`);
+      } catch (e) {}
     }
   });
-  // alias maths <-> mathematics
   if (cbtBankCache["mathematics"] && !cbtBankCache["maths"])
     cbtBankCache["maths"] = cbtBankCache["mathematics"];
   if (cbtBankCache["maths"] && !cbtBankCache["mathematics"])
     cbtBankCache["mathematics"] = cbtBankCache["maths"];
 }
 loadAllCbtBanks();
-
 const DUMMY = {
   english: Array.from({ length: 60 }, (_, i) => ({
     question_text: `English Q${i + 1}: Synonym for happy?`,
@@ -199,7 +164,6 @@ const DUMMY = {
     subject: "mathematics",
   })),
 };
-
 function strongShuffle(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -208,7 +172,6 @@ function strongShuffle(arr) {
   }
   return a;
 }
-
 function getQs(subject, n) {
   const key = subject.toLowerCase();
   let bank = cbtBankCache[key] || [];
@@ -218,10 +181,7 @@ function getQs(subject, n) {
     if (alias) bank = cbtBankCache[alias] || [];
     if (bank.length === 0) bank = DUMMY[key] || DUMMY.english;
   }
-  // triple shuffle from RAM (0 FS)
-  let shuffledBank = strongShuffle(bank);
-  shuffledBank = strongShuffle(shuffledBank);
-  shuffledBank = strongShuffle(shuffledBank);
+  let shuffledBank = strongShuffle(strongShuffle(strongShuffle(bank)));
   const picked = shuffledBank.slice(0, Math.min(n, bank.length));
   return picked.map((q, idx) => {
     const correctLetter = (q.correct_answer || "A").toUpperCase();
@@ -260,10 +220,6 @@ router.put("/config", (req, res) => {
   if (durationMinutes) CONFIG.durationMinutes = parseInt(durationMinutes);
   if (questionsPerSubject)
     CONFIG.questionsPerSubject = parseInt(questionsPerSubject);
-  if (CONFIG.durationMinutes < 5) CONFIG.durationMinutes = 5;
-  if (CONFIG.durationMinutes > 300) CONFIG.durationMinutes = 300;
-  if (CONFIG.questionsPerSubject < 5) CONFIG.questionsPerSubject = 5;
-  if (CONFIG.questionsPerSubject > 60) CONFIG.questionsPerSubject = 60;
   saveConfig();
   res.json({ success: true, config: CONFIG });
 });
@@ -281,9 +237,6 @@ router.post("/start", checkSubscription, (req, res) => {
   allSubjects.forEach((sub) => {
     questions[sub] = getQs(sub, CONFIG.questionsPerSubject);
   });
-  console.log(
-    `CBT START: ${CONFIG.questionsPerSubject} per subject, Total: ${CONFIG.questionsPerSubject * allSubjects.length}`,
-  );
   res.json({
     subjects: allSubjects,
     questions,
@@ -314,7 +267,6 @@ router.post("/submit", checkSubscription, (req, res) => {
       breakdown[sub] = { score: subScore, total: questions[sub].length };
     });
   }
-  console.log(`CBT SUBMIT: ${score}/${total}`);
   res.json({
     score,
     total,
@@ -360,7 +312,7 @@ function calculateStreaks(allResults) {
         } else if (d < checkDate) break;
       }
     }
-    if (currentStreak > 0) {
+    if (currentStreak > 0)
       streaks.push({
         userId,
         name: results[0].name || "Anon",
@@ -368,11 +320,11 @@ function calculateStreaks(allResults) {
         lastActive: new Date(days[0]),
         totalExams: results.length,
       });
-    }
   });
   return streaks.sort((a, b) => b.streak - a.streak).slice(0, 10);
 }
 
+// === SAVES ONLY SCORE - NO HEAVY DATA - NO CRASH ===
 router.post("/save-result", checkSubscription, async (req, res) => {
   try {
     const {
@@ -382,10 +334,7 @@ router.post("/save-result", checkSubscription, async (req, res) => {
       rawScore,
       rawTotal,
       breakdown,
-      subjects,
       timeTaken,
-      userAnswers,
-      questionsSnapshot,
       attemptId,
     } = req.body;
     if (!breakdown)
@@ -400,9 +349,6 @@ router.post("/save-result", checkSubscription, async (req, res) => {
     let isFlagged = false;
     if (timeSec > 0 && timeSec <= 300) {
       isFlagged = true;
-      console.log(
-        `🚨 ANTI-CHEAT FLAGGED: ${userId} ${totalScore}/400 in ${timeSec}s`,
-      );
     }
     const english = subArray.find((s) => s.name.toLowerCase() === "english");
     const others = subArray.filter((s) => s.name.toLowerCase() !== "english");
@@ -423,9 +369,12 @@ router.post("/save-result", checkSubscription, async (req, res) => {
       subjects: subArray,
       timeTaken: timeSec,
       isFlagged,
-      attemptId: attemptId || undefined,
-      userAnswers: userAnswers || {},
-      questionsSnapshot: questionsSnapshot || null,
+      attemptId:
+        attemptId ||
+        `att_${Date.now()}_${crypto.randomBytes(3).toString("hex")}`,
+      // === IMPORTANT: Save 0 bytes to Mongo - review is from localStorage ===
+      userAnswers: {},
+      questionsSnapshot: null,
     });
     res.json({
       success: true,
@@ -442,6 +391,7 @@ router.post("/save-result", checkSubscription, async (req, res) => {
 router.get("/review/:attemptId", async (req, res) => {
   try {
     const { attemptId } = req.params;
+    // NO .lean() - safe for JSON file model
     const result = await CbtResult.findOne({ attemptId });
     if (!result) return res.status(404).json({ error: "Attempt not found" });
     res.json(result);
@@ -453,7 +403,7 @@ router.get("/review/:attemptId", async (req, res) => {
 router.get("/leaderboard", async (req, res) => {
   try {
     const { type = "main", subject } = req.query;
-    const allValid = await CbtResult.find({ isFlagged: false }).lean(); // lean() for 10x faster
+    const allValid = await CbtResult.find({ isFlagged: false });
     if (type === "main") {
       const bestMap = {};
       allValid.forEach((r) => {

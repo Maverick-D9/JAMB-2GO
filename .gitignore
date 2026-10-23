@@ -2,7 +2,6 @@ node_modules
 client/node_modules
 server/node_modules
 dist
-.env# legacy crash files
 auth-users.json
 users.json
 subscriptions.json

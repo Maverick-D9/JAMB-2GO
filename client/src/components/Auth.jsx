@@ -390,7 +390,8 @@ export default function Auth({ onAuth }) {
         <div className="hidden lg:block pl-10">
           <div className="inline-flex items-center gap-2 bg-white/[0.06] border border-white/10 rounded-full px-3 py-1 text-[10px] tracking-[0.15em] text-amber-200 uppercase font-bold mb-6">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />{" "}
-            2,047 JAMBITES ONLINE NOW
+            TEST YOURSELF • IMPROVE YOURSELF • THINK DIVERSE • TRASCEND • 2000+
+            JAMBITES
           </div>
           <div className="flex items-center gap-3 mb-6">
             <div className="w-11 h-11 rounded-xl bg-[#38BDF8] flex items-center justify-center font-black text-black text-xl">
@@ -400,7 +401,7 @@ export default function Auth({ onAuth }) {
               className="font-black text-white tracking-tight text-[16px]"
               style={{ fontFamily: "Cinzel" }}
             >
-              JAMB2Go Palace
+              SCHOLARS' HAVEN
             </span>
           </div>
           <h1 className="font-black text-[56px] leading-[0.9] tracking-tight text-white">
@@ -635,7 +636,7 @@ export default function Auth({ onAuth }) {
                     ))}
                   </div>
                   <p className="text-center text-slate-500 text-[11px]">
-                    Real code sent to your Gmail (not 123456 anymore)
+                    Scholar's code sent to your Gmail
                   </p>
                   <button
                     type="submit"

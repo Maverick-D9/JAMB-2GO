@@ -49,7 +49,6 @@ userSchema.statics.findByIdCustom = function (userId) {
 userSchema.statics.createUser = function (userInput) {
   const now = new Date();
   const trialEndsAt = new Date();
-  // === WAS: +3 hardcoded, NOW: from vitals ===
   trialEndsAt.setDate(now.getDate() + VITALS.TRIAL.DURATION_DAYS);
 
   return this.create({
@@ -94,6 +93,18 @@ userSchema.statics.checkUserAccess = function (user) {
     ? new Date(user.subscriptionExpiresAt)
     : null;
 
+  // === FIXED ORDER FOR OPTION B: Check ACTIVE first ===
+  if (user.subscriptionStatus === "active" && subExpires && now < subExpires) {
+    const daysLeft = Math.ceil((subExpires - now) / 86400000);
+    return {
+      tier: VITALS.SUBSCRIPTION.TIER_NAME,
+      status: "active",
+      daysLeft,
+      expiresAt: user.subscriptionExpiresAt,
+      trialEndsAt: user.trialEndsAt,
+    };
+  }
+
   if (user.subscriptionStatus === "trial" && now < trialEnds) {
     const daysLeft = Math.ceil((trialEnds - now) / 86400000);
     return {
@@ -103,15 +114,7 @@ userSchema.statics.checkUserAccess = function (user) {
       trialEndsAt: user.trialEndsAt,
     };
   }
-  if (user.subscriptionStatus === "active" && subExpires && now < subExpires) {
-    const daysLeft = Math.ceil((subExpires - now) / 86400000);
-    return {
-      tier: VITALS.SUBSCRIPTION.TIER_NAME,
-      status: "active",
-      daysLeft,
-      expiresAt: user.subscriptionExpiresAt,
-    };
-  }
+
   const isExpiredActive =
     user.subscriptionStatus === "active" && subExpires && now >= subExpires;
   return {

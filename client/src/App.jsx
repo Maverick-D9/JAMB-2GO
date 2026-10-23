@@ -73,13 +73,27 @@ function PaywallModal({ access, userId, email, onClose }) {
         <h2 className="text-white text-[22px] font-black mt-2">
           {isExpired
             ? VITALS.MESSAGES.TRIAL_ENDED
-            : VITALS.MESSAGES.FREE_ZONE_TITLE}
+            : isTrial
+              ? `Upgrade Your Trial 👑`
+              : VITALS.MESSAGES.FREE_ZONE_TITLE}
         </h2>
         <p className="text-slate-400 text-[13px] mt-2 leading-6">
-          {isTrial
-            ? `You are on FREE trial — ${access.daysLeft} day(s) left.`
-            : VITALS.MESSAGES.FREE_ZONE_DESC}{" "}
-          {VITALS.SUBSCRIPTION.LABEL}
+          {isTrial ? (
+            <>
+              You are on FREE trial —{" "}
+              <b className="text-white">{access.daysLeft} day(s) left.</b>
+              <br />
+              <span className="text-emerald-300">
+                Option B: Pay now and your {VITALS.SUBSCRIPTION.DURATION_DAYS}{" "}
+                days will start AFTER trial ends. You keep your free days +{" "}
+                {VITALS.SUBSCRIPTION.DURATION_DAYS} days.
+              </span>
+            </>
+          ) : (
+            <>
+              {VITALS.MESSAGES.FREE_ZONE_DESC} {VITALS.SUBSCRIPTION.LABEL}
+            </>
+          )}
         </p>
         <div className="mt-5 bg-[#080C18] border border-white/10 rounded-[18px] p-4 text-left">
           <div className="flex justify-between text-[13px]">
@@ -89,10 +103,16 @@ function PaywallModal({ access, userId, email, onClose }) {
             </span>
           </div>
           <div className="mt-2 text-[12px] text-slate-300 grid gap-1.5">
-            <div>✅ All 11 Subjects • Live Arena</div>
-            <div>✅ CBT Practice • 2hrs Mock</div>
+            <div>✅ All Subjects • Live Arena</div>
+            <div>✅ CBT Practice • Test your speed & accuracy</div>
             <div>✅ Drill Palace • Topic Mastery</div>
             <div>✅ Chat & DMs</div>
+            {isTrial && (
+              <div className="text-emerald-300 font-bold">
+                ✅ You keep {access.daysLeft} free days +{" "}
+                {VITALS.SUBSCRIPTION.DURATION_DAYS} days after
+              </div>
+            )}
           </div>
         </div>
         <button
@@ -100,10 +120,16 @@ function PaywallModal({ access, userId, email, onClose }) {
           disabled={loading}
           className="w-full mt-5 py-4 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 text-black font-black text-[15px]"
         >
-          {loading ? "Opening Paystack..." : VITALS.MESSAGES.PAY_BUTTON_SHORT}
+          {loading
+            ? "Opening Paystack..."
+            : isTrial
+              ? `Upgrade Now — ${VITALS.SUBSCRIPTION.LABEL} (Starts after trial)`
+              : VITALS.MESSAGES.PAY_BUTTON_SHORT}
         </button>
         <button onClick={onClose} className="mt-3 text-slate-500 text-[12px]">
-          Maybe later — stay in English only
+          {isTrial
+            ? "Continue trial for now"
+            : "Maybe later — stay in English only"}
         </button>
       </div>
     </div>
@@ -1097,27 +1123,7 @@ export default function App() {
               position: "absolute",
               left: "82%",
               top: "42%",
-              animation: "drift 8s ease-in-out infinite",
-            }}
-          >
-            <div
-              style={{
-                animation: "blinkNeon 2.6s infinite",
-                color: "#FDE68A",
-                fontSize: "13px",
-                fontFamily: "Caveat",
-                transform: "rotate(4deg)",
-              }}
-            >
-              C₆H₆ (Benzene)
-            </div>
-          </div>
-          <div
-            style={{
-              position: "absolute",
-              left: "84%",
-              top: "36%",
-              animation: "drift 9s ease-in-out infinite, blinkNeon 3s infinite",
+              animation: "drift 8s ease-in-out infinite, blinkNeon 3s infinite",
             }}
           >
             <svg
@@ -1446,12 +1452,12 @@ export default function App() {
               className="font-black text-[42px] tracking-tight drop-shadow-[0_0_24px_rgba(56,189,248,0.6)]"
               style={{ fontFamily: "Cinzel" }}
             >
-              <span className="text-white">JAMB</span>
+              <span className="text-white">SCHOLARS'</span>
               <span className="text-[#38BDF8]">•</span>
-              <span className="text-white">2GO</span>
+              <span className="text-white">HAVEN</span>
             </div>
             <p className="text-slate-400 text-[13px] mt-1">
-              Welcome back,{" "}
+              Welcome back,Scholar-{" "}
               <span className="text-white font-bold">{username} 👑</span> •{" "}
               {hasFullAccess
                 ? `✅ ${access.status} • ${access.daysLeft}d left`
@@ -1459,17 +1465,29 @@ export default function App() {
             </p>
           </div>
 
+          {/* === OPTION B + SUBSCRIBE DURING TRIAL FIX === */}
           {hasFullAccess ? (
-            <div className="mt-4 bg-emerald-500/10 border border-emerald-500/20 rounded-[14px] px-4 py-2.5 flex justify-between items-center backdrop-blur-xl">
-              <span className="text-emerald-300 text-[12px] font-bold">
+            <div className="mt-4 bg-emerald-500/10 border border-emerald-500/20 rounded-[14px] px-4 py-2.5 flex justify-between items-center backdrop-blur-xl gap-2">
+              <span className="text-emerald-300 text-[12px] font-bold shrink-0">
                 👑{" "}
                 {access.status === "trial"
-                  ? `🎁 Trial: ${access.daysLeft} days left`
-                  : `Active Pass: ${access.daysLeft} days left`}
+                  ? `🎁 Trial: ${access.daysLeft}d left`
+                  : `Active Pass: ${access.daysLeft}d left`}
               </span>
-              <span className="text-emerald-400 text-[11px]">
-                All 11 rooms unlocked
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-emerald-400 text-[11px] hidden md:inline">
+                  All 11 rooms unlocked
+                </span>
+                {access.status === "trial" && (
+                  <button
+                    onClick={() => setShowPaywall(true)}
+                    className="bg-amber-400 text-black text-[11px] font-black px-3.5 py-1.5 rounded-full shadow-[0_0_20px_rgba(251,191,36,0.4)] hover:scale-105 transition"
+                  >
+                    Upgrade Now — Keep {access.daysLeft}d +{" "}
+                    {VITALS.SUBSCRIPTION.DURATION_DAYS}d 👑
+                  </button>
+                )}
+              </div>
             </div>
           ) : (
             <div className="mt-4 bg-amber-400/10 border border-amber-400/20 rounded-[14px] px-4 py-3 flex justify-between items-center backdrop-blur-xl">
@@ -1508,7 +1526,7 @@ export default function App() {
                 CBT Practice {!hasFullAccess && "🔒"}
               </div>
               <div className="text-[11px] text-slate-400 mt-1">
-                4 subjects, 2hrs mock.
+                4 subjects, Controlled timing.
               </div>
             </button>
             <button
@@ -1542,13 +1560,13 @@ export default function App() {
                 Live Room Quiz
               </div>
               <div className="text-[11px] text-slate-400 mt-1">
-                Compete for the crown.
+                Wake up the Scholar in you!.
               </div>
             </button>
           </div>
 
           <div className="mt-4 mb-3 text-[11px] text-sky-300/70 uppercase text-center tracking-[0.18em] font-black">
-            ⚗️ CHOOSE YOUR BATTLEFIELD — HOVER TO GLOW
+            ⚗️ CHOOSE YOUR BATTLEFIELD — SCULPT YOUR MIND ⚗️
           </div>
 
           <div

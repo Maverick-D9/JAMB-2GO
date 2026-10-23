@@ -952,13 +952,36 @@ io.on("connection", (socket) => {
       }
     }
   });
-  socket.on("leave_room", (room) => {
-    const data = socketUserMap[socket.id];
-    const targetRoom = room || data?.room;
-    socket.leave(targetRoom);
-    if (data) {
-      socket.to(data.room).emit("userLeft", { username: data.username });
-      emitParticipants(data.room);
+  socket.on("leave_room", (payload) => {
+    // Handle both old: "english-room" and new: { room, username }
+    let targetRoom, username;
+    if (typeof payload === "string") {
+      targetRoom = payload;
+      username = socketUserMap[socket.id]?.username;
+    } else if (payload && typeof payload === "object") {
+      targetRoom = payload.room || socketUserMap[socket.id]?.room;
+      username = payload.username || socketUserMap[socket.id]?.username;
+    } else {
+      targetRoom = socketUserMap[socket.id]?.room;
+      username = socketUserMap[socket.id]?.username;
+    }
+
+    if (targetRoom) socket.leave(targetRoom);
+
+    if (targetRoom && username) {
+      console.log(`🔴 LEAVE: ${username} -> ${targetRoom}`);
+      // This is what makes "← username left" appear
+      io.to(targetRoom).emit("userLeft", { username });
+      emitParticipants(targetRoom);
+    }
+
+    // Clean map if leaving current room
+    if (
+      socketUserMap[socket.id] &&
+      socketUserMap[socket.id].room === targetRoom
+    ) {
+      // keep map for a moment for disconnect, but you can delete if you want
+      // delete socketUserMap[socket.id];
     }
   });
   socket.on("answer_question", async ({ room, username, answer }) => {

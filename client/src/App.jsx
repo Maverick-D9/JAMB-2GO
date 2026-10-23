@@ -117,6 +117,7 @@ function SystemMessage({ type, username }) {
     </div>
   );
 }
+
 function ParticipantsList({
   users,
   currentUsername,
@@ -178,6 +179,7 @@ function ParticipantsList({
     </div>
   );
 }
+
 function ChatPanel({
   activeChat,
   setActiveChat,
@@ -190,10 +192,39 @@ function ChatPanel({
   username,
   socket,
 }) {
+  const [showEmoji, setShowEmoji] = useState(false);
+  const EMOJIS = [
+    "😀",
+    "😂",
+    "❤️",
+    "🔥",
+    "👏",
+    "💯",
+    "😭",
+    "😎",
+    "⚡",
+    "🙏",
+    "💀",
+    "😅",
+    "🤣",
+    "👑",
+    "✅",
+    "❌",
+    "🎉",
+    "😡",
+    "🥺",
+    "🤝",
+    "😍",
+    "🙌",
+    "👀",
+    "💪",
+  ];
+
   const isRoom = activeChat === "room";
   const currentHistory = isRoom
     ? messages
     : privateConversations[activeChat] || [];
+
   const send = () => {
     if (!chatMsg.trim() || !hasAccess) return;
     if (isRoom)
@@ -206,7 +237,13 @@ function ChatPanel({
         message: chatMsg,
       });
     setChatMsg("");
+    setShowEmoji(false);
   };
+
+  const addEmoji = (emoji) => {
+    setChatMsg((prev) => prev + emoji);
+  };
+
   return (
     <div
       className={`bg-[#121A2E]/70 backdrop-blur-xl rounded-[18px] p-3.5 border flex flex-col flex-1 overflow-hidden w-full ${isRoom ? "border-white/10" : "border-sky-400/30"}`}
@@ -248,7 +285,28 @@ function ChatPanel({
           );
         })}
       </div>
-      <div className="flex gap-2 mt-2.5">
+
+      {showEmoji && (
+        <div className="grid grid-cols-6 gap-1 p-2 bg-[#0F172A] border border-white/10 rounded-xl mt-2.5 animate-[pop_0.2s]">
+          {EMOJIS.map((em) => (
+            <button
+              key={em}
+              onClick={() => addEmoji(em)}
+              className="text-[20px] hover:bg-white/10 rounded-lg p-1.5 transition"
+            >
+              {em}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="flex gap-2 mt-2.5 items-center">
+        <button
+          onClick={() => setShowEmoji(!showEmoji)}
+          className="w-10 h-[42px] rounded-full bg-[#0F172A] border border-white/10 grid place-items-center text-[18px] shrink-0 hover:bg-white/10"
+        >
+          😊
+        </button>
         <input
           value={chatMsg}
           onChange={(e) => setChatMsg(e.target.value)}
@@ -258,7 +316,7 @@ function ChatPanel({
         />
         <button
           onClick={send}
-          className="w-11 h-[42px] rounded-full bg-sky-400 text-black grid place-items-center"
+          className="w-11 h-[42px] rounded-full bg-sky-400 text-black grid place-items-center font-bold"
         >
           ↗
         </button>
@@ -266,6 +324,7 @@ function ChatPanel({
     </div>
   );
 }
+
 function LeaderboardModal({
   leaderboardData,
   qNumber,
@@ -575,7 +634,7 @@ export default function App() {
     setIsLocked(false);
     setLockedWinner(null);
     if (showChat && room !== id) {
-      socket.emit("leave_room", room);
+      socket.emit("leave_room", { room, username });
       setMessages([]);
       setPrivateConversations({});
       setUnreadDMs({});
@@ -588,6 +647,21 @@ export default function App() {
     setShowChat(true);
     socket.emit("join_room", { room: id, username });
   };
+
+  const handleBackToLobby = () => {
+    if (room && username) {
+      socket.emit("leave_room", { room, username });
+    }
+    setShowChat(false);
+    setMessages([]);
+    setPrivateConversations({});
+    setUnreadDMs({});
+    setActiveChat("room");
+    setMyScore(0);
+    setMyStreak(0);
+    setRoomUsers([]);
+  };
+
   const handleSubjectClick = (id) => {
     const isEnglish = id === "english-room";
     if (!isEnglish && !hasFullAccess) {
@@ -627,7 +701,9 @@ export default function App() {
     localStorage.removeItem("jambite_user");
     setAuthedUser(null);
     setShowChat(false);
-    socket.emit("leave_room", room);
+    if (room && username) {
+      socket.emit("leave_room", { room, username });
+    }
   };
 
   useEffect(() => {
@@ -767,7 +843,6 @@ export default function App() {
       />
     );
 
-  // ===================== LOBBY WITH ALL FEATURES =====================
   if (!showChat) {
     return (
       <div className="min-h-screen w-full bg-[#050A14] relative flex justify-center items-start py-6 px-4 overflow-hidden">
@@ -792,7 +867,6 @@ export default function App() {
           @keyframes pulseAtom { 0%,100%{transform: scale(1)} 50%{transform: scale(1.15)} }
         `}</style>
 
-        {/* GRAFFITI LAYER - DRIFT + BLINK + SVG */}
         <div
           style={{
             position: "absolute",
@@ -804,7 +878,6 @@ export default function App() {
             transition: "filter 0.4s ease",
           }}
         >
-          {/* FORMULAS - drift left/right + up/down + blink */}
           <div
             style={{
               position: "absolute",
@@ -1039,8 +1112,6 @@ export default function App() {
               C₆H₆ (Benzene)
             </div>
           </div>
-
-          {/* BENZENE RING SVG - graffiti */}
           <div
             style={{
               position: "absolute",
@@ -1080,8 +1151,6 @@ export default function App() {
               <circle cx="15" cy="25" r="6" fill="#FDE68A" />
             </svg>
           </div>
-
-          {/* DOUBLE BENZENE - NAPHTHALENE */}
           <div
             style={{
               position: "absolute",
@@ -1130,8 +1199,6 @@ export default function App() {
               />
             </svg>
           </div>
-
-          {/* ATOM DOODLE - Bohr model */}
           <div
             style={{
               position: "absolute",
@@ -1190,8 +1257,6 @@ export default function App() {
               />
             </svg>
           </div>
-
-          {/* BEAKER / FLASK */}
           <div
             style={{
               position: "absolute",
@@ -1229,8 +1294,6 @@ export default function App() {
               </circle>
             </svg>
           </div>
-
-          {/* LIGHTBULB - Idea */}
           <div
             style={{
               position: "absolute",
@@ -1267,8 +1330,6 @@ export default function App() {
               </text>
             </svg>
           </div>
-
-          {/* PENDULUM / PHYSICS */}
           <div
             style={{
               position: "absolute",
@@ -1344,8 +1405,6 @@ export default function App() {
               </g>
             </svg>
           </div>
-
-          {/* SPLATTERS */}
           <div
             style={{
               position: "absolute",
@@ -1595,7 +1654,7 @@ export default function App() {
             <div className="hidden md:flex px-3 py-1.5 rounded-full bg-[#0F172A] text-slate-400 text-[11px] font-bold">
               {myScore} pts •{" "}
               <button
-                onClick={() => setShowChat(false)}
+                onClick={handleBackToLobby}
                 className="ml-2 text-sky-400 hover:text-white"
               >
                 ← Lobby

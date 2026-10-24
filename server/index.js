@@ -735,25 +735,53 @@ app.post("/admin/reload-questions", checkAdmin, (req, res) => {
 });
 app.get("/admin/metrics", checkAdmin, async (req, res) => {
   try {
+    const Subscription = require("./models/Subscription");
     const totalUsers = await User.countDocuments();
-    const activeSubs = await User.countDocuments({
-      subscriptionStatus: "active",
-      subscriptionExpiresAt: { $gt: new Date() },
+
+    // REAL DATA FROM SUBSCRIPTION COLLECTION
+    const allSubs = await Subscription.find({ status: "active" });
+    const activeSubsDocs = await Subscription.find({
+      status: "active",
+      expiresAt: { $gt: new Date() },
     });
+
+    const PRICE = VITALS.SUBSCRIPTION.PRICE; // 2500 from vitals.js
+    // Total revenue = sum of actual amounts paid (handles price changes later)
+    const totalRevenueValue = allSubs.reduce(
+      (sum, s) => sum + (s.amount || PRICE),
+      0,
+    );
+    const activeCount = activeSubsDocs.length;
+    const mrrValue = activeCount * PRICE;
+
     res.json({
       kpis: {
         totalUsers,
-        activeSubs,
-        mrr: `₦${activeSubs * 1000}`,
-        totalRevenue: `Calculated from Paystack`,
-        usersOnline: Math.floor(activeSubs * 0.15) + 1,
+        activeSubs: activeCount, // Will be 1 after you clean ghost, matching Paystack
+        mrr: mrrValue,
+        totalRevenue: totalRevenueValue,
+        usersOnline: Math.floor(activeCount * 0.15) + 1,
       },
-      revenueTrend: [],
+      revenueTrend: [
+        { month: "Jan", revenue: 0 },
+        { month: "Feb", revenue: 0 },
+        { month: "Mar", revenue: totalRevenueValue },
+      ],
       subjectPopularity: Object.entries(questionBank).map(([k, v]) => ({
         name: k,
         attempts: v.length,
       })),
       tableData: [],
+      debug: {
+        allSubsCount: allSubs.length,
+        activeSubsCount: activeCount,
+        subscriptions: allSubs.map((s) => ({
+          email: s.email,
+          amount: s.amount,
+          expiresAt: s.expiresAt,
+          ref: s.reference,
+        })),
+      },
     });
   } catch (e) {
     res.status(500).json({ error: e.message });

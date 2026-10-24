@@ -39,15 +39,14 @@ const ALIAS_MAP = {
 };
 const normalize = (s) => ALIAS_MAP[s.toLowerCase()] || s.toLowerCase();
 
-const mockMetrics = {
-  kpis: { totalRevenue: "₦200", mrr: "₦200", activeSubs: 1, usersOnline: 1 },
-  revenueTrend: [
-    { month: "Jan", revenue: 0 },
-    { month: "Feb", revenue: 0 },
-    { month: "Mar", revenue: 200 },
-  ],
-  subjectPopularity: [{ name: "english", attempts: 1 }],
-};
+const PRICE = VITALS.SUBSCRIPTION.PRICE;
+const PRICE_LABEL = VITALS.SUBSCRIPTION.DISPLAY_COMMA;
+
+function formatNaira(val) {
+  const n = Number(val || 0);
+  if (isNaN(n)) return "₦0";
+  return `₦${n.toLocaleString()}`;
+}
 
 function Toast({ message, onClose }) {
   useEffect(() => {
@@ -74,21 +73,34 @@ function Toast({ message, onClose }) {
   );
 }
 
-function DashboardStats({ counts }) {
+function DashboardStats() {
   const [data, setData] = useState(null);
+  const [err, setErr] = useState("");
   useEffect(() => {
     const pass = localStorage.getItem("admin_pass");
     fetch(`${API}/admin/metrics`, { headers: { "x-admin-password": pass } })
       .then((r) => r.json())
-      .then((realData) => setData(realData))
-      .catch(() => setData(mockMetrics));
+      .then((realData) => {
+        if (realData.error) throw new Error(realData.error);
+        setData(realData);
+      })
+      .catch((e) => setErr(e.message));
   }, []);
-  if (!data)
+
+  if (err)
     return (
-      <div className="bg-[#121A2E]/70 backdrop-blur-xl border border-white/10 p-6 rounded-[20px] text-slate-400 text-sm">
-        Loading metrics...
+      <div className="bg-[#121A2E]/70 border border-red-500/20 p-6 rounded-[20px] text-red-300 text-sm mb-6">
+        Metrics Error: {err} — Ensure backend /admin/metrics uses Subscription
+        collection, not User * 5000
       </div>
     );
+  if (!data)
+    return (
+      <div className="bg-[#121A2E]/70 backdrop-blur-xl border border-white/10 p-6 rounded-[20px] text-slate-400 text-sm mb-6">
+        Loading metrics from {PRICE_LABEL} source...
+      </div>
+    );
+
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -98,8 +110,11 @@ function DashboardStats({ counts }) {
             Total Revenue
           </p>
           <h2 className="text-[22px] font-black text-white mt-1">
-            {data.kpis.totalRevenue}
+            {formatNaira(data.kpis.totalRevenue)}
           </h2>
+          <p className="text-[10px] text-slate-500 mt-1">
+            {PRICE} x {data.kpis.activeSubs} active • {PRICE_LABEL}
+          </p>
         </div>
         <div className="group relative bg-[#121A2E]/70 backdrop-blur-xl p-5 rounded-[20px] border border-white/10 overflow-hidden hover:-translate-y-1 transition-all">
           <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-sky-400/30 to-transparent" />
@@ -107,8 +122,11 @@ function DashboardStats({ counts }) {
             MRR
           </p>
           <h2 className="text-[22px] font-black text-sky-400 mt-1">
-            {data.kpis.mrr}
+            {formatNaira(data.kpis.mrr)}
           </h2>
+          <p className="text-[10px] text-slate-500 mt-1">
+            Live from Subscriptions
+          </p>
         </div>
         <div className="group relative bg-[#121A2E]/70 backdrop-blur-xl p-5 rounded-[20px] border border-white/10 overflow-hidden hover:-translate-y-1 transition-all">
           <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent" />
@@ -118,6 +136,9 @@ function DashboardStats({ counts }) {
           <h2 className="text-[22px] font-black text-emerald-400 mt-1">
             {data.kpis.activeSubs}
           </h2>
+          <p className="text-[10px] text-slate-500 mt-1">
+            {data.kpis.totalUsers} total users
+          </p>
         </div>
         <div className="group relative bg-[#121A2E]/70 backdrop-blur-xl p-5 rounded-[20px] border border-white/10 overflow-hidden hover:-translate-y-1 transition-all">
           <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-violet-400/30 to-transparent" />
@@ -126,7 +147,7 @@ function DashboardStats({ counts }) {
           </p>
           <h2 className="text-[22px] font-black text-white mt-1 flex items-center gap-2">
             <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_8px_#22c55e]"></span>
-            {data.kpis.usersOnline}
+            {data.kpis.usersOnline || 0}
           </h2>
         </div>
       </div>
@@ -136,10 +157,10 @@ function DashboardStats({ counts }) {
             className="text-white font-extrabold text-[13px] tracking-wide mb-4"
             style={{ fontFamily: "Cinzel" }}
           >
-            REVENUE TREND
+            REVENUE TREND ({PRICE_LABEL})
           </h3>
           <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={data.revenueTrend}>
+            <AreaChart data={data.revenueTrend || []}>
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke="rgba(255,255,255,0.06)"
@@ -171,7 +192,7 @@ function DashboardStats({ counts }) {
             SUBJECT POPULARITY
           </h3>
           <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={data.subjectPopularity}>
+            <BarChart data={data.subjectPopularity || []}>
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke="rgba(255,255,255,0.06)"
@@ -482,7 +503,6 @@ export default function Admin() {
       </div>
       <div className="max-w-7xl mx-auto relative z-10">
         <Toast message={status} onClose={() => setStatus("")} />
-
         <div className="flex flex-col md:flex-row justify-between gap-4 items-start md:items-center mb-6 bg-[#121A2E]/70 backdrop-blur-xl border border-white/10 rounded-[20px] p-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 grid place-items-center font-black">
@@ -499,7 +519,7 @@ export default function Admin() {
                 </span>
               </h1>
               <p className="text-slate-500 text-[10px] tracking-widest">
-                PALACE ADMIN • AUTO-LOCK 30M
+                PALACE ADMIN • AUTO-LOCK 30M • {PRICE_LABEL}
               </p>
             </div>
           </div>
@@ -524,7 +544,6 @@ export default function Admin() {
             </button>
           </div>
         </div>
-
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           <button
             onClick={() => (window.location.href = "/admin/topics")}
@@ -568,9 +587,7 @@ export default function Admin() {
             <div className="text-[11px] text-slate-500">Refresh counts</div>
           </button>
         </div>
-
-        <DashboardStats counts={counts} />
-
+        <DashboardStats />
         <div className="bg-[#121A2E]/70 backdrop-blur-xl rounded-[20px] border border-white/10 p-5 mb-6 relative overflow-hidden">
           <div className="flex justify-between items-center mb-4">
             <h3
@@ -602,7 +619,6 @@ export default function Admin() {
             ))}
           </div>
         </div>
-
         <div className="bg-[#121A2E]/80 backdrop-blur-xl rounded-[20px] border border-emerald-500/20 p-6 mb-6 relative overflow-hidden">
           <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent" />
           <h3
@@ -681,7 +697,6 @@ export default function Admin() {
             </a>
           </div>
         </div>
-
         <div className="bg-[#121A2E]/70 backdrop-blur-xl rounded-[20px] border border-white/10 overflow-hidden">
           <button
             onClick={() => setIsUploadOpen(!isUploadOpen)}

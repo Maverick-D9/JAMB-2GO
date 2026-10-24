@@ -3,28 +3,34 @@ const nodemailer = require("nodemailer");
 let transporter = null;
 
 function getTransporter() {
-  if (transporter) return transporter;
-
   const user = process.env.EMAIL_USER;
-  const pass = process.env.EMAIL_PASS;
+  const pass = process.env.EMAIL_PASS?.replace(/\s/g, ""); // remove spaces from app password
 
   if (!user || !pass) {
-    console.log(
-      "⚠️ EMAIL_USER / EMAIL_PASS missing in .env - using DEV OTP mode",
-    );
+    console.log("⚠️ EMAIL_USER / EMAIL_PASS missing - DEV OTP mode");
     return null;
   }
 
+  if (transporter) return transporter;
+
   transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
-    port: 587, // FIXED: was 465 (blocked by ISP + causes ENETUNREACH)
-    secure: false, // must be false for 587
+    port: 587,
+    secure: false,
     auth: { user, pass },
-    family: 4, // FIXED: Force IPv4 - this kills ENETUNREACH error
-    tls: { ciphers: "SSLv3" },
-    connectionTimeout: 15000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
+    family: 4,
+    connectionTimeout: 20000,
+    greetingTimeout: 20000,
+    socketTimeout: 20000,
+    // REMOVED: tls: { ciphers: "SSLv3" } <- This was killing you
+    tls: {
+      ciphers: "TLSv1.2",
+    },
+  });
+
+  transporter.verify((err) => {
+    if (err) console.log("[MAIL CONFIG FAIL]", err.message);
+    else console.log("[MAIL READY] Gmail ready:", user);
   });
 
   return transporter;
@@ -32,9 +38,8 @@ function getTransporter() {
 
 async function sendOtp(email, code, type = "verify") {
   const isReset = type === "reset";
-  const tx = getTransporter();
+  let tx = getTransporter();
 
-  // No email config? Log OTP and return success so signup never blocks
   if (!tx) {
     console.log(`\n========== DEV OTP [${type.toUpperCase()}] ==========`);
     console.log(`To: ${email} | CODE: ${code}`);
@@ -52,12 +57,10 @@ async function sendOtp(email, code, type = "verify") {
       html: `
       <div style="font-family:Inter,sans-serif;background:#0F172A;padding:24px">
         <div style="max-width:420px;margin:auto;background:#1E293B;padding:28px;border-radius:16px;border:1px solid #334155">
-          <div style="width:40px;height:40px;background:#38BDF8;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#0F172A">J</div>
           <h2 style="color:white;margin:16px 0 8px">${isReset ? "Reset your password" : "Verify your email"}</h2>
-          <p style="color:#94a3b8;font-size:13px">${isReset ? "Use this code to reset your password:" : "Use this code to create your account:"}</p>
+          <p style="color:#94a3b8;font-size:13px">Use this code:</p>
           <div style="font-size:32px;font-weight:800;letter-spacing:10px;color:#38BDF8;text-align:center;margin:20px 0;background:#0F172A;padding:16px;border-radius:12px">${code}</div>
-          <p style="color:#64748b;font-size:11px">Expires in 10 minutes. If you didn't request this, ignore.</p>
-          <p style="color:#475569;font-size:10px;margin-top:20px;border-top:1px solid #1e293b;padding-top:12px">🔒 Secure 256-bit SSL Encrypted</p>
+          <p style="color:#64748b;font-size:11px">Expires in 10 minutes.</p>
         </div>
       </div>
     `,
@@ -66,10 +69,12 @@ async function sendOtp(email, code, type = "verify") {
     return { success: true };
   } catch (e) {
     console.error(`[MAIL FAIL] ${email} -> ${code}:`, e.message);
+    // Kill broken transporter so next email creates fresh one
+    transporter = null;
+
     console.log(`\n========== FALLBACK DEV OTP ==========`);
     console.log(`To: ${email} | CODE: ${code}`);
     console.log(`=====================================\n`);
-    // CRITICAL: Don't throw - return devMode so auth.js doesn't return 500
     return { success: true, devMode: true, code, error: e.message };
   }
 }
@@ -80,7 +85,6 @@ async function sendReceipt(email, reference, expiresAt) {
     console.log(`[DEV RECEIPT] ${email} - ${reference}`);
     return { success: true, devMode: true };
   }
-
   const expiryDate = expiresAt
     ? new Date(expiresAt).toLocaleDateString("en-NG", {
         year: "numeric",
@@ -93,30 +97,13 @@ async function sendReceipt(email, reference, expiresAt) {
     await tx.sendMail({
       from: `"JAMB CBT" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: "Payment Confirmed - JAMB CBT Full Access Activated",
-      html: `
-      <div style="font-family:Inter,sans-serif;background:#0F172A;padding:24px">
-        <div style="max-width:480px;margin:auto;background:#1E293B;padding:28px;border-radius:16px;border:1px solid #334155">
-          <div style="width:40px;height:40px;background:#22c55e;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#0F172A">✓</div>
-          <h2 style="color:white;margin:16px 0 8px">Payment Successful!</h2>
-          <p style="color:#94a3b8;font-size:13px;line-height:1.6">Your full access to JAMB CBT has been activated. You now have access to all subjects.</p>
-          <div style="background:#0F172A;padding:16px;border-radius:12px;margin:20px 0;border:1px solid #1e293b">
-            <p style="color:#64748b;font-size:11px;margin:0 0 4px">REFERENCE</p>
-            <p style="color:white;font-size:13px;font-family:monospace;margin:0 0 12px">${reference}</p>
-            <p style="color:#64748b;font-size:11px;margin:0 0 4px">AMOUNT</p>
-            <p style="color:white;font-size:13px;margin:0 0 12px">₦2,000</p>
-            <p style="color:#64748b;font-size:11px;margin:0 0 4px">EXPIRES</p>
-            <p style="color:#38BDF8;font-size:13px;margin:0">${expiryDate}</p>
-          </div>
-          <p style="color:#475569;font-size:11px;margin-top:20px;border-top:1px solid #1e293b;padding-top:12px">Need help? Reply to this email.<br/>🔒 Secure 256-bit SSL Encrypted</p>
-        </div>
-      </div>
-    `,
+      subject: "Payment Confirmed - JAMB CBT Full Access",
+      html: `<div style="font-family:sans-serif;padding:24px"><h2>Payment Successful!</h2><p>Ref: ${reference}<br>Amount: ₦2,500<br>Expires: ${expiryDate}</p></div>`,
     });
     return { success: true };
   } catch (e) {
     console.error(`[RECEIPT FAIL] ${email}:`, e.message);
-    // Receipt failure should never block payment - log and continue
+    transporter = null;
     return { success: true, devMode: true, error: e.message };
   }
 }

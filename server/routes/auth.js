@@ -43,7 +43,6 @@ router.post("/request-otp", async (req, res) => {
 
     const code = genCode();
 
-    // Clean old OTPs
     try {
       await Otp.deleteMany({ email: cleanEmail });
     } catch {}
@@ -60,7 +59,6 @@ router.post("/request-otp", async (req, res) => {
       } catch {}
     }
 
-    // Hash and save pending BEFORE email - so session exists even if email fails
     const hashed = await bcrypt.hash(password, 10);
     global.pendingUsers.set(cleanEmail, {
       fullName,
@@ -71,30 +69,26 @@ router.post("/request-otp", async (req, res) => {
       trialEndsAt: genTrial(),
     });
 
-    // Send email - this will NOT throw now (fixed mailer.js)
-    const mailResult = await sendOtp(cleanEmail, code);
-
+    // FAST - respond instantly, don't wait for Gmail
     res.json({
       success: true,
-      message: mailResult.devMode
-        ? "OTP generated (check server terminal if email not received)"
-        : "OTP sent to " + email,
-      // devOtp allows signup to work even when Gmail is blocked
-      devOtp: mailResult.devMode ? code : undefined,
+      message: "OTP sent to " + email,
+    });
+
+    // Send email in background
+    setImmediate(async () => {
+      try {
+        await sendOtp(cleanEmail, code);
+        console.log(`[OTP BG SENT] ${cleanEmail} -> ${code}`);
+      } catch (e) {
+        console.error(`[OTP BG FAIL] ${cleanEmail}:`, e.message);
+      }
     });
   } catch (e) {
     console.error("request-otp error:", e);
-    // If we already saved pending user, don't block - return success
-    const cleanEmail = (req.body.email || "").toLowerCase().trim();
-    if (global.pendingUsers.has(cleanEmail)) {
-      const code = global.pendingUsers.get(cleanEmail)?.code || null;
-      return res.json({
-        success: true,
-        message: "OTP generated - check server logs",
-        devOtp: code,
-      });
+    if (!res.headersSent) {
+      res.status(500).json({ error: "Failed to send OTP: " + e.message });
     }
-    res.status(500).json({ error: "Failed to send OTP: " + e.message });
   }
 });
 
@@ -282,19 +276,30 @@ router.post("/forgot-password", async (req, res) => {
     } catch (e) {
       console.log("OTP mongo error fallback", e.message);
     }
-    const result = await sendOtp(cleanEmail, code, "reset");
     global.resetTokens.set(cleanEmail, {
       code,
       expires: Date.now() + 10 * 60 * 1000,
     });
+
+    // FAST - respond instantly
     res.json({
       success: true,
       message: "Reset code sent to " + cleanEmail,
-      devOtp: result.devMode ? code : undefined,
+    });
+
+    // Send in background
+    setImmediate(() => {
+      sendOtp(cleanEmail, code, "reset").catch((err) => {
+        console.error(`[RESET BG FAIL] ${cleanEmail}:`, err.message);
+      });
     });
   } catch (e) {
     console.error("forgot-password error:", e);
-    res.status(500).json({ error: "Failed to send reset email: " + e.message });
+    if (!res.headersSent) {
+      res
+        .status(500)
+        .json({ error: "Failed to send reset email: " + e.message });
+    }
   }
 });
 

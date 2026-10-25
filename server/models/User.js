@@ -4,14 +4,14 @@ const VITALS = require("../config/vitals");
 const userSchema = new mongoose.Schema(
   {
     userId: { type: String, unique: true },
-    id: { type: String },
+    id: { type: String, index: true },
     email: {
       type: String,
       unique: true,
       lowercase: true,
       required: true,
     },
-    username: { type: String, sparse: true },
+    username: { type: String, sparse: true, index: true },
     password: String,
     fullName: String,
     subject: { type: String, default: "english-room" },
@@ -26,13 +26,11 @@ const userSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-// === PRODUCTION INDEXES FOR SCALE ===
-userSchema.index({ userId: 1 });
-userSchema.index({ id: 1 });
-userSchema.index({ email: 1 });
-userSchema.index({ username: 1 });
-userSchema.index({ subscriptionStatus: 1, subscriptionExpiresAt: 1 }); // for "find all expired" queries
+// Only indexes that are NOT already unique
+userSchema.index({ subscriptionStatus: 1, subscriptionExpiresAt: 1 });
 userSchema.index({ createdAt: -1 });
+
+// ... keep all your statics exactly same as you have now ...
 
 userSchema.statics.findByEmail = function (email) {
   if (!email) return null;
@@ -44,23 +42,15 @@ userSchema.statics.findByUsername = function (username) {
   return this.findOne({ username: new RegExp(`^${username}$`, "i") });
 };
 
-// === OPTIMIZED: Try fastest index first, no $or ===
 userSchema.statics.findByIdCustom = async function (userId) {
   if (!userId) return null;
-
-  // 1. Fastest: try userId index
   let user = await this.findOne({ userId });
   if (user) return user;
-
-  // 2. Try id index
   user = await this.findOne({ id: userId });
   if (user) return user;
-
-  // 3. Last: try email (only if looks like email)
   if (String(userId).includes("@")) {
     return this.findOne({ email: userId.toLowerCase().trim() });
   }
-
   return null;
 };
 
@@ -69,7 +59,6 @@ userSchema.statics.createUser = function (userInput) {
   const trialEndsAt =
     userInput.trialEndsAt ||
     new Date(now.getTime() + VITALS.TRIAL.DURATION_DAYS * 24 * 60 * 60 * 1000);
-
   return this.create({
     userId:
       userInput.userId ||
@@ -93,7 +82,7 @@ userSchema.statics.createUser = function (userInput) {
 
 userSchema.statics.updateUser = function (userId, updates) {
   return this.findOneAndUpdate(
-    { userId }, // <-- FIXED: always update by userId only, not $or
+    { userId },
     { $set: updates },
     { returnDocument: "after" },
   );
@@ -111,7 +100,6 @@ userSchema.statics.checkUserAccess = function (user) {
   const subExpires = user.subscriptionExpiresAt
     ? new Date(user.subscriptionExpiresAt)
     : null;
-
   if (user.subscriptionStatus === "active" && subExpires && now < subExpires) {
     const daysLeft = Math.ceil((subExpires - now) / 86400000);
     return {
@@ -122,7 +110,6 @@ userSchema.statics.checkUserAccess = function (user) {
       trialEndsAt: user.trialEndsAt,
     };
   }
-
   if (user.subscriptionStatus === "trial" && now < trialEnds) {
     const daysLeft = Math.ceil((trialEnds - now) / 86400000);
     return {
@@ -132,7 +119,6 @@ userSchema.statics.checkUserAccess = function (user) {
       trialEndsAt: user.trialEndsAt,
     };
   }
-
   const isExpiredActive =
     user.subscriptionStatus === "active" && subExpires && now >= subExpires;
   return {

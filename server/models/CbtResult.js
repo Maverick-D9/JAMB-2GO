@@ -8,7 +8,7 @@ const cbtResultSchema = new mongoose.Schema(
     name: { type: String, default: "Anonymous" },
     date: { type: Date, default: Date.now },
 
-    totalScore: { type: Number, required: true, index: true },
+    totalScore: { type: Number, required: true },
     rawScore: Number,
     rawTotal: Number,
 
@@ -30,7 +30,7 @@ const cbtResultSchema = new mongoose.Schema(
     ],
 
     timeTaken: { type: Number, default: 0 },
-    isFlagged: { type: Boolean, default: false, index: true },
+    isFlagged: { type: Boolean, default: false },
     attemptId: { type: String, required: true, unique: true },
 
     userAnswers: { type: Object, default: {} },
@@ -40,38 +40,30 @@ const cbtResultSchema = new mongoose.Schema(
 );
 
 // === PRODUCTION INDEXES FOR 100K+ DOCS ===
+// attemptId already indexed by unique:true above, don't add again
 cbtResultSchema.index({ userId: 1, totalScore: -1 });
 cbtResultSchema.index({ isFlagged: 1, totalScore: -1, timeTaken: 1 });
-cbtResultSchema.index({ attemptId: 1 }, { unique: true });
 cbtResultSchema.index({ date: -1 });
-cbtResultSchema.index({ "subjects.name": 1 });
 cbtResultSchema.index({ userId: 1, date: -1 });
 
 const CbtResultModel = mongoose.model("CbtResult", cbtResultSchema);
 
-// === AUTO MIGRATION: Move old json file to Mongo on first boot ===
+// === AUTO MIGRATION ===
 (async () => {
   try {
     const FILE_PATH = path.join(__dirname, "..", "cbt-results.json");
     if (!fs.existsSync(FILE_PATH)) return;
-
     const raw = fs.readFileSync(FILE_PATH, "utf8");
     const jsonData = JSON.parse(raw);
-
     if (!Array.isArray(jsonData) || jsonData.length === 0) return;
-
     const countInDb = await CbtResultModel.countDocuments();
     if (countInDb > 0) {
       console.log(
-        `✅ CbtResult already in Mongo (${countInDb}), skipping json migration`,
+        `✅ CbtResult already in Mongo (${countInDb}), skipping migration`,
       );
       return;
     }
-
-    console.log(
-      `🔄 MIGRATING ${jsonData.length} old results from cbt-results.json to Mongo...`,
-    );
-
+    console.log(`🔄 MIGRATING ${jsonData.length} old results to Mongo...`);
     const docs = jsonData.map((r) => ({
       userId: r.userId || r.username || "Anonymous",
       name: r.name || r.userId || "Anonymous",
@@ -96,16 +88,11 @@ const CbtResultModel = mongoose.model("CbtResult", cbtResultSchema);
       userAnswers: r.userAnswers || {},
       questionsSnapshot: r.questionsSnapshot || null,
     }));
-
-    // Insert in batches of 500 to avoid memory spike
     for (let i = 0; i < docs.length; i += 500) {
       const batch = docs.slice(i, i + 500);
       await CbtResultModel.insertMany(batch, { ordered: false });
     }
-
-    console.log(`✅ MIGRATED ${docs.length} results to Mongo`);
-
-    // Backup old file
+    console.log(`✅ MIGRATED ${docs.length} results`);
     fs.renameSync(FILE_PATH, FILE_PATH + `.backup_${Date.now()}.json`);
   } catch (e) {
     console.log("Migration skip/error:", e.message);

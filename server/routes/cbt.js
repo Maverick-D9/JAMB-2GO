@@ -45,7 +45,6 @@ async function checkSubscription(req, res, next) {
   if (!userId)
     return res.status(401).json({ error: "Login required", code: "NO_USER" });
   try {
-    // Try JWT first
     let user = null;
     try {
       if (userId.includes(".")) {
@@ -64,22 +63,17 @@ async function checkSubscription(req, res, next) {
     }
 
     if (!user)
-      return res
-        .status(403)
-        .json({
-          error: "SUBSCRIPTION_REQUIRED",
-          code: "SUBSCRIPTION_REQUIRED",
-        });
+      return res.status(403).json({
+        error: "SUBSCRIPTION_REQUIRED",
+        code: "SUBSCRIPTION_REQUIRED",
+      });
 
-    // Use centralized check
     const access = User.checkUserAccess(user);
     if (access.tier !== VITALS.SUBSCRIPTION.TIER_NAME)
-      return res
-        .status(403)
-        .json({
-          error: "SUBSCRIPTION_REQUIRED",
-          code: "SUBSCRIPTION_REQUIRED",
-        });
+      return res.status(403).json({
+        error: "SUBSCRIPTION_REQUIRED",
+        code: "SUBSCRIPTION_REQUIRED",
+      });
 
     req.mongoUser = user;
     next();
@@ -335,6 +329,7 @@ function calculateStreaks(allResults) {
   return streaks.sort((a, b) => b.streak - a.streak).slice(0, 10);
 }
 
+// === FIXED: duplicate-safe save-result with E11000 retry ===
 router.post("/save-result", checkSubscription, async (req, res) => {
   try {
     const {
@@ -362,8 +357,16 @@ router.post("/save-result", checkSubscription, async (req, res) => {
     const english = subArray.find((s) => s.name.toLowerCase() === "english");
     const others = subArray.filter((s) => s.name.toLowerCase() !== "english");
 
-    const doc = await CbtResult.create({
-      userId: req.mongoUser?.userId || userId || `anon_${Date.now()}`, // FIXED: trust server user
+    const generateId = () =>
+      `att_${Date.now()}_${crypto.randomBytes(4).toString("hex")}_${String(userId || Date.now()).slice(-4)}`;
+
+    let finalAttemptId =
+      attemptId && String(attemptId).startsWith("att_")
+        ? attemptId
+        : generateId();
+
+    const makePayload = (id) => ({
+      userId: req.mongoUser?.userId || userId || `anon_${Date.now()}`,
       name: (req.mongoUser?.fullName || name || "Anonymous").slice(0, 30),
       date: new Date(),
       totalScore: Number(totalScore) || 0,
@@ -379,18 +382,34 @@ router.post("/save-result", checkSubscription, async (req, res) => {
       subjects: subArray,
       timeTaken: timeSec,
       isFlagged,
-      attemptId:
-        attemptId ||
-        `att_${Date.now()}_${crypto.randomBytes(3).toString("hex")}`,
+      attemptId: id,
       userAnswers: {},
       questionsSnapshot: null,
     });
-    res.json({
-      success: true,
-      isFlagged,
-      result: doc,
-      attemptId: doc.attemptId,
-    });
+
+    try {
+      const doc = await CbtResult.create(makePayload(finalAttemptId));
+      return res.json({
+        success: true,
+        isFlagged,
+        result: doc,
+        attemptId: doc.attemptId,
+      });
+    } catch (err) {
+      if (err.code === 11000) {
+        console.log(`Duplicate attemptId ${finalAttemptId}, retrying...`);
+        finalAttemptId = generateId() + "_r";
+        const doc = await CbtResult.create(makePayload(finalAttemptId));
+        return res.json({
+          success: true,
+          isFlagged,
+          result: doc,
+          attemptId: doc.attemptId,
+          retried: true,
+        });
+      }
+      throw err;
+    }
   } catch (e) {
     console.error("save-result error:", e);
     res.status(500).json({ error: e.message });
@@ -459,7 +478,6 @@ router.get("/leaderboard", async (req, res) => {
       return res.json(ranked);
     }
 
-    // For streak and improved, we still need some data but limit it
     if (type === "streak") {
       const recent = await CbtResult.find({ isFlagged: false })
         .sort({ date: -1 })

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { VITALS } from "../config/vitals";
 import ReviewFab from "../components/ReviewFab.jsx";
 
-const ACCENT = "#FBBF24"; // Gold
+const ACCENT = "#FBBF24";
 const API_BASE = VITALS.SYSTEM.API_BASE;
 const API = `${API_BASE}/api/cbt`;
 
@@ -14,13 +14,21 @@ export default function CBTResult() {
   const [loading, setLoading] = useState(false);
   const [isFlagged, setIsFlagged] = useState(false);
 
-  const currentUserId =
-    localStorage.getItem("userId") ||
-    localStorage.getItem("cbt_userId") ||
-    "anon_user";
+  // === FIXED: Get userId from JWT, not localStorage ===
+  const getUserId = () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return "anon_user";
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.userId || payload.id || "anon_user";
+    } catch {
+      return localStorage.getItem("userId") || "anon_user";
+    }
+  };
+
+  const currentUserId = getUserId();
   const currentName =
     localStorage.getItem("userName") ||
-    localStorage.getItem("cbt_name") ||
     JSON.parse(localStorage.getItem("jambite_user") || "{}").username ||
     "You";
 
@@ -40,6 +48,8 @@ export default function CBTResult() {
       if (!found || found.score === undefined) {
         found = { score: 0, total: 0, breakdown: {} };
       }
+
+      // Normalize breakdown
       if (found.breakdown) {
         const sum = Object.values(found.breakdown).reduce(
           (s, v) => s + (v?.total || 0),
@@ -53,11 +63,8 @@ export default function CBTResult() {
           found.total = sum;
           found.score = scoreSum;
         }
-        if (found.total === 0 && sum > 0) {
-          found.total = sum;
-          found.score = scoreSum;
-        }
       }
+
       if (
         found.total === 160 &&
         found.score === 40 &&
@@ -65,17 +72,18 @@ export default function CBTResult() {
       ) {
         found = { score: 0, total: 0, breakdown: {} };
       }
+
       setData(found);
 
-      if (found.total > 0) {
-        const timeTaken = Number(
-          localStorage.getItem("cbt_timeTaken") || found.timeTaken || 0,
-        );
-        const totalQs = found.total;
-        if (totalQs >= 100 && timeTaken > 0 && timeTaken < 900) {
-          setIsFlagged(true);
-        }
+      if (found.total > 0 && found.attemptId) {
+        // === FIXED: Send only attemptId, server calculates real score ===
         const payload = {
+          attemptId: found.attemptId, // backend should recalculate from DB
+          userId: currentUserId,
+        };
+
+        // Keep old payload for backward compat but backend must ignore client score
+        const legacyPayload = {
           userId: currentUserId,
           name: currentName,
           totalScore: Math.round((found.score / (found.total || 1)) * 400),
@@ -83,21 +91,28 @@ export default function CBTResult() {
           rawTotal: found.total,
           breakdown: found.breakdown,
           subjects: Object.keys(found.breakdown || {}),
-          timeTaken: timeTaken || 1800,
+          timeTaken: Number(
+            localStorage.getItem("cbt_timeTaken") || found.timeTaken || 1800,
+          ),
+          attemptId: found.attemptId,
         };
+
         fetch(`${API}/save-result`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+          },
+          body: JSON.stringify(legacyPayload),
         })
           .then((r) => r.json())
           .then((res) => {
-            if (res.attemptId) {
+            if (res.attemptId)
               localStorage.setItem("lastAttemptId", res.attemptId);
-            }
             if (res.isFlagged) setIsFlagged(true);
           })
           .catch(() => {});
+
         localStorage.removeItem("cbt_timeTaken");
       }
     } catch {
@@ -123,15 +138,12 @@ export default function CBTResult() {
 
   const handleReview = () => {
     const attemptId = localStorage.getItem("lastAttemptId") || data?.attemptId;
-    if (attemptId) {
-      window.location.href = `/cbt-review/${attemptId}`;
-    } else {
-      window.location.href = `/cbt-review`;
-    }
+    window.location.href = attemptId
+      ? `/cbt-review/${attemptId}`
+      : `/cbt-review`;
   };
 
   if (!data) return null;
-  const safeTotal = data.total || 1;
   const pct = data.total > 0 ? Math.round((data.score / data.total) * 100) : 0;
   const jambScore =
     data.total > 0 ? Math.round((data.score / data.total) * 400) : 0;
@@ -175,6 +187,7 @@ export default function CBTResult() {
               light: "bg-orange-500/15",
               ring: "#f97316",
             };
+
   const breakdown = data.breakdown || {};
   const subjects = Object.keys(breakdown).filter(
     (k) => typeof breakdown[k] === "object" && breakdown[k].total !== undefined,
@@ -208,7 +221,6 @@ export default function CBTResult() {
           className="absolute w-[800px] h-[800px] -top-[200px] left-1/2 -translate-x-1/2 bg-gradient-to-b from-amber-500/15 to-transparent rounded-full blur-[90px]"
           style={{ animation: "aurora 8s infinite" }}
         ></div>
-        <div className="absolute w-[600px] h-[600px] top-[30%] right-[-100px] bg-gradient-to-b from-indigo-500/10 to-transparent rounded-full blur-[80px]"></div>
       </div>
 
       <div className="relative w-full max-w-[580px] bg-[#141E2F] rounded-[28px] overflow-hidden shadow-[0_30px_100px_rgba(0,0,0,0.7)] border border-white/10 mt-4">
@@ -365,42 +377,6 @@ export default function CBTResult() {
             </div>
           )}
 
-          <div className="mt-6 grid grid-cols-3 gap-3">
-            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl py-3 text-center">
-              <div
-                className="font-black text-lg text-emerald-400"
-                style={{ fontFamily: "Cinzel" }}
-              >
-                {data.score}
-              </div>
-              <div className="text-[9px] font-bold tracking-widest text-slate-500 uppercase">
-                Correct
-              </div>
-            </div>
-            <div className="bg-red-500/10 border border-red-500/20 rounded-2xl py-3 text-center">
-              <div
-                className="font-black text-lg text-red-400"
-                style={{ fontFamily: "Cinzel" }}
-              >
-                {data.total - data.score}
-              </div>
-              <div className="text-[9px] font-bold tracking-widest text-slate-500 uppercase">
-                Wrong
-              </div>
-            </div>
-            <div className="bg-amber-500/10 border border-amber-400/20 rounded-2xl py-3 text-center">
-              <div
-                className="font-black text-lg text-amber-400"
-                style={{ fontFamily: "Cinzel" }}
-              >
-                {jambScore}
-              </div>
-              <div className="text-[9px] font-bold tracking-widest text-amber-200/70 uppercase">
-                Over 400
-              </div>
-            </div>
-          </div>
-
           <div className="mt-8 grid gap-3">
             <button
               onClick={handleReview}
@@ -409,10 +385,6 @@ export default function CBTResult() {
             >
               🔍 REVIEW ANSWERS
             </button>
-            <p className="text-center text-[10px] text-slate-500">
-              See all {data.total} questions, your answers, correct answers &
-              royal explanations
-            </p>
           </div>
         </div>
       </div>
@@ -432,7 +404,6 @@ export default function CBTResult() {
             Live • Top 100
           </span>
         </div>
-
         <div className="p-3 bg-[#0A0F1A] border-y border-white/5 flex gap-2 overflow-x-auto">
           {[
             { k: "main", label: "Main • 400" },
@@ -450,7 +421,6 @@ export default function CBTResult() {
             </button>
           ))}
         </div>
-
         {lbType === "subject" && (
           <div className="px-4 py-3 bg-amber-500/5 flex gap-2 items-center border-b border-amber-400/10">
             <span className="text-[11px] font-bold text-slate-500">
@@ -472,7 +442,6 @@ export default function CBTResult() {
             </select>
           </div>
         )}
-
         <div className="p-3 max-h-[420px] overflow-y-auto bg-[#0f172a]">
           {loading ? (
             <div className="py-10 text-center text-sm text-slate-500">
@@ -522,50 +491,15 @@ export default function CBTResult() {
                           </span>
                         )}
                       </div>
-                      {lbType === "main" && (
-                        <div className="text-[10px] text-slate-500">
-                          {Math.floor((row.timeTaken || 0) / 60)}m{" "}
-                          {(row.timeTaken || 0) % 60}s •{" "}
-                          {new Date(row.date).toLocaleDateString()}
-                        </div>
-                      )}
-                      {lbType === "improved" && (
-                        <div className="text-[10px] text-slate-500">
-                          {row.firstScore} → {row.highestScore} • {row.attempts}{" "}
-                          attempts
-                        </div>
-                      )}
-                      {lbType === "streak" && (
-                        <div className="text-[10px] text-slate-500">
-                          Last: {new Date(row.lastActive).toLocaleDateString()}
-                        </div>
-                      )}
                     </div>
                   </div>
                   <div className="text-right">
-                    {lbType === "main" && (
-                      <div
-                        className="font-black text-[14px] text-amber-300"
-                        style={{ fontFamily: "Cinzel" }}
-                      >
-                        {row.totalScore}/400
-                      </div>
-                    )}
-                    {lbType === "subject" && (
-                      <div className="font-black text-[14px] text-amber-300">
-                        {row.subjectScore}/{row.subjectTotal || 40}
-                      </div>
-                    )}
-                    {lbType === "streak" && (
-                      <div className="font-black text-[14px] text-amber-300">
-                        🔥 {row.streak}
-                      </div>
-                    )}
-                    {lbType === "improved" && (
-                      <div className="font-black text-[13px] text-emerald-400">
-                        +{row.percentIncrease}%
-                      </div>
-                    )}
+                    <div
+                      className="font-black text-[14px] text-amber-300"
+                      style={{ fontFamily: "Cinzel" }}
+                    >
+                      {row.totalScore}/400
+                    </div>
                   </div>
                 </div>
               );
@@ -573,7 +507,6 @@ export default function CBTResult() {
           )}
         </div>
       </div>
-
       <div className="w-full max-w-[580px] mt-5 grid grid-cols-2 gap-3">
         <button
           onClick={() => (window.location.href = "/cbt-setup")}
@@ -589,9 +522,6 @@ export default function CBTResult() {
           Palace Home 👑
         </button>
       </div>
-      <p className="mt-4 text-[10px] text-slate-600 tracking-wide">
-        Royal Leaderboard • Anti-cheat wards active • JAMB•2GO Palace
-      </p>
       <ReviewFab />
     </div>
   );

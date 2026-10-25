@@ -3,17 +3,23 @@ const VITALS = require("../config/vitals");
 
 const subSchema = new mongoose.Schema(
   {
-    userId: { type: String, index: true, required: true },
-    email: { type: String, index: true },
+    userId: { type: String, required: true },
+    email: { type: String },
     reference: { type: String, unique: true, required: true },
     amount: { type: Number, default: VITALS.SUBSCRIPTION.PRICE },
     amountKobo: { type: Number, default: VITALS.SUBSCRIPTION.PRICE_KOBO },
     paidAt: { type: Date, default: Date.now },
     expiresAt: Date,
-    status: { type: String, default: "active", index: true },
+    status: { type: String, default: "active" },
   },
   { timestamps: true },
 );
+
+// === PRODUCTION INDEXES FOR SCALE ===
+subSchema.index({ userId: 1, status: 1 }); // fast "is user active?"
+subSchema.index({ expiresAt: 1 }); // fast expiry check + sorting
+subSchema.index({ email: 1 });
+subSchema.index({ createdAt: -1 });
 
 subSchema.statics.createSubscription = async function (
   userId,
@@ -27,7 +33,6 @@ subSchema.statics.createSubscription = async function (
   const User = require("./User");
   const u = await User.findByIdCustom(userId);
 
-  // === OPTION B LOGIC: 50 days starts AFTER trial ===
   let base = now;
   const trialEndsAt = u?.trialEndsAt ? new Date(u.trialEndsAt) : null;
   const subExpiresAt = u?.subscriptionExpiresAt
@@ -40,13 +45,10 @@ subSchema.statics.createSubscription = async function (
     u?.subscriptionStatus === "active" && subExpiresAt && now < subExpiresAt;
 
   if (isTrialActive) {
-    // B: Pay during trial = trialEnd + 50 days (keeps free days)
     base = trialEndsAt;
   } else if (isSubActive) {
-    // Renewal before expiry = extend from current expiry
     base = subExpiresAt;
   } else {
-    // Expired or new = start from now
     base = now;
   }
 

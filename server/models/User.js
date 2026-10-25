@@ -3,16 +3,15 @@ const VITALS = require("../config/vitals");
 
 const userSchema = new mongoose.Schema(
   {
-    userId: { type: String, unique: true, index: true },
-    id: { type: String, index: true },
+    userId: { type: String, unique: true },
+    id: { type: String },
     email: {
       type: String,
       unique: true,
       lowercase: true,
-      index: true,
       required: true,
     },
-    username: { type: String, sparse: true, index: true },
+    username: { type: String, sparse: true },
     password: String,
     fullName: String,
     subject: { type: String, default: "english-room" },
@@ -20,36 +19,56 @@ const userSchema = new mongoose.Schema(
     isGoogle: Boolean,
     verified: { type: Boolean, default: true },
     trialEndsAt: Date,
-    subscriptionStatus: { type: String, default: "trial", index: true },
-    subscriptionExpiresAt: { type: Date, index: true },
+    subscriptionStatus: { type: String, default: "trial" },
+    subscriptionExpiresAt: { type: Date },
     lastPaymentReference: String,
   },
   { timestamps: true },
 );
 
+// === PRODUCTION INDEXES FOR SCALE ===
+userSchema.index({ userId: 1 });
+userSchema.index({ id: 1 });
+userSchema.index({ email: 1 });
+userSchema.index({ username: 1 });
+userSchema.index({ subscriptionStatus: 1, subscriptionExpiresAt: 1 }); // for "find all expired" queries
+userSchema.index({ createdAt: -1 });
+
 userSchema.statics.findByEmail = function (email) {
   if (!email) return null;
-  return this.findOne({ email: email.toLowerCase() });
+  return this.findOne({ email: email.toLowerCase().trim() });
 };
+
 userSchema.statics.findByUsername = function (username) {
   if (!username) return null;
   return this.findOne({ username: new RegExp(`^${username}$`, "i") });
 };
-userSchema.statics.findByIdCustom = function (userId) {
+
+// === OPTIMIZED: Try fastest index first, no $or ===
+userSchema.statics.findByIdCustom = async function (userId) {
   if (!userId) return null;
-  return this.findOne({
-    $or: [
-      { userId },
-      { id: userId },
-      { email: userId.toLowerCase?.() || userId },
-    ],
-  });
+
+  // 1. Fastest: try userId index
+  let user = await this.findOne({ userId });
+  if (user) return user;
+
+  // 2. Try id index
+  user = await this.findOne({ id: userId });
+  if (user) return user;
+
+  // 3. Last: try email (only if looks like email)
+  if (String(userId).includes("@")) {
+    return this.findOne({ email: userId.toLowerCase().trim() });
+  }
+
+  return null;
 };
 
 userSchema.statics.createUser = function (userInput) {
   const now = new Date();
-  const trialEndsAt = new Date();
-  trialEndsAt.setDate(now.getDate() + VITALS.TRIAL.DURATION_DAYS);
+  const trialEndsAt =
+    userInput.trialEndsAt ||
+    new Date(now.getTime() + VITALS.TRIAL.DURATION_DAYS * 24 * 60 * 60 * 1000);
 
   return this.create({
     userId:
@@ -57,8 +76,8 @@ userSchema.statics.createUser = function (userInput) {
       userInput.id ||
       `user_${Date.now()}_${Math.random().toString(36).slice(2)}`,
     id: userInput.userId || userInput.id,
-    email: (userInput.email || "").toLowerCase(),
-    username: userInput.username,
+    email: (userInput.email || "").toLowerCase().trim(),
+    username: userInput.username?.toLowerCase().trim(),
     password: userInput.password,
     fullName: userInput.fullName || userInput.username || "User",
     subject: userInput.subject || "english-room",
@@ -74,7 +93,7 @@ userSchema.statics.createUser = function (userInput) {
 
 userSchema.statics.updateUser = function (userId, updates) {
   return this.findOneAndUpdate(
-    { $or: [{ userId }, { id: userId }, { email: userId }] },
+    { userId }, // <-- FIXED: always update by userId only, not $or
     { $set: updates },
     { returnDocument: "after" },
   );
@@ -93,7 +112,6 @@ userSchema.statics.checkUserAccess = function (user) {
     ? new Date(user.subscriptionExpiresAt)
     : null;
 
-  // === FIXED ORDER FOR OPTION B: Check ACTIVE first ===
   if (user.subscriptionStatus === "active" && subExpires && now < subExpires) {
     const daysLeft = Math.ceil((subExpires - now) / 86400000);
     return {

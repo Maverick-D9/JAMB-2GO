@@ -11,7 +11,6 @@ const GOOGLE_CLIENT_ID =
   "882391897710-2lluqbkg9f4f2smnbof64qvr33kot2kl.apps.googleusercontent.com";
 
 global.pendingUsers = global.pendingUsers || new Map();
-global.resetTokens = global.resetTokens || new Map();
 
 function genCode() {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -43,21 +42,8 @@ router.post("/request-otp", async (req, res) => {
 
     const code = genCode();
 
-    try {
-      await Otp.deleteMany({ email: cleanEmail });
-    } catch {}
-
-    try {
-      await Otp.create({
-        email: cleanEmail,
-        code: String(code),
-        expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-      });
-    } catch {
-      try {
-        Otp.create && Otp.create(cleanEmail, String(code));
-      } catch {}
-    }
+    // === FIXED: Use new TTL model ===
+    await Otp.createOtp(cleanEmail, code);
 
     const hashed = await bcrypt.hash(password, 10);
     global.pendingUsers.set(cleanEmail, {
@@ -69,7 +55,6 @@ router.post("/request-otp", async (req, res) => {
       trialEndsAt: genTrial(),
     });
 
-    // FIX: instant + returns code so first attempt shows sign
     res.json({
       success: true,
       message: "OTP sent to " + email,
@@ -96,27 +81,18 @@ router.post("/verify-otp", async (req, res) => {
   try {
     const { email, code } = req.body;
     const cleanEmail = (email || "").toLowerCase().trim();
-    let check = { ok: false };
-    try {
-      const otpDoc = await Otp.findOne({ email: cleanEmail });
-      if (
-        otpDoc &&
-        String(otpDoc.code) === String(code) &&
-        new Date(otpDoc.expiresAt) > new Date()
-      )
-        check.ok = true;
-      else if (otpDoc) check.error = "Invalid or expired code";
-      else check.error = "No OTP found";
-    } catch {
-      check = Otp.verify(email, String(code));
-    }
+
+    const check = await Otp.verifyOtp(cleanEmail, String(code));
+
     if (!check.ok)
       return res.status(400).json({ error: check.error || "Invalid code" });
+
     const pending = global.pendingUsers.get(cleanEmail);
     if (!pending)
       return res
         .status(400)
         .json({ error: "Signup session expired. Signup again." });
+
     const user = await User.createUser({
       fullName: pending.fullName,
       username: pending.username,
@@ -125,13 +101,9 @@ router.post("/verify-otp", async (req, res) => {
       subject: pending.subject,
       trialEndsAt: pending.trialEndsAt,
     });
+
     global.pendingUsers.delete(cleanEmail);
-    try {
-      await Otp.deleteOne({ email: cleanEmail });
-    } catch {}
-    try {
-      await Otp.deleteMany({ email: cleanEmail });
-    } catch {}
+
     const token = jwt.sign(
       { email: user.email, username: user.username, userId: user.userId },
       JWT_SECRET,
@@ -259,6 +231,7 @@ router.post("/google", async (req, res) => {
     res.status(500).json({ error: "Google authentication failed" });
   }
 });
+
 router.post("/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
@@ -269,21 +242,10 @@ router.post("/forgot-password", async (req, res) => {
       return res.status(404).json({ error: "No account with this email" });
 
     const code = genCode();
-    try {
-      await Otp.deleteMany({ email: cleanEmail });
-      await Otp.create({
-        email: cleanEmail,
-        code: String(code),
-        expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-      });
-    } catch (e) {}
 
-    global.resetTokens.set(cleanEmail, {
-      code: String(code),
-      expires: Date.now() + 10 * 60 * 1000,
-    });
+    // === FIXED: Only Mongo now, no Map ===
+    await Otp.createOtp(cleanEmail, code);
 
-    // SECURE: Never return code for reset
     res.json({
       success: true,
       message: "Reset code sent to " + cleanEmail,
@@ -303,6 +265,7 @@ router.post("/forgot-password", async (req, res) => {
     }
   }
 });
+
 router.post("/reset-password", async (req, res) => {
   try {
     const { email, code, newPassword } = req.body;
@@ -312,30 +275,22 @@ router.post("/reset-password", async (req, res) => {
       return res
         .status(400)
         .json({ error: "Password must be at least 6 characters" });
+
     const cleanEmail = email.toLowerCase().trim();
-    let valid = false;
-    try {
-      const otpDoc = await Otp.findOne({ email: cleanEmail });
-      if (
-        otpDoc &&
-        String(otpDoc.code) === String(code) &&
-        new Date(otpDoc.expiresAt) > new Date()
-      )
-        valid = true;
-    } catch {}
-    const mem = global.resetTokens.get(cleanEmail);
-    if (mem && String(mem.code) === String(code) && mem.expires > Date.now())
-      valid = true;
-    if (!valid)
-      return res.status(400).json({ error: "Invalid or expired code" });
+
+    // === FIXED: Use new verifyOtp ===
+    const check = await Otp.verifyOtp(cleanEmail, String(code));
+    if (!check.ok)
+      return res
+        .status(400)
+        .json({ error: check.error || "Invalid or expired code" });
+
     const user = await User.findOne({ email: cleanEmail });
     if (!user) return res.status(404).json({ error: "User not found" });
+
     const hashed = await bcrypt.hash(newPassword, 10);
     await User.updateOne({ _id: user._id }, { password: hashed });
-    try {
-      await Otp.deleteMany({ email: cleanEmail });
-    } catch {}
-    global.resetTokens.delete(cleanEmail);
+
     res.json({
       success: true,
       message: "Password reset successful. You can now login.",

@@ -1,105 +1,115 @@
-const fs = require('fs');
-const path = require('path');
+const mongoose = require("mongoose");
+const fs = require("fs");
+const path = require("path");
 
-const FILE_PATH = path.join(__dirname, '..', 'cbt-results.json');
+const cbtResultSchema = new mongoose.Schema(
+  {
+    userId: { type: String, required: true },
+    name: { type: String, default: "Anonymous" },
+    date: { type: Date, default: Date.now },
 
-if (!fs.existsSync(FILE_PATH)) {
-  fs.writeFileSync(FILE_PATH, JSON.stringify([], null, 2));
-}
+    totalScore: { type: Number, required: true, index: true },
+    rawScore: Number,
+    rawTotal: Number,
 
-function loadAll() {
-  try { return JSON.parse(fs.readFileSync(FILE_PATH, 'utf8')); }
-  catch { return []; }
-}
-function saveAll(data) {
-  fs.writeFileSync(FILE_PATH, JSON.stringify(data, null, 2));
-}
+    englishScore: Number,
+    subject2Name: String,
+    subject2Score: Number,
+    subject3Name: String,
+    subject3Score: Number,
+    subject4Name: String,
+    subject4Score: Number,
 
-class CbtResult {
-  static async create(doc) {
-    const all = loadAll();
-    const id = Date.now().toString(36) + Math.random().toString(36).slice(2);
-    const newDoc = {
-      _id: id,
-      userId: doc.userId || doc.username || 'Anonymous',
-      name: doc.name || doc.userId || 'Anonymous',
-      date: doc.date || new Date().toISOString(),
-      totalScore: doc.totalScore || 0,
-      englishScore: doc.englishScore || 0,
-      subject2Name: doc.subject2Name || '',
-      subject2Score: doc.subject2Score || 0,
-      subject3Name: doc.subject3Name || '',
-      subject3Score: doc.subject3Score || 0,
-      subject4Name: doc.subject4Name || '',
-      subject4Score: doc.subject4Score || 0,
-      rawScore: doc.rawScore || doc.totalScore || 0,
-      rawTotal: doc.rawTotal || 400,
-      subjects: doc.subjects || [],
-      timeTaken: doc.timeTaken || 0,
-      isFlagged: doc.isFlagged || false,
-      // === STEP 1: REVIEW ===
-      attemptId: doc.attemptId || id,
-      userAnswers: doc.userAnswers || {},
-      questionsSnapshot: doc.questionsSnapshot || null,
-      // === END STEP 1 ===
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    all.push(newDoc);
-    saveAll(all);
-    return newDoc;
+    subjects: [
+      {
+        name: String,
+        score: Number,
+        total: Number,
+        _id: false,
+      },
+    ],
+
+    timeTaken: { type: Number, default: 0 },
+    isFlagged: { type: Boolean, default: false, index: true },
+    attemptId: { type: String, required: true, unique: true },
+
+    userAnswers: { type: Object, default: {} },
+    questionsSnapshot: { type: Object, default: null },
+  },
+  { timestamps: true },
+);
+
+// === PRODUCTION INDEXES FOR 100K+ DOCS ===
+cbtResultSchema.index({ userId: 1, totalScore: -1 });
+cbtResultSchema.index({ isFlagged: 1, totalScore: -1, timeTaken: 1 });
+cbtResultSchema.index({ attemptId: 1 }, { unique: true });
+cbtResultSchema.index({ date: -1 });
+cbtResultSchema.index({ "subjects.name": 1 });
+cbtResultSchema.index({ userId: 1, date: -1 });
+
+const CbtResultModel = mongoose.model("CbtResult", cbtResultSchema);
+
+// === AUTO MIGRATION: Move old json file to Mongo on first boot ===
+(async () => {
+  try {
+    const FILE_PATH = path.join(__dirname, "..", "cbt-results.json");
+    if (!fs.existsSync(FILE_PATH)) return;
+
+    const raw = fs.readFileSync(FILE_PATH, "utf8");
+    const jsonData = JSON.parse(raw);
+
+    if (!Array.isArray(jsonData) || jsonData.length === 0) return;
+
+    const countInDb = await CbtResultModel.countDocuments();
+    if (countInDb > 0) {
+      console.log(
+        `✅ CbtResult already in Mongo (${countInDb}), skipping json migration`,
+      );
+      return;
+    }
+
+    console.log(
+      `🔄 MIGRATING ${jsonData.length} old results from cbt-results.json to Mongo...`,
+    );
+
+    const docs = jsonData.map((r) => ({
+      userId: r.userId || r.username || "Anonymous",
+      name: r.name || r.userId || "Anonymous",
+      date: r.date ? new Date(r.date) : new Date(r.createdAt || Date.now()),
+      totalScore: r.totalScore || 0,
+      rawScore: r.rawScore || 0,
+      rawTotal: r.rawTotal || 0,
+      englishScore: r.englishScore || 0,
+      subject2Name: r.subject2Name || "",
+      subject2Score: r.subject2Score || 0,
+      subject3Name: r.subject3Name || "",
+      subject3Score: r.subject3Score || 0,
+      subject4Name: r.subject4Name || "",
+      subject4Score: r.subject4Score || 0,
+      subjects: r.subjects || [],
+      timeTaken: r.timeTaken || 0,
+      isFlagged: r.isFlagged || false,
+      attemptId:
+        r.attemptId ||
+        r._id ||
+        `att_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+      userAnswers: r.userAnswers || {},
+      questionsSnapshot: r.questionsSnapshot || null,
+    }));
+
+    // Insert in batches of 500 to avoid memory spike
+    for (let i = 0; i < docs.length; i += 500) {
+      const batch = docs.slice(i, i + 500);
+      await CbtResultModel.insertMany(batch, { ordered: false });
+    }
+
+    console.log(`✅ MIGRATED ${docs.length} results to Mongo`);
+
+    // Backup old file
+    fs.renameSync(FILE_PATH, FILE_PATH + `.backup_${Date.now()}.json`);
+  } catch (e) {
+    console.log("Migration skip/error:", e.message);
   }
+})();
 
-  constructor(doc) {
-    Object.assign(this, doc);
-  }
-  async save() {
-    return CbtResult.create(this);
-  }
-
-  static async find(filter = {}) {
-    let all = loadAll();
-    if (filter.userId) all = all.filter(r => r.userId === filter.userId);
-    if (filter.isFlagged!== undefined) all = all.filter(r => r.isFlagged === filter.isFlagged);
-    if (filter.attemptId) all = all.filter(r => r.attemptId === filter.attemptId || r._id === filter.attemptId);
-    return all;
-  }
-
-  static async findOne(filter = {}) {
-    const res = await this.find(filter);
-    return res[0] || null;
-  }
-
-  static async getLeaderboard(limit = 100) {
-    const all = loadAll().filter(r =>!r.isFlagged);
-    const best = {};
-    all.forEach(r => {
-      const id = r.userId;
-      if (!best[id] || r.totalScore > best[id].totalScore ||
-         (r.totalScore === best[id].totalScore && r.timeTaken < best[id].timeTaken)) {
-        best[id] = r;
-      }
-    });
-    return Object.values(best)
-   .sort((a, b) => {
-        if (b.totalScore!== a.totalScore) return b.totalScore - a.totalScore;
-        return a.timeTaken - b.timeTaken;
-      })
-   .slice(0, limit);
-  }
-
-  static async deleteAll() {
-    saveAll([]);
-  }
-
-  static async deleteMany() {
-    saveAll([]);
-  }
-
-  static findById(id) {
-    const all = loadAll();
-    return all.find(r => r._id === id || r.attemptId === id) || null;
-  }
-}
-
-module.exports = CbtResult;
+module.exports = CbtResultModel;

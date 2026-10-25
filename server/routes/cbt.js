@@ -31,6 +31,7 @@ function checkAdminPassword(req) {
   return passHeader === VITALS.ADMIN.PASSWORD;
 }
 
+// === FIXED: Use optimized findByIdCustom from User.js ===
 async function checkSubscription(req, res, next) {
   if (checkAdminPassword(req)) return next();
   const userId =
@@ -38,15 +39,30 @@ async function checkSubscription(req, res, next) {
     req.body.username ||
     req.query.userId ||
     req.headers["x-user-id"] ||
-    req.headers["x-user-email"];
+    req.headers["x-user-email"] ||
+    req.headers["authorization"]?.replace("Bearer ", "");
+
   if (!userId)
     return res.status(401).json({ error: "Login required", code: "NO_USER" });
   try {
-    const user = await User.findOne({
-      $or: [{ email: userId }, { username: userId }, { userId: userId }].filter(
-        Boolean,
-      ),
-    });
+    // Try JWT first
+    let user = null;
+    try {
+      if (userId.includes(".")) {
+        const jwt = require("jsonwebtoken");
+        const payload = jwt.verify(
+          userId,
+          process.env.JWT_SECRET || "jamb2go_secret_change_this",
+        );
+        user = await User.findOne({ userId: payload.userId });
+      }
+    } catch {}
+
+    if (!user) {
+      user = await User.findByIdCustom(userId);
+      if (!user) user = await User.findByEmail(userId);
+    }
+
     if (!user)
       return res
         .status(403)
@@ -54,22 +70,17 @@ async function checkSubscription(req, res, next) {
           error: "SUBSCRIPTION_REQUIRED",
           code: "SUBSCRIPTION_REQUIRED",
         });
-    const now = new Date();
-    const subExpiry = user.subscriptionExpiresAt
-      ? new Date(user.subscriptionExpiresAt)
-      : null;
-    const trialExpiry = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
-    const isActive =
-      (subExpiry && subExpiry > now) ||
-      (trialExpiry && trialExpiry > now) ||
-      user.subscriptionStatus === "active";
-    if (!isActive)
+
+    // Use centralized check
+    const access = User.checkUserAccess(user);
+    if (access.tier !== VITALS.SUBSCRIPTION.TIER_NAME)
       return res
         .status(403)
         .json({
           error: "SUBSCRIPTION_REQUIRED",
           code: "SUBSCRIPTION_REQUIRED",
         });
+
     req.mongoUser = user;
     next();
   } catch (e) {
@@ -146,7 +157,7 @@ function loadAllCbtBanks() {
 loadAllCbtBanks();
 const DUMMY = {
   english: Array.from({ length: 60 }, (_, i) => ({
-    question_text: `English Q${i + 1}: Synonym for happy?`,
+    question_text: `English Q${i + 1}`,
     option_a: "Sad",
     option_b: "Joyful",
     option_c: "Angry",
@@ -155,7 +166,7 @@ const DUMMY = {
     subject: "english",
   })),
   mathematics: Array.from({ length: 60 }, (_, i) => ({
-    question_text: `Maths Q${i + 1}: ${i + 2}+${i + 3}*2=?`,
+    question_text: `Maths Q${i + 1}`,
     option_a: `${i + 5}`,
     option_b: `${i + 8}`,
     option_c: `${i + 2 * i}`,
@@ -181,7 +192,7 @@ function getQs(subject, n) {
     if (alias) bank = cbtBankCache[alias] || [];
     if (bank.length === 0) bank = DUMMY[key] || DUMMY.english;
   }
-  let shuffledBank = strongShuffle(strongShuffle(strongShuffle(bank)));
+  let shuffledBank = strongShuffle(bank);
   const picked = shuffledBank.slice(0, Math.min(n, bank.length));
   return picked.map((q, idx) => {
     const correctLetter = (q.correct_answer || "A").toUpperCase();
@@ -324,7 +335,6 @@ function calculateStreaks(allResults) {
   return streaks.sort((a, b) => b.streak - a.streak).slice(0, 10);
 }
 
-// === SAVES ONLY SCORE - NO HEAVY DATA - NO CRASH ===
 router.post("/save-result", checkSubscription, async (req, res) => {
   try {
     const {
@@ -339,6 +349,7 @@ router.post("/save-result", checkSubscription, async (req, res) => {
     } = req.body;
     if (!breakdown)
       return res.status(400).json({ error: "breakdown required" });
+
     const subArray = Object.entries(breakdown).map(([sName, data]) => ({
       name: sName,
       score: data.score || 0,
@@ -346,15 +357,14 @@ router.post("/save-result", checkSubscription, async (req, res) => {
     }));
     const totalQuestions = subArray.reduce((a, b) => a + b.total, 0);
     const timeSec = Number(timeTaken) || 0;
-    let isFlagged = false;
-    if (timeSec > 0 && timeSec <= 300) {
-      isFlagged = true;
-    }
+    let isFlagged = timeSec > 0 && timeSec <= 300;
+
     const english = subArray.find((s) => s.name.toLowerCase() === "english");
     const others = subArray.filter((s) => s.name.toLowerCase() !== "english");
+
     const doc = await CbtResult.create({
-      userId: userId || `anon_${Date.now()}`,
-      name: (name || "Anonymous").slice(0, 30),
+      userId: req.mongoUser?.userId || userId || `anon_${Date.now()}`, // FIXED: trust server user
+      name: (req.mongoUser?.fullName || name || "Anonymous").slice(0, 30),
       date: new Date(),
       totalScore: Number(totalScore) || 0,
       rawScore: rawScore || 0,
@@ -372,7 +382,6 @@ router.post("/save-result", checkSubscription, async (req, res) => {
       attemptId:
         attemptId ||
         `att_${Date.now()}_${crypto.randomBytes(3).toString("hex")}`,
-      // === IMPORTANT: Save 0 bytes to Mongo - review is from localStorage ===
       userAnswers: {},
       questionsSnapshot: null,
     });
@@ -391,7 +400,6 @@ router.post("/save-result", checkSubscription, async (req, res) => {
 router.get("/review/:attemptId", async (req, res) => {
   try {
     const { attemptId } = req.params;
-    // NO .lean() - safe for JSON file model
     const result = await CbtResult.findOne({ attemptId });
     if (!result) return res.status(404).json({ error: "Attempt not found" });
     res.json(result);
@@ -400,58 +408,73 @@ router.get("/review/:attemptId", async (req, res) => {
   }
 });
 
+// === FIXED: Leaderboard now uses aggregation, not full load ===
 router.get("/leaderboard", async (req, res) => {
   try {
     const { type = "main", subject } = req.query;
-    const allValid = await CbtResult.find({ isFlagged: false });
+
     if (type === "main") {
-      const bestMap = {};
-      allValid.forEach((r) => {
-        if (
-          !bestMap[r.userId] ||
-          r.totalScore > bestMap[r.userId].totalScore ||
-          (r.totalScore === bestMap[r.userId].totalScore &&
-            r.timeTaken < bestMap[r.userId].timeTaken)
-        ) {
-          bestMap[r.userId] = r;
-        }
-      });
-      const ranked = Object.values(bestMap)
-        .sort(
-          (a, b) => b.totalScore - a.totalScore || a.timeTaken - b.timeTaken,
-        )
-        .slice(0, 100);
+      const ranked = await CbtResult.aggregate([
+        { $match: { isFlagged: false } },
+        { $sort: { totalScore: -1, timeTaken: 1, date: -1 } },
+        { $group: { _id: "$userId", doc: { $first: "$$ROOT" } } },
+        { $replaceRoot: { newRoot: "$doc" } },
+        { $sort: { totalScore: -1, timeTaken: 1 } },
+        { $limit: 100 },
+      ]);
       return res.json(ranked);
     }
+
     if (type === "subject" && subject) {
       const key = subject.toLowerCase();
-      const bestMap = {};
-      allValid.forEach((r) => {
-        const found = r.subjects?.find((s) => s.name.toLowerCase() === key);
-        if (!found) return;
-        if (
-          !bestMap[r.userId] ||
-          found.score > (bestMap[r.userId].subjectScore || 0)
-        ) {
-          bestMap[r.userId] = {
-            ...r,
-            subjectScore: found.score,
-            subjectTotal: found.total,
-          };
-        }
-      });
-      const ranked = Object.values(bestMap)
-        .sort((a, b) => b.subjectScore - a.subjectScore)
-        .slice(0, 100);
+      const ranked = await CbtResult.aggregate([
+        { $match: { isFlagged: false, "subjects.name": key } },
+        { $unwind: "$subjects" },
+        { $match: { "subjects.name": key } },
+        { $sort: { "subjects.score": -1 } },
+        {
+          $group: {
+            _id: "$userId",
+            doc: { $first: "$$ROOT" },
+            subjectScore: { $first: "$subjects.score" },
+            subjectTotal: { $first: "$subjects.total" },
+          },
+        },
+        { $sort: { subjectScore: -1 } },
+        { $limit: 100 },
+        {
+          $replaceRoot: {
+            newRoot: {
+              $mergeObjects: [
+                "$doc",
+                {
+                  subjectScore: "$subjectScore",
+                  subjectTotal: "$subjectTotal",
+                },
+              ],
+            },
+          },
+        },
+      ]);
       return res.json(ranked);
     }
+
+    // For streak and improved, we still need some data but limit it
     if (type === "streak") {
-      const streaks = calculateStreaks(allValid);
-      return res.json(streaks);
+      const recent = await CbtResult.find({ isFlagged: false })
+        .sort({ date: -1 })
+        .limit(5000)
+        .lean();
+      return res.json(calculateStreaks(recent));
     }
+
     if (type === "improved") {
+      const recent = await CbtResult.find({ isFlagged: false })
+        .sort({ date: -1 })
+        .limit(5000)
+        .lean();
       const grouped = {};
-      allValid.forEach((r) => {
+      recent.forEach((r) => {
         if (!grouped[r.userId]) grouped[r.userId] = [];
         grouped[r.userId].push(r);
       });
@@ -463,7 +486,7 @@ router.get("/leaderboard", async (req, res) => {
         const highest = Math.max(...arr.map((x) => x.totalScore));
         if (first <= 0) return;
         const percent = ((highest - first) / first) * 100;
-        if (percent > 0) {
+        if (percent > 0)
           improved.push({
             userId,
             name: arr[0].name,
@@ -472,7 +495,6 @@ router.get("/leaderboard", async (req, res) => {
             percentIncrease: Math.round(percent),
             attempts: arr.length,
           });
-        }
       });
       return res.json(
         improved
@@ -480,6 +502,7 @@ router.get("/leaderboard", async (req, res) => {
           .slice(0, 100),
       );
     }
+
     res.json([]);
   } catch (e) {
     console.error(e);

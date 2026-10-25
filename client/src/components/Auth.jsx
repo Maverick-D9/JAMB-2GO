@@ -40,11 +40,13 @@ export default function Auth({ onAuth }) {
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
   const [otpEmail, setOtpEmail] = useState("");
+  const [devOtp, setDevOtp] = useState(null);
   const otpRefs = useRef([]);
 
   const [forgotEmail, setForgotEmail] = useState("");
   const [resetCode, setResetCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [forgotDevOtp, setForgotDevOtp] = useState(null);
 
   const [quizState, setQuizState] = useState(0);
   const [battleTime, setBattleTime] = useState(12);
@@ -199,11 +201,17 @@ export default function Auth({ onAuth }) {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to send OTP");
         setOtpEmail(form.email);
+        setDevOtp(data.devOtp || null);
         setView("otp");
         setTimer(60);
         setCanResend(false);
-        setOtp(["", "", "", "", "", ""]);
-        showToast(data.message || "Code sent to " + form.email, "success");
+        if (data.devOtp) {
+          setOtp(data.devOtp.toString().split(""));
+          showToast(`Email is slow — Your code is ${data.devOtp}`, "success");
+        } else {
+          setOtp(["", "", "", "", "", ""]);
+          showToast(data.message || "Code sent to " + form.email, "success");
+        }
       } else {
         const res = await fetch(`${API}/login`, {
           method: "POST",
@@ -268,7 +276,13 @@ export default function Auth({ onAuth }) {
       if (!res.ok) throw new Error(data.error);
       setTimer(60);
       setCanResend(false);
-      showToast("Code resent to " + otpEmail, "success");
+      if (data.devOtp) {
+        setDevOtp(data.devOtp);
+        setOtp(data.devOtp.toString().split(""));
+        showToast(`New code: ${data.devOtp}`, "success");
+      } else {
+        showToast("Code resent to " + otpEmail, "success");
+      }
     } catch (err) {
       showToast(err.message);
     }
@@ -290,8 +304,10 @@ export default function Auth({ onAuth }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      showToast(data.message, "success");
+      setForgotDevOtp(data.devOtp || null);
+      showToast(data.devOtp ? `Code: ${data.devOtp}` : data.message, "success");
       setView("reset");
+      if (data.devOtp) setResetCode(data.devOtp.toString());
     } catch (err) {
       showToast(err.message);
     }
@@ -326,6 +342,7 @@ export default function Auth({ onAuth }) {
       setIsLogin(true);
       setResetCode("");
       setNewPassword("");
+      setForgotDevOtp(null);
     } catch (err) {
       showToast(err.message);
     }
@@ -554,6 +571,16 @@ export default function Auth({ onAuth }) {
               <p className="text-slate-400 text-[13px] mt-1">
                 Code sent to {forgotEmail}
               </p>
+              {forgotDevOtp && (
+                <div className="bg-sky-500/10 border border-sky-400/30 rounded-2xl p-4 text-center mt-4">
+                  <p className="text-[11px] text-sky-300 uppercase tracking-widest font-bold">
+                    Email slow — use this code
+                  </p>
+                  <p className="text-[32px] font-black tracking-[10px] text-white mt-1">
+                    {forgotDevOtp}
+                  </p>
+                </div>
+              )}
               <form onSubmit={handleResetPassword} className="grid gap-4 mt-7">
                 <div className="input-wrap flex items-center bg-[#080C18] border border-white/10 rounded-full px-4">
                   <span className="mr-2 text-slate-500 text-sm">🔢</span>
@@ -623,6 +650,19 @@ export default function Auth({ onAuth }) {
                   className="grid gap-4 mt-7"
                   style={{ animation: "fadeIn 0.3s ease" }}
                 >
+                  {devOtp && (
+                    <div className="bg-sky-500/10 border border-sky-400/30 rounded-2xl p-4 text-center">
+                      <p className="text-[11px] text-sky-300 uppercase tracking-widest font-bold">
+                        Email is slow — use this code
+                      </p>
+                      <p className="text-[32px] font-black tracking-[10px] text-white mt-1">
+                        {devOtp}
+                      </p>
+                      <p className="text-[11px] text-slate-400 mt-1">
+                        Auto-filled below — just tap Verify
+                      </p>
+                    </div>
+                  )}
                   <div className="flex gap-2 justify-between">
                     {otp.map((d, i) => (
                       <input
@@ -636,7 +676,9 @@ export default function Auth({ onAuth }) {
                     ))}
                   </div>
                   <p className="text-center text-slate-500 text-[11px]">
-                    Scholar's code sent to your Gmail
+                    {devOtp
+                      ? "Code shown above — no need to check Gmail"
+                      : "Scholar's code sent to your Gmail"}
                   </p>
                   <button
                     type="submit"
@@ -663,6 +705,7 @@ export default function Auth({ onAuth }) {
                     onClick={() => {
                       setView("signup");
                       setIsLogin(false);
+                      setDevOtp(null);
                     }}
                     className="bg-transparent border-none text-slate-500 text-[12px] cursor-pointer"
                   >

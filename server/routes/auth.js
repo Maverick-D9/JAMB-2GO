@@ -259,7 +259,6 @@ router.post("/google", async (req, res) => {
     res.status(500).json({ error: "Google authentication failed" });
   }
 });
-
 router.post("/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
@@ -268,6 +267,7 @@ router.post("/forgot-password", async (req, res) => {
     const user = await User.findOne({ email: cleanEmail });
     if (!user)
       return res.status(404).json({ error: "No account with this email" });
+
     const code = genCode();
     try {
       await Otp.deleteMany({ email: cleanEmail });
@@ -276,18 +276,17 @@ router.post("/forgot-password", async (req, res) => {
         code: String(code),
         expiresAt: new Date(Date.now() + 10 * 60 * 1000),
       });
-    } catch (e) {
-      console.log("OTP mongo error fallback", e.message);
-    }
+    } catch (e) {}
+
     global.resetTokens.set(cleanEmail, {
       code: String(code),
       expires: Date.now() + 10 * 60 * 1000,
     });
 
+    // SECURE: Never return code for reset
     res.json({
       success: true,
       message: "Reset code sent to " + cleanEmail,
-      devOtp: code,
     });
 
     setImmediate(() => {
@@ -304,7 +303,6 @@ router.post("/forgot-password", async (req, res) => {
     }
   }
 });
-
 router.post("/reset-password", async (req, res) => {
   try {
     const { email, code, newPassword } = req.body;

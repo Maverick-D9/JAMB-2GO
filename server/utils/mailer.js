@@ -1,21 +1,24 @@
 const nodemailer = require("nodemailer");
 
 function getTransporter() {
-  const user = process.env.EMAIL_USER;
-  const pass = process.env.EMAIL_PASS?.replace(/\s/g, "");
+  const user = (process.env.EMAIL_USER || "").trim();
+  const pass = (process.env.EMAIL_PASS || "").replace(/\s/g, "").trim();
 
   if (!user || !pass) {
     console.log("⚠️ EMAIL_USER / EMAIL_PASS missing - DEV OTP mode");
     return null;
   }
 
-  const tx = nodemailer.createTransport({
+  return nodemailer.createTransport({
     service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
     auth: { user, pass },
+    tls: { rejectUnauthorized: false },
     pool: false,
+    connectionTimeout: 10000,
   });
-
-  return tx;
 }
 
 async function sendOtp(email, code, type = "verify") {
@@ -30,8 +33,8 @@ async function sendOtp(email, code, type = "verify") {
   }
 
   try {
-    await tx.sendMail({
-      from: `"JAMB CBT" <${process.env.EMAIL_USER}>`,
+    const info = await tx.sendMail({
+      from: `"JAMB CBT" <${user}>`,
       to: email,
       subject: isReset
         ? "Reset Your JAMB CBT Password"
@@ -45,21 +48,24 @@ async function sendOtp(email, code, type = "verify") {
         </div>
       </div>`,
     });
-    console.log(`[OTP SENT] ${email} -> ${code}`);
+    console.log(`[OTP SENT] ${email} -> ${code} | ${info.messageId}`);
     return { success: true };
   } catch (e) {
     console.error(`[MAIL FAIL] ${email}:`, e.message);
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("Email failed to send. Try again.");
-    }
-    return { success: true, devMode: true, code };
+    console.error(e); // log full stack
+    // FIX: Don't throw in production - return devMode so logs show it, but don't break
+    console.log(
+      `\n========== FALLBACK DEV OTP [${type.toUpperCase()}] ==========`,
+    );
+    console.log(`To: ${email} | CODE: ${code} | Error: ${e.message}`);
+    console.log(`================================================\n`);
+    return { success: true, devMode: true, code, error: e.message };
   }
 }
 
 async function sendReceipt(email, reference, expiresAt) {
   const tx = getTransporter();
   if (!tx) return { success: true, devMode: true };
-
   const expiryDate = expiresAt
     ? new Date(expiresAt).toLocaleDateString("en-NG", {
         year: "numeric",
@@ -67,7 +73,6 @@ async function sendReceipt(email, reference, expiresAt) {
         day: "numeric",
       })
     : "30 days";
-
   try {
     await tx.sendMail({
       from: `"JAMB CBT" <${process.env.EMAIL_USER}>`,

@@ -23,8 +23,6 @@ export default function CBTExam() {
     }
     try {
       const data = JSON.parse(saved);
-      // DO NOT RE-SHUFFLE HERE - backend already shuffled with anti-cheat
-      // Using as-is ensures cbt_exam == what review will read
       setExamData(data);
       setCurrentSubject(data.subjects?.[0] || "english");
       const duration =
@@ -39,21 +37,23 @@ export default function CBTExam() {
   }, []);
 
   useEffect(() => {
-    if (!timeLeft || isSubmitting) return;
+    if (!examData || timeLeft <= 0 || isSubmitting) return;
     const t = setInterval(() => {
       setTimeLeft((prev) => {
-        const taken = totalDuration - (prev - 1);
+        const next = prev - 1;
+        const taken = totalDuration - next;
         localStorage.setItem("cbt_timeTaken", String(taken > 0 ? taken : 0));
-        if (prev <= 1) {
+        if (next <= 0) {
           clearInterval(t);
-          handleSubmit(true);
+          // use flag to avoid double call
+          setTimeout(() => handleSubmit(true), 100);
           return 0;
         }
-        return prev - 1;
+        return next;
       });
     }, 1000);
     return () => clearInterval(t);
-  }, [examData, timeLeft, isSubmitting, totalDuration]);
+  }, [examData, isSubmitting, totalDuration]);
 
   const questionsBySubject = useMemo(() => {
     if (!examData) return {};
@@ -114,9 +114,10 @@ export default function CBTExam() {
       localStorage.getItem("cbt_name") ||
       JSON.parse(localStorage.getItem("jambite_user") || "{}").username ||
       "JAMBite";
-    const attemptId = examData.examId || examData._id || Date.now().toString();
 
-    // === LIGHT PAYLOAD FOR MONGO - 0 heavy data ===
+    // FIXED: unique attemptId per submission
+    const attemptId = `att_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
     const payloadLeaderboard = {
       userId,
       name: userName,
@@ -130,18 +131,17 @@ export default function CBTExam() {
       attemptId,
     };
 
-    fetch(`${API_BASE}/api/cbt/save-result`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payloadLeaderboard),
-    })
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.attemptId) localStorage.setItem("lastAttemptId", d.attemptId);
-      })
-      .catch(() => {});
-
-    localStorage.setItem("lastAttemptId", attemptId);
+    try {
+      const r = await fetch(`${API_BASE}/api/cbt/save-result`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payloadLeaderboard),
+      });
+      const d = await r.json();
+      localStorage.setItem("lastAttemptId", d.attemptId || attemptId);
+    } catch (e) {
+      localStorage.setItem("lastAttemptId", attemptId);
+    }
 
     const finalResult = {
       score,
@@ -149,28 +149,12 @@ export default function CBTExam() {
       breakdown,
       timeTaken,
       jambScore: Math.round((score / (total || 1)) * 400),
-      attemptId,
+      attemptId: localStorage.getItem("lastAttemptId"),
       answers: answers,
       questions: questionsBySubject,
       userAnswers: answers,
-      questionsSnapshot: questionsBySubject,
     };
 
-    try {
-      // Optional: keep submit for stats but no heavy data
-      await fetch(`${API_BASE}/api/cbt/submit`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          answers,
-          questions: questionsBySubject,
-          attemptId,
-          timeTaken,
-        }),
-      });
-    } catch (e) {}
-
-    // Save full exam for local review (0 Mongo cost)
     localStorage.setItem("cbt_result", JSON.stringify(finalResult));
     window.location.href = "/cbt-result";
   };

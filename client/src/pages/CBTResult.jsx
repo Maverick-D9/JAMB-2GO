@@ -12,15 +12,18 @@ export default function CBTResult() {
   const [lbType, setLbType] = useState("main");
   const [subjectFilter, setSubjectFilter] = useState("mathematics");
   const [loading, setLoading] = useState(false);
-  const [isFlagged, setIsFlagged] = useState(false);
 
-  // === FIXED: Get userId from JWT, not localStorage ===
   const getUserId = () => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) return "anon_user";
+      if (!token) return localStorage.getItem("userId") || "anon_user";
       const payload = JSON.parse(atob(token.split(".")[1]));
-      return payload.userId || payload.id || "anon_user";
+      return (
+        payload.userId ||
+        payload.id ||
+        localStorage.getItem("userId") ||
+        "anon_user"
+      );
     } catch {
       return localStorage.getItem("userId") || "anon_user";
     }
@@ -41,15 +44,14 @@ export default function CBTResult() {
         if (raw) {
           try {
             found = JSON.parse(raw);
+            if (found && found.score !== undefined) break;
           } catch {}
-          if (found && found.score !== undefined) break;
         }
       }
       if (!found || found.score === undefined) {
         found = { score: 0, total: 0, breakdown: {} };
       }
 
-      // Normalize breakdown
       if (found.breakdown) {
         const sum = Object.values(found.breakdown).reduce(
           (s, v) => s + (v?.total || 0),
@@ -65,56 +67,9 @@ export default function CBTResult() {
         }
       }
 
-      if (
-        found.total === 160 &&
-        found.score === 40 &&
-        Object.keys(found.breakdown || {}).length === 0
-      ) {
-        found = { score: 0, total: 0, breakdown: {} };
-      }
-
       setData(found);
-
-      if (found.total > 0 && found.attemptId) {
-        // === FIXED: Send only attemptId, server calculates real score ===
-        const payload = {
-          attemptId: found.attemptId, // backend should recalculate from DB
-          userId: currentUserId,
-        };
-
-        // Keep old payload for backward compat but backend must ignore client score
-        const legacyPayload = {
-          userId: currentUserId,
-          name: currentName,
-          totalScore: Math.round((found.score / (found.total || 1)) * 400),
-          rawScore: found.score,
-          rawTotal: found.total,
-          breakdown: found.breakdown,
-          subjects: Object.keys(found.breakdown || {}),
-          timeTaken: Number(
-            localStorage.getItem("cbt_timeTaken") || found.timeTaken || 1800,
-          ),
-          attemptId: found.attemptId,
-        };
-
-        fetch(`${API}/save-result`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
-          },
-          body: JSON.stringify(legacyPayload),
-        })
-          .then((r) => r.json())
-          .then((res) => {
-            if (res.attemptId)
-              localStorage.setItem("lastAttemptId", res.attemptId);
-            if (res.isFlagged) setIsFlagged(true);
-          })
-          .catch(() => {});
-
-        localStorage.removeItem("cbt_timeTaken");
-      }
+      // FIXED: NO save-result here anymore. Only read.
+      // Result was already saved once in CBTExam.jsx
     } catch {
       setData({ score: 0, total: 0, breakdown: {} });
     }
@@ -243,11 +198,6 @@ export default function CBTResult() {
           <p className="text-amber-200/60 text-[10px] mt-1 uppercase tracking-[0.3em]">
             Sealed by the King's Council
           </p>
-          {isFlagged && (
-            <div className="mt-3 text-[10px] bg-red-500/20 text-red-300 border border-red-500/30 rounded-full px-3 py-1 inline-block">
-              ⚠️ FLAGGED: Too fast for leaderboard
-            </div>
-          )}
         </div>
 
         <div className="p-8">

@@ -15,11 +15,8 @@ const subSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-// === PRODUCTION INDEXES FOR SCALE ===
+// ONLY 2 INDEXES NEEDED - reference is already unique
 subSchema.index({ userId: 1, status: 1 }); // fast "is user active?"
-subSchema.index({ expiresAt: 1 }); // fast expiry check + sorting
-subSchema.index({ email: 1 });
-subSchema.index({ createdAt: -1 });
 
 subSchema.statics.createSubscription = async function (
   userId,
@@ -28,33 +25,23 @@ subSchema.statics.createSubscription = async function (
 ) {
   const existing = await this.findOne({ reference });
   if (existing) return existing;
-
   const now = new Date();
   const User = require("./User");
   const u = await User.findByIdCustom(userId);
-
   let base = now;
   const trialEndsAt = u?.trialEndsAt ? new Date(u.trialEndsAt) : null;
   const subExpiresAt = u?.subscriptionExpiresAt
     ? new Date(u.subscriptionExpiresAt)
     : null;
-
   const isTrialActive =
     u?.subscriptionStatus === "trial" && trialEndsAt && now < trialEndsAt;
   const isSubActive =
     u?.subscriptionStatus === "active" && subExpiresAt && now < subExpiresAt;
-
-  if (isTrialActive) {
-    base = trialEndsAt;
-  } else if (isSubActive) {
-    base = subExpiresAt;
-  } else {
-    base = now;
-  }
-
+  if (isTrialActive) base = trialEndsAt;
+  else if (isSubActive) base = subExpiresAt;
+  else base = now;
   const expiresAt = new Date(base);
   expiresAt.setDate(base.getDate() + VITALS.SUBSCRIPTION.DURATION_DAYS);
-
   const doc = await this.findOneAndUpdate(
     { reference },
     {
@@ -69,13 +56,11 @@ subSchema.statics.createSubscription = async function (
     },
     { upsert: true, returnDocument: "after" },
   );
-
   await User.updateUser(userId, {
     subscriptionStatus: "active",
     subscriptionExpiresAt: expiresAt,
     lastPaymentReference: reference,
   });
-
   console.log(
     `✅ User ${userId} active till ${expiresAt.toISOString()} (Option B base: ${base.toISOString()})`,
   );

@@ -31,7 +31,6 @@ function checkAdminPassword(req) {
   return passHeader === VITALS.ADMIN.PASSWORD;
 }
 
-// === FIXED: Use optimized findByIdCustom from User.js ===
 async function checkSubscription(req, res, next) {
   if (checkAdminPassword(req)) return next();
   const userId =
@@ -41,7 +40,6 @@ async function checkSubscription(req, res, next) {
     req.headers["x-user-id"] ||
     req.headers["x-user-email"] ||
     req.headers["authorization"]?.replace("Bearer ", "");
-
   if (!userId)
     return res.status(401).json({ error: "Login required", code: "NO_USER" });
   try {
@@ -56,25 +54,25 @@ async function checkSubscription(req, res, next) {
         user = await User.findOne({ userId: payload.userId });
       }
     } catch {}
-
     if (!user) {
       user = await User.findByIdCustom(userId);
       if (!user) user = await User.findByEmail(userId);
     }
-
     if (!user)
-      return res.status(403).json({
-        error: "SUBSCRIPTION_REQUIRED",
-        code: "SUBSCRIPTION_REQUIRED",
-      });
-
+      return res
+        .status(403)
+        .json({
+          error: "SUBSCRIPTION_REQUIRED",
+          code: "SUBSCRIPTION_REQUIRED",
+        });
     const access = User.checkUserAccess(user);
     if (access.tier !== VITALS.SUBSCRIPTION.TIER_NAME)
-      return res.status(403).json({
-        error: "SUBSCRIPTION_REQUIRED",
-        code: "SUBSCRIPTION_REQUIRED",
-      });
-
+      return res
+        .status(403)
+        .json({
+          error: "SUBSCRIPTION_REQUIRED",
+          code: "SUBSCRIPTION_REQUIRED",
+        });
     req.mongoUser = user;
     next();
   } catch (e) {
@@ -139,7 +137,6 @@ function loadAllCbtBanks() {
     if (file) {
       try {
         cbtBankCache[sub] = parseCSV(fs.readFileSync(file, "utf8"));
-        console.log(`CBT CACHE: ${cbtBankCache[sub].length} Qs for ${sub}`);
       } catch (e) {}
     }
   });
@@ -329,7 +326,7 @@ function calculateStreaks(allResults) {
   return streaks.sort((a, b) => b.streak - a.streak).slice(0, 10);
 }
 
-// === FIXED: duplicate-safe save-result with E11000 retry ===
+// === FINAL FIXED SAVE-RESULT: 1 doc guarantee + dynamic flag ===
 router.post("/save-result", checkSubscription, async (req, res) => {
   try {
     const {
@@ -350,28 +347,68 @@ router.post("/save-result", checkSubscription, async (req, res) => {
       score: data.score || 0,
       total: data.total || 0,
     }));
-    const totalQuestions = subArray.reduce((a, b) => a + b.total, 0);
+    const totalQuestions =
+      rawTotal || subArray.reduce((a, b) => a + b.total, 0) || 20;
     const timeSec = Number(timeTaken) || 0;
-    let isFlagged = timeSec > 0 && timeSec <= 300;
+
+    // FIXED FLAG: 8 sec per Q min, but allow 60 sec for test mode <=40 Qs
+    let isFlagged = false;
+    const minAllowed = totalQuestions * 8;
+    if (timeSec > 0 && timeSec < minAllowed) isFlagged = true;
+    if (totalQuestions <= 40 && timeSec >= 60) isFlagged = false;
 
     const english = subArray.find((s) => s.name.toLowerCase() === "english");
     const others = subArray.filter((s) => s.name.toLowerCase() !== "english");
+    const finalUserId = req.mongoUser?.userId || userId || `anon_${Date.now()}`;
+
+    // === DEDUP CHECK 1: attemptId already exists ===
+    if (attemptId) {
+      const existing = await CbtResult.findOne({ attemptId });
+      if (existing) {
+        return res.json({
+          success: true,
+          isFlagged: existing.isFlagged,
+          result: existing,
+          attemptId: existing.attemptId,
+          duplicate: true,
+        });
+      }
+    }
+
+    // === DEDUP CHECK 2: same user + same score in 90 sec ===
+    const ninetyAgo = new Date(Date.now() - 90 * 1000);
+    const recentDup = await CbtResult.findOne({
+      userId: finalUserId,
+      rawScore,
+      rawTotal: totalQuestions,
+      date: { $gte: ninetyAgo },
+    });
+    if (recentDup) {
+      return res.json({
+        success: true,
+        isFlagged: recentDup.isFlagged,
+        result: recentDup,
+        attemptId: recentDup.attemptId,
+        duplicate: true,
+      });
+    }
 
     const generateId = () =>
-      `att_${Date.now()}_${crypto.randomBytes(4).toString("hex")}_${String(userId || Date.now()).slice(-4)}`;
-
+      `att_${Date.now()}_${crypto.randomBytes(4).toString("hex")}_${String(finalUserId).slice(-4)}`;
     let finalAttemptId =
       attemptId && String(attemptId).startsWith("att_")
         ? attemptId
         : generateId();
 
     const makePayload = (id) => ({
-      userId: req.mongoUser?.userId || userId || `anon_${Date.now()}`,
+      userId: finalUserId,
       name: (req.mongoUser?.fullName || name || "Anonymous").slice(0, 30),
       date: new Date(),
-      totalScore: Number(totalScore) || 0,
+      totalScore:
+        Number(totalScore) ||
+        Math.round((rawScore / (totalQuestions || 1)) * 400),
       rawScore: rawScore || 0,
-      rawTotal: rawTotal || totalQuestions,
+      rawTotal: totalQuestions,
       englishScore: english?.score || 0,
       subject2Name: others[0]?.name || "",
       subject2Score: others[0]?.score || 0,
@@ -397,7 +434,6 @@ router.post("/save-result", checkSubscription, async (req, res) => {
       });
     } catch (err) {
       if (err.code === 11000) {
-        console.log(`Duplicate attemptId ${finalAttemptId}, retrying...`);
         finalAttemptId = generateId() + "_r";
         const doc = await CbtResult.create(makePayload(finalAttemptId));
         return res.json({
@@ -418,8 +454,7 @@ router.post("/save-result", checkSubscription, async (req, res) => {
 
 router.get("/review/:attemptId", async (req, res) => {
   try {
-    const { attemptId } = req.params;
-    const result = await CbtResult.findOne({ attemptId });
+    const result = await CbtResult.findOne({ attemptId: req.params.attemptId });
     if (!result) return res.status(404).json({ error: "Attempt not found" });
     res.json(result);
   } catch (e) {
@@ -427,11 +462,9 @@ router.get("/review/:attemptId", async (req, res) => {
   }
 });
 
-// === FIXED: Leaderboard now uses aggregation, not full load ===
 router.get("/leaderboard", async (req, res) => {
   try {
     const { type = "main", subject } = req.query;
-
     if (type === "main") {
       const ranked = await CbtResult.aggregate([
         { $match: { isFlagged: false } },
@@ -443,7 +476,6 @@ router.get("/leaderboard", async (req, res) => {
       ]);
       return res.json(ranked);
     }
-
     if (type === "subject" && subject) {
       const key = subject.toLowerCase();
       const ranked = await CbtResult.aggregate([
@@ -477,7 +509,6 @@ router.get("/leaderboard", async (req, res) => {
       ]);
       return res.json(ranked);
     }
-
     if (type === "streak") {
       const recent = await CbtResult.find({ isFlagged: false })
         .sort({ date: -1 })
@@ -485,7 +516,6 @@ router.get("/leaderboard", async (req, res) => {
         .lean();
       return res.json(calculateStreaks(recent));
     }
-
     if (type === "improved") {
       const recent = await CbtResult.find({ isFlagged: false })
         .sort({ date: -1 })
@@ -520,7 +550,6 @@ router.get("/leaderboard", async (req, res) => {
           .slice(0, 100),
       );
     }
-
     res.json([]);
   } catch (e) {
     console.error(e);

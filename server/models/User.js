@@ -4,14 +4,9 @@ const VITALS = require("../config/vitals");
 const userSchema = new mongoose.Schema(
   {
     userId: { type: String, unique: true },
-    id: { type: String, index: true },
-    email: {
-      type: String,
-      unique: true,
-      lowercase: true,
-      required: true,
-    },
-    username: { type: String, sparse: true, index: true },
+    id: { type: String }, // REMOVED index:true - duplicate of userId
+    email: { type: String, unique: true, lowercase: true, required: true },
+    username: { type: String }, // REMOVED index:true, unique handles search
     password: String,
     fullName: String,
     subject: { type: String, default: "english-room" },
@@ -26,11 +21,8 @@ const userSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-// Only indexes that are NOT already unique
+// ONLY 2 indexes needed - email already unique
 userSchema.index({ subscriptionStatus: 1, subscriptionExpiresAt: 1 });
-userSchema.index({ createdAt: -1 });
-
-// ... keep all your statics exactly same as you have now ...
 
 userSchema.statics.findByEmail = function (email) {
   if (!email) return null;

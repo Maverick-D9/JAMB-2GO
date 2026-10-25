@@ -12,7 +12,6 @@ const VITALS = require("./config/vitals");
 mongoose
   .connect(VITALS.SYSTEM.MONGODB_URI, { dbName: VITALS.SYSTEM.MONGODB_DB_NAME })
   .then(() => console.log("✅ MongoDB jamb-2go connected"));
-
 const User = require("./models/User");
 
 async function hasFullAccessFor(usernameOrEmail) {

@@ -859,7 +859,7 @@ function startQuizLoop(room, subject) {
   const calcSubjects = ["maths", "physics", "chemistry", "accounting"];
   const intervalTime = calcSubjects.includes(canonical) ? 60000 : 20000;
   const askQuestion = () => {
-    if (state.qCount > 0 && state.qCount % 3 === 0) {
+    if (state.qCount > 0 && state.qCount % 10 === 0) {
       const leaderboard = buildLeaderboard(room);
       io.to(room).emit("show_leaderboard", {
         leaderboard,

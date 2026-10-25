@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import io from "socket.io-client";
+import ArenaDoodlesGlow from "./components/ArenaDoodlesGlow.jsx";
 import Auth from "./components/Auth";
 import Admin from "./pages/Admin";
 import CBTSetup from "./pages/CBTSetup";
@@ -1728,6 +1729,8 @@ export default function App() {
       </div>
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_360px] overflow-hidden">
         <div className="relative flex flex-col items-center justify-center p-4 md:p-8 overflow-y-auto">
+          {/* GLOWING FLOATING DOODLES */}
+          <ArenaDoodlesGlow />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-sky-500/[0.07] rounded-full blur-[120px] pointer-events-none" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-violet-500/[0.05] rounded-full blur-[100px] pointer-events-none" />
           {currentQ ? (

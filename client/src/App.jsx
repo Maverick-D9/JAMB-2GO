@@ -15,6 +15,7 @@ import AdminTopics from "./pages/AdminTopics";
 import { VITALS } from "./config/vitals";
 import Reviews from "./pages/Reviews";
 import ReviewFab from "./components/ReviewFab.jsx";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const API_BASE = VITALS.SYSTEM.API_BASE;
 const socket = io.connect(API_BASE);
@@ -639,6 +640,12 @@ export default function App() {
     window.location.pathname === "/reviews"
   ) {
     return <Reviews />;
+  }
+  if (
+    typeof window !== "undefined" &&
+    window.location.pathname === "/privacy-policy"
+  ) {
+    return <PrivacyPolicy />;
   }
   const isEnglishRoom = room === "english-room";
   const hasFullAccess = access?.tier === "full_access";

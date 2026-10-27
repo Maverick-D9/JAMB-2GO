@@ -495,6 +495,7 @@ export default function App() {
   });
   const [showPaywall, setShowPaywall] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [showMobileChat, setShowMobileChat] = useState(false);
   const [room, setRoom] = useState(() => authedUser?.subject || "english-room");
   const [palaceMode, setPalaceMode] = useState("arena");
   const [currentQ, setCurrentQ] = useState(null);
@@ -1827,7 +1828,60 @@ export default function App() {
             </div>
           )}
         </div>
-        <div className="hidden lg:flex w-full max-w-[360px] bg-[#080C18]/70 border-l border-white/10 flex-col p-3.5 gap-3.5 backdrop-blur-xl">
+        {/* MOBILE FLOATING BUTTON */}
+        <button
+          onClick={() => setShowMobileChat((s) => !s)}
+          className="lg:hidden fixed bottom-6 right-4 z-[60] w-14 h-14 rounded-full bg-sky-400 text-black grid place-items-center shadow-[0_0_30px_rgba(56,189,248,0.6)] text-[22px]"
+        >
+          💬
+        </button>
+
+        {/* MOBILE DRAWER - shows on tab */}
+        {showMobileChat && (
+          <div className="lg:hidden fixed inset-0 z-50 flex justify-end bg-black/60">
+            <div className="w-[88%] max-w-[380px] h-full bg-[#080C18] border-l border-white/10 flex flex-col p-3.5 gap-3.5 overflow-y-auto">
+              <button
+                onClick={() => setShowMobileChat(false)}
+                className="self-end text-white bg-white/10 px-3 py-1 rounded-full text-[12px]"
+              >
+                ✕ Close
+              </button>
+              <ParticipantsList
+                users={
+                  roomUsers.length ? roomUsers : [{ username, score: myScore }]
+                }
+                currentUsername={username}
+                activeChat={activeChat}
+                setActiveChat={setActiveChat}
+                unreadDMs={unreadDMs}
+                setUnreadDMs={setUnreadDMs}
+              />
+              <ChatPanel
+                activeChat={activeChat}
+                setActiveChat={setActiveChat}
+                messages={messages}
+                privateConversations={privateConversations}
+                chatMsg={chatMsg}
+                setChatMsg={setChatMsg}
+                hasAccess={canAccessCurrentRoom}
+                room={room}
+                username={username}
+                socket={socket}
+              />
+              <div className="text-center py-2">
+                <button
+                  onClick={handleBackToLobby}
+                  className="text-sky-400 text-[12px]"
+                >
+                  ← Back to Lobby
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* DESKTOP - stays same but now ALWAYS visible on laptop */}
+        <div className="hidden lg:flex w-full max-w-[360px] bg-[#080C18]/70 border-l border-white/10 flex-col p-3.5 gap-3.5 backdrop-blur-xl overflow-y-auto">
           <ParticipantsList
             users={
               roomUsers.length ? roomUsers : [{ username, score: myScore }]
@@ -1850,6 +1904,14 @@ export default function App() {
             username={username}
             socket={socket}
           />
+          <div className="mt-auto text-center pt-2">
+            <button
+              onClick={handleBackToLobby}
+              className="text-slate-500 text-[11px] px-3 py-1 rounded-full border border-white/10"
+            >
+              ← Back to Lobby
+            </button>
+          </div>
         </div>
       </div>
       <ReviewFab />

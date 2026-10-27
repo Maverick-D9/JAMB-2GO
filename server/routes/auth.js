@@ -8,8 +8,7 @@ const { sendOtp } = require("../utils/mailer");
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || "jamb2go_secret_change_this";
 const GOOGLE_CLIENT_ID =
-  "882391897710-2lluqbkg9f4f2smnbof64qvr33kot2kl.apps.googleusercontent.com";
-
+  process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID;
 global.pendingUsers = global.pendingUsers || new Map();
 
 function genCode() {

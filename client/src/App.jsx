@@ -901,6 +901,10 @@ export default function App() {
           }
           @keyframes rotateSlow { 0%{transform: rotate(0deg)} 100%{transform: rotate(360deg)} }
           @keyframes pulseAtom { 0%,100%{transform: scale(1)} 50%{transform: scale(1.15)} }
+          @keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
         `}</style>
 
         <div
@@ -1846,6 +1850,81 @@ export default function App() {
               >
                 ✕ Close
               </button>
+              <ParticipantsList
+                users={
+                  roomUsers.length ? roomUsers : [{ username, score: myScore }]
+                }
+                currentUsername={username}
+                activeChat={activeChat}
+                setActiveChat={setActiveChat}
+                unreadDMs={unreadDMs}
+                setUnreadDMs={setUnreadDMs}
+              />
+              <ChatPanel
+                activeChat={activeChat}
+                setActiveChat={setActiveChat}
+                messages={messages}
+                privateConversations={privateConversations}
+                chatMsg={chatMsg}
+                setChatMsg={setChatMsg}
+                hasAccess={canAccessCurrentRoom}
+                room={room}
+                username={username}
+                socket={socket}
+              />
+              <div className="text-center py-2">
+                <button
+                  onClick={handleBackToLobby}
+                  className="text-sky-400 text-[12px]"
+                >
+                  ← Back to Lobby
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ===== MOBILE CHAT - UPGRADED ===== */}
+        <button
+          onClick={() => setShowMobileChat((s) => !s)}
+          className="lg:hidden fixed bottom-6 right-4 z-[60] w-14 h-14 rounded-full bg-sky-400 text-black grid place-items-center shadow-[0_0_30px_rgba(56,189,248,0.6)] text-[22px] active:scale-90 transition"
+        >
+          💬
+          {Object.values(unreadDMs).reduce((a, b) => a + b, 0) > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] min-w-[20px] h-5 rounded-full grid place-items-center font-black px-1">
+              {Object.values(unreadDMs).reduce((a, b) => a + b, 0)}
+            </span>
+          )}
+        </button>
+
+        {showMobileChat && (
+          <div
+            className="lg:hidden fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-[6px]"
+            onClick={() => setShowMobileChat(false)}
+          >
+            <div
+              className="w-[88%] max-w-[380px] h-full bg-[#080C18]/90 backdrop-blur-xl border-l border-white/10 flex flex-col p-3.5 gap-3.5 overflow-y-auto animate-[slideIn_0.3s]"
+              onClick={(e) => e.stopPropagation()}
+              onTouchStart={(e) =>
+                (e.currentTarget.dataset.startX = e.touches[0].clientX)
+              }
+              onTouchEnd={(e) => {
+                const startX = Number(e.currentTarget.dataset.startX || 0);
+                const endX = e.changedTouches[0].clientX;
+                if (endX - startX > 80) setShowMobileChat(false);
+              }}
+            >
+              <div className="flex justify-between items-center">
+                <span className="text-sky-300 text-[11px] font-black tracking-widest">
+                  LIVE • SWIPE → TO CLOSE
+                </span>
+                <button
+                  onClick={() => setShowMobileChat(false)}
+                  className="text-white bg-white/10 px-3 py-1 rounded-full text-[12px]"
+                >
+                  ✕ Close
+                </button>
+              </div>
               <ParticipantsList
                 users={
                   roomUsers.length ? roomUsers : [{ username, score: myScore }]

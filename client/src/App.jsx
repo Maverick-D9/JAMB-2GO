@@ -16,6 +16,7 @@ import { VITALS } from "./config/vitals";
 import Reviews from "./pages/Reviews";
 import ReviewFab from "./components/ReviewFab.jsx";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TextHype from "./components/TextHype.jsx";
 
 const API_BASE = VITALS.SYSTEM.API_BASE;
 const socket = io.connect(API_BASE);
@@ -1628,10 +1629,17 @@ export default function App() {
   const C = 2 * Math.PI * R;
   const off = C * (1 - prog);
   const urgent = timer <= 10 && timer > 0;
-
   return (
     <div className="w-full h-screen bg-[#050A14] overflow-hidden font-['Inter',sans-serif] relative flex flex-col">
+      {/* TEXT HYPE - Zero Mongo, No clash with Leaderboard */}
+      <TextHype
+        socket={socket}
+        isLeaderboardOpen={showLeaderboard}
+        username={username}
+      />
+
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700;800&display=swap'); @keyframes pulse-red { 0%{transform:scale(1); box-shadow:0 0 0 0 rgba(239,68,68,0.7)} 70%{transform:scale(1.08); box-shadow:0 0 0 14px rgba(239,68,68,0)} 100%{transform:scale(1); box-shadow:0 0 0 0 rgba(239,68,68,0)} } @keyframes flicker { 0%,100%{transform:scale(1) rotate(-2deg); filter:brightness(1)} 25%{transform:scale(1.25) rotate(2deg); filter:brightness(1.4)} 50%{transform:scale(0.9) rotate(-1deg)} 75%{transform:scale(1.15) rotate(1deg)} } @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)} 40%{transform:translateX(7px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} } @keyframes pop { 0%{transform:scale(0.96)} 60%{transform:scale(1.02)} 100%{transform:scale(1)} } .glass-card{ background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(56, 189, 248, 0.3); box-shadow: 0 0 90px rgba(56,189,248,0.12), inset 0 1px 0 rgba(255,255,255,0.08); } .option-btn{ transition: all 0.18s cubic-bezier(.34,1.56,.64,1); } .option-btn:hover{ transform: translateY(-2px) scale(1.01); box-shadow: 0 0 32px rgba(56,189,248,0.35); border-color: rgba(56,189,248,0.9) !important; }`}</style>
+
       {showPaywall && (
         <PaywallModal
           access={access}

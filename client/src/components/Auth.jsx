@@ -2,8 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { VITALS } from "../config/vitals";
 
 const API = `${VITALS.SYSTEM.API_BASE}/api/auth`;
-const GOOGLE_CLIENT_ID =
-  "882391897710-2lluqbkg9f4f2smnbof64qvr33kot2kl.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 function saveSession(data) {
   const u = data.user || {};

@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { VITALS } from "../config/vitals";
 
 const API = VITALS.SYSTEM.API_BASE;
 
 export default function AdminTopics() {
-  const [subject, setSubject] = useState("biology"); // default to biology like screenshot
+  const [subject, setSubject] = useState("biology");
   const [topics, setTopics] = useState([]);
   const [newTopic, setNewTopic] = useState("");
   const [csvText, setCsvText] = useState("");
@@ -12,6 +12,9 @@ export default function AdminTopics() {
   const [msg, setMsg] = useState("");
   const [counts, setCounts] = useState({});
   const [refreshing, setRefreshing] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const uploadingRef = useRef(false); // prevents StrictMode double fire
   const adminPass = localStorage.getItem("admin_pass") || "JAMB2GO_2026";
 
   const load = async () => {
@@ -22,8 +25,7 @@ export default function AdminTopics() {
       });
       const data = await res.json();
       setTopics(data.topics || []);
-      if (data.counts) setCounts(data.counts);
-      else setCounts({});
+      setCounts(data.counts || {});
     } catch (e) {
       setTopics([]);
     }
@@ -31,14 +33,14 @@ export default function AdminTopics() {
 
   useEffect(() => {
     load();
+    setUploadTopic(""); // clear old topic when subject changes
   }, [subject]);
 
-  // === FIXED REFRESH - NOW ACTUALLY REBUILDS CACHE ===
   const handleRefresh = async () => {
+    if (refreshing) return;
     setRefreshing(true);
     setMsg("⏳ Rebuilding drill cache...");
     try {
-      // Force backend to reload topics.json + rebuild drillCache
       await fetch(`${API}/admin/reload-questions`, {
         method: "POST",
         headers: { "x-admin-password": adminPass },
@@ -65,18 +67,16 @@ export default function AdminTopics() {
     });
     const data = await res.json();
     if (data.ok || data.success) {
+      const added = newTopic.trim();
       setNewTopic("");
-      // Use returned data instantly so you don't need refresh
       if (data.topics) {
         setTopics(data.topics);
         if (data.counts) setCounts(data.counts);
       } else {
         await load();
       }
-      if (data.topics && data.topics.includes(newTopic.trim())) {
-        setUploadTopic(newTopic.trim());
-      }
-      setMsg(`✅ Topic "${newTopic.trim()}" added to ${subject.toUpperCase()}`);
+      setUploadTopic(added);
+      setMsg(`✅ Topic "${added}" added to ${subject.toUpperCase()}`);
       setTimeout(() => setMsg(""), 3000);
     } else {
       setMsg(`❌ ${data.error || data.message || "Error adding topic"}`);
@@ -84,10 +84,16 @@ export default function AdminTopics() {
   };
 
   const upload = async () => {
+    // HARD LOCK - this is the fix for double toast
+    if (uploadingRef.current || uploading) return;
     if (!csvText.trim()) return setMsg("❌ Paste CSV first");
-    const targetTopic = uploadTopic || newTopic;
-    if (!targetTopic) return setMsg("❌ Select a topic first");
+    if (!uploadTopic)
+      return setMsg("❌ Select a topic first - click a topic pill");
+
+    uploadingRef.current = true;
+    setUploading(true);
     setMsg("⏳ Uploading to DRILL...");
+
     try {
       const res = await fetch(`${API}/admin/upload-drill`, {
         method: "POST",
@@ -95,20 +101,24 @@ export default function AdminTopics() {
           "Content-Type": "application/json",
           "x-admin-password": adminPass,
         },
-        body: JSON.stringify({ subject, topic: targetTopic, csvText }),
+        body: JSON.stringify({ subject, topic: uploadTopic, csvText }),
       });
       const data = await res.json();
       if (data.success) {
-        setMsg(
-          `✅ ${data.count || 0} Qs saved to drill/${subject}/${targetTopic} • ${data.message || ""}`,
-        );
+        setMsg(`✅ ${data.message}`);
         setCsvText("");
-        load();
+        await load();
       } else {
         setMsg(`❌ ${data.error || data.message || "Upload failed"}`);
       }
     } catch (e) {
       setMsg(`❌ Network error: ${e.message}`);
+    } finally {
+      setUploading(false);
+      setTimeout(() => {
+        uploadingRef.current = false;
+      }, 800); // cooldown
+      setTimeout(() => setMsg(""), 4000);
     }
   };
 
@@ -233,7 +243,6 @@ export default function AdminTopics() {
                   Add
                 </button>
               </div>
-
               <div className="mt-5">
                 <div className="text-[10px] font-bold tracking-widest text-slate-600 uppercase mb-2">
                   Existing Topics — Click to set as upload target
@@ -281,7 +290,6 @@ export default function AdminTopics() {
                 {rowCount} rows
               </span>
             </div>
-
             <label className="text-[10px] tracking-widest font-bold text-slate-500 uppercase mt-4 block">
               Target Topic
             </label>
@@ -297,7 +305,6 @@ export default function AdminTopics() {
                 </option>
               ))}
             </select>
-
             <div className="mt-4 p-3 rounded-xl bg-[#0B0F1E] border border-white/5">
               <div className="text-[10px] font-bold text-slate-500 uppercase">
                 Current Selection
@@ -307,24 +314,25 @@ export default function AdminTopics() {
                 <span className="text-emerald-400">{uploadTopic || "..."}</span>
               </div>
             </div>
-
             <label className="text-[10px] tracking-widest font-bold text-slate-500 uppercase mt-5 block">
               CSV Data
             </label>
             <textarea
               value={csvText}
               onChange={(e) => setCsvText(e.target.value)}
-              placeholder={`question_text,option_a,option_b,option_c,option_d,correct,explanation
-What is 2+2?,2,3,4,5,C,Basic addition
-Solve x²=4,1,2,-2,4,B,Take sqrt both sides`}
+              placeholder={`question_text,option_a,option_b,option_c,option_d,correct,explanation`}
               className="w-full h-[280px] p-3.5 bg-[#0B0F1E] border border-white/10 rounded-xl mt-2 text-[12px] font-mono focus:outline-none focus:border-emerald-400/50 placeholder:text-white/20 resize-none"
             />
 
             <button
               onClick={upload}
-              className="w-full mt-4 py-3.5 bg-gradient-to-r from-white to-slate-200 text-black font-black rounded-xl text-sm hover:scale-[1.01] transition flex items-center justify-center gap-2"
+              disabled={uploading || !uploadTopic}
+              type="button"
+              className={`w-full mt-4 py-3.5 font-black rounded-xl text-sm transition flex items-center justify-center gap-2 ${uploading || !uploadTopic ? "bg-white/10 text-white/30 cursor-not-allowed" : "bg-gradient-to-r from-white to-slate-200 text-black hover:scale-[1.01]"}`}
             >
-              🚀 Upload to {uploadTopic || "..."}
+              {uploading
+                ? "⏳ Uploading..."
+                : `🚀 Upload to ${uploadTopic || "..."}`}
             </button>
             <div className="grid grid-cols-2 gap-2 mt-2">
               <button
@@ -343,16 +351,6 @@ Solve x²=4,1,2,-2,4,B,Take sqrt both sides`}
               >
                 Copy
               </button>
-            </div>
-
-            <div className="mt-4 p-3 bg-sky-400/10 border border-sky-400/20 rounded-xl">
-              <div className="text-[10px] font-black tracking-widest text-sky-400">
-                FORMAT TIP
-              </div>
-              <div className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                question_text, option_a, b, c, d, correct (A-D), explanation.
-                One per line.
-              </div>
             </div>
           </div>
         </div>

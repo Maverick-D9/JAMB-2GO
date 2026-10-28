@@ -455,6 +455,10 @@ app.get("/api/cbt/drill/questions", (req, res) => {
   req.url = "/api/drill/questions?" + new URLSearchParams(req.query).toString();
   app.handle(req, res);
 });
+
+const _recentUploadHashes = new Map();
+const _activeLocks = new Set();
+
 app.post("/admin/upload-drill", checkAdmin, async (req, res) => {
   try {
     const { subject, topic, csvText, questions } = req.body;
@@ -462,6 +466,32 @@ app.post("/admin/upload-drill", checkAdmin, async (req, res) => {
       return res.status(400).json({ error: "subject and topic required" });
     const subj = normalizeSubject(subject);
     const topicName = topic.trim();
+    const lockKey = `${subj}::${topicName.toLowerCase()}`;
+
+    // === KILL DOUBLE ===
+    if (_activeLocks.has(lockKey)) {
+      return res.status(429).json({ error: "Upload in progress" });
+    }
+    const crypto = require("crypto");
+    const hash = crypto
+      .createHash("md5")
+      .update(`${subj}|${topicName}|${(csvText || "").slice(0, 2000)}`)
+      .digest("hex");
+    if (
+      _recentUploadHashes.has(hash) &&
+      Date.now() - _recentUploadHashes.get(hash) < 15000
+    ) {
+      return res.json({
+        success: true,
+        count: 0,
+        message: `Duplicate ignored - already saved to drill/${subj}/${topicName}`,
+        counts: buildCountsForSubject(subj).counts,
+        totalQs: buildCountsForSubject(subj).totalQs,
+      });
+    }
+    _activeLocks.add(lockKey);
+    _recentUploadHashes.set(hash, Date.now());
+
     const folder = path.join(DRILL_PATH, subj);
     if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
     const filePath = path.join(folder, `${topicName}.csv`);
@@ -506,6 +536,8 @@ app.post("/admin/upload-drill", checkAdmin, async (req, res) => {
     const lines =
       finalCsv.split("\n").filter((l) => l.trim() !== "").length - 1;
     const data = buildCountsForSubject(subj);
+
+    _activeLocks.delete(lockKey);
     res.json({
       success: true,
       message: `${lines} Qs saved to drill/${subj}/${topicName}`,
@@ -514,6 +546,12 @@ app.post("/admin/upload-drill", checkAdmin, async (req, res) => {
       totalQs: data.totalQs,
     });
   } catch (e) {
+    // make sure lock is freed on error
+    try {
+      _activeLocks.delete(
+        `${normalizeSubject(req.body.subject)}::${req.body.topic?.trim().toLowerCase()}`,
+      );
+    } catch {}
     res.status(500).json({ error: e.message });
   }
 });

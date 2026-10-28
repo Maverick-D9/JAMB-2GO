@@ -125,5 +125,62 @@
     "Public Corporation,Privatisation and Local Government",
     "Nigerian Foreign Policy",
     "International Organisations"
+  ],
+  "accounting": [
+    "Nature and Significance of Accounting",
+    "Principles of Double Entry",
+    "Source Documents and Books of Original Entry",
+    "The Ledger and Trial Balance",
+    "Final Accounts of a Sole Trader",
+    "Control Account and Correction of Errors",
+    "Bank Reconciliation Statement",
+    "Incomplete Records",
+    "Manufacturing Accounts",
+    "Partnership Account",
+    "Company Account",
+    "Non Profit Making Organisation",
+    "Departmental nd Branch Accounts",
+    "Public Sector Accounting",
+    "IT in Accounting"
+  ],
+  "literature": [
+    "Drama",
+    "Prose",
+    "Poetry",
+    "Figure of Speech",
+    "The Lion and The Jewel",
+    "So the Path does not die",
+    "Redemption Road",
+    "Animal Farm",
+    "A MidSummer Night's Dream",
+    "African Poetry",
+    "Non African Poetry",
+    "Literary Appreciation and Criticism",
+    "Macbeth"
+  ],
+  "crs": [
+    "The Sovereignty of God",
+    "The Covenant with Abraham,Isaac annd Jacob",
+    "Moses and the Exodus",
+    "Joshua and the Conquest of Canaan",
+    "The Judges",
+    "Samuel and the Kingship in Isreal",
+    "The Prophets",
+    "The Birth and Early Life of Jesus",
+    "The Teachings and Miracles of Jesus",
+    "The Passion of Christ",
+    "The Early Church",
+    "The Epistle and Christain Living",
+    "Divine Providence,Guidance and Protection",
+    "Parental Responsibility",
+    "Obedience and Disobedience",
+    "Greed and its Effect",
+    "Religious Reforms in Judah"
+  ],
+  "commerce": [
+    "Introduction to Commerce",
+    "Forms of Business Units",
+    "Home Trade",
+    "Trade Documents and Terms of Trade"
   ]
 }

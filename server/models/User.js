@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema(
     password: String,
     fullName: String,
     subject: { type: String, default: "english-room" },
+    liveCorrect: { type: Number, default: 0 },
     picture: String,
     isGoogle: Boolean,
     verified: { type: Boolean, default: true },

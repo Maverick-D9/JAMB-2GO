@@ -8,6 +8,7 @@ const path = require("path");
 require("dotenv").config();
 const mongoose = require("mongoose");
 const VITALS = require("./config/vitals");
+const { registerLiveRankHandlers } = require("./sockets/liveRankHandler");
 
 mongoose
   .connect(VITALS.SYSTEM.MONGODB_URI, { dbName: VITALS.SYSTEM.MONGODB_DB_NAME })
@@ -458,7 +459,6 @@ app.get("/api/cbt/drill/questions", (req, res) => {
 
 const _recentUploadHashes = new Map();
 const _activeLocks = new Set();
-
 app.post("/admin/upload-drill", checkAdmin, async (req, res) => {
   try {
     const { subject, topic, csvText, questions } = req.body;
@@ -495,34 +495,86 @@ app.post("/admin/upload-drill", checkAdmin, async (req, res) => {
     const folder = path.join(DRILL_PATH, subj);
     if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
     const filePath = path.join(folder, `${topicName}.csv`);
-    let finalCsv = "";
+
+    // === PARSE INCOMING ROWS ===
+    let incomingRows = [];
     if (csvText) {
-      finalCsv = csvText;
-      if (!csvText.toLowerCase().includes("question_text"))
-        finalCsv =
-          "question_text,option_a,option_b,option_c,option_d,correct,explanation,topic\n" +
-          csvText;
+      let lines = csvText.split(/\r?\n/).filter((l) => l.trim() !== "");
+      const hasHeader = lines[0].toLowerCase().includes("question_text");
+      incomingRows = hasHeader ? lines.slice(1) : lines;
     } else if (Array.isArray(questions)) {
-      const rows = [
-        "question_text,option_a,option_b,option_c,option_d,correct,explanation,topic",
-      ];
-      questions.forEach((q) => {
-        rows.push(
-          [
-            csvEscape(q.question_text),
-            csvEscape(q.option_a),
-            csvEscape(q.option_b),
-            csvEscape(q.option_c),
-            csvEscape(q.option_d),
-            csvEscape(q.correct),
-            csvEscape(q.explanation),
-            csvEscape(q.topic || topicName),
-          ].join(","),
-        );
+      incomingRows = questions.map((q) => {
+        return [
+          csvEscape(q.question_text),
+          csvEscape(q.option_a),
+          csvEscape(q.option_b),
+          csvEscape(q.option_c),
+          csvEscape(q.option_d),
+          csvEscape(q.correct),
+          csvEscape(q.explanation),
+          csvEscape(q.topic || topicName),
+        ].join(",");
       });
-      finalCsv = rows.join("\n");
     }
-    fs.writeFileSync(filePath, finalCsv);
+
+    // === READ EXISTING + DEDUP + APPEND ===
+    let existingContent = "";
+    let existingSet = new Set();
+    let isNewFile = !fs.existsSync(filePath);
+
+    if (!isNewFile) {
+      existingContent = fs.readFileSync(filePath, "utf8").trim();
+      const existingLines = existingContent
+        .split(/\r?\n/)
+        .filter((l) => l.trim() !== "");
+      const hasHeaderExisting = existingLines[0]
+        .toLowerCase()
+        .includes("question_text");
+      const dataLines = hasHeaderExisting
+        ? existingLines.slice(1)
+        : existingLines;
+      dataLines.forEach((line) => {
+        try {
+          const qText = parseCsvLine(line)[0];
+          if (qText) existingSet.add(qText.trim().toLowerCase());
+        } catch {}
+      });
+    }
+
+    let rowsToAdd = [];
+    let skippedDuplicate = 0;
+    incomingRows.forEach((row) => {
+      if (!row.trim()) return;
+      try {
+        const qText = parseCsvLine(row)[0];
+        if (!qText) return;
+        const norm = qText.trim().toLowerCase();
+        if (existingSet.has(norm)) {
+          skippedDuplicate++;
+        } else {
+          rowsToAdd.push(row);
+          existingSet.add(norm);
+        }
+      } catch {
+        rowsToAdd.push(row);
+      }
+    });
+
+    let finalTotal = 0;
+    if (isNewFile) {
+      const header =
+        "question_text,option_a,option_b,option_c,option_d,correct,explanation,topic";
+      const finalCsv = header + "\n" + rowsToAdd.join("\n");
+      fs.writeFileSync(filePath, finalCsv);
+      finalTotal = rowsToAdd.length;
+    } else {
+      if (rowsToAdd.length > 0) {
+        const toAppend = "\n" + rowsToAdd.join("\n");
+        fs.appendFileSync(filePath, toAppend);
+      }
+      finalTotal = countDrillFileQs(filePath);
+    }
+
     if (!topicsCache[subj]) topicsCache[subj] = [];
     if (
       !topicsCache[subj].some(
@@ -533,15 +585,16 @@ app.post("/admin/upload-drill", checkAdmin, async (req, res) => {
       await saveTopicsCache();
     }
     rebuildDrillCache();
-    const lines =
-      finalCsv.split("\n").filter((l) => l.trim() !== "").length - 1;
     const data = buildCountsForSubject(subj);
 
     _activeLocks.delete(lockKey);
     res.json({
       success: true,
-      message: `${lines} Qs saved to drill/${subj}/${topicName}`,
-      count: lines,
+      message: `${rowsToAdd.length} added, ${skippedDuplicate} dup skipped. Total ${finalTotal} Qs in drill/${subj}/${topicName}`,
+      count: rowsToAdd.length,
+      added: rowsToAdd.length,
+      skippedDuplicate,
+      total: finalTotal,
       counts: data.counts,
       totalQs: data.totalQs,
     });
@@ -934,7 +987,11 @@ function startQuizLoop(room, subject) {
   console.log(`✅ Quiz loop started for ${room} every ${intervalTime / 1000}s`);
 }
 
+const liveRooms = global.liveRooms || new Map();
+global.liveRooms = liveRooms;
+
 io.on("connection", (socket) => {
+  registerLiveRankHandlers(io, socket, liveRooms);
   socket.on("join_room", async ({ room, username }) => {
     console.log(`🔵 JOIN: ${username} -> ${room}`);
     if (!isEnglishRoom(room)) {

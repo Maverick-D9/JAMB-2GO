@@ -23,7 +23,6 @@ export default function ArenaDoodlesGlow() {
           <path d="M40 75 L60 75 M42 80 L58 80 M44 85 L56 85" />
           <path d="M45 45 Q50 35 55 45 Q50 55 45 45" />
         </svg>
-
         {/* ATOM - top right */}
         <svg
           className="doodle absolute right-[3%] top-[8%] w-32 h-32 text-cyan-300"
@@ -52,7 +51,6 @@ export default function ArenaDoodlesGlow() {
           <circle cx="85" cy="35" r="3" fill="currentColor" />
           <circle cx="20" cy="70" r="3" fill="currentColor" />
         </svg>
-
         {/* GRADUATION CAP - left mid */}
         <svg
           className="doodle absolute left-[3%] top-[45%] w-28 h-20 text-cyan-200"
@@ -67,7 +65,6 @@ export default function ArenaDoodlesGlow() {
           <circle cx="80" cy="18" r="2" fill="currentColor" />
           <path d="M80 18 L85 38 L82 35 L78 38" />
         </svg>
-
         {/* BEAKER - right mid */}
         <svg
           className="doodle absolute right-[4%] top-[48%] w-24 h-36 text-cyan-300"
@@ -82,7 +79,6 @@ export default function ArenaDoodlesGlow() {
           <circle cx="35" cy="50" r="2.5" />
           <circle cx="45" cy="42" r="1.5" />
         </svg>
-
         {/* BOOK - left bottom */}
         <svg
           className="doodle absolute left-[4%] bottom-[12%] w-32 h-24 text-cyan-200"
@@ -96,7 +92,6 @@ export default function ArenaDoodlesGlow() {
           <path d="M50 20 L50 60" />
           <path d="M15 30 Q35 22 48 30 M60 28 Q80 22 90 30" />
         </svg>
-
         {/* PI - right bottom */}
         <div
           className="doodle absolute right-[5%] bottom-[6%] text-7xl font-serif text-cyan-300"
@@ -104,16 +99,12 @@ export default function ArenaDoodlesGlow() {
         >
           π
         </div>
-
-        {/* E=mc2 - center bottom */}
         <div
           className="doodle absolute left-[38%] bottom-[4%] text-4xl font-mono text-cyan-200 tracking-wider"
           style={{ animationDelay: "1.7s" }}
         >
           E=mc²
         </div>
-
-        {/* Sigma subtle */}
         <div
           className="doodle absolute left-[2%] bottom-[2%] text-5xl text-cyan-300/60"
           style={{ animationDelay: "2s" }}

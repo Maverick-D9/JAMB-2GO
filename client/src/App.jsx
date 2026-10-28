@@ -16,6 +16,7 @@ import { VITALS } from "./config/vitals";
 import Reviews from "./pages/Reviews";
 import ReviewFab from "./components/ReviewFab.jsx";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import { getLiveRank } from "./config/liveRanks";
 import TextHype from "./components/TextHype.jsx";
 
 const API_BASE = VITALS.SYSTEM.API_BASE;
@@ -169,6 +170,7 @@ function ParticipantsList({
           const isMe = u.username === currentUsername;
           const isActive = activeChat === u.username;
           const unread = unreadDMs[u.username] || 0;
+          const rank = getLiveRank(u.liveCorrect || 0);
           return (
             <button
               key={u.username}
@@ -190,11 +192,17 @@ function ParticipantsList({
                     </span>
                   )}
                 </div>
-                <span
-                  className={`text-[13px] font-semibold truncate ${isActive ? "text-black" : "text-slate-300"}`}
-                >
-                  {u.username} {isMe && "(you)"}
-                </span>
+                <div className="flex flex-col">
+                  <span
+                    className={`text-[13px] font-semibold truncate flex items-center gap-1 ${isActive ? "text-black" : "text-slate-300"}`}
+                  >
+                    {u.username} {isMe && "(you)"}{" "}
+                    <span title={rank.name}>{rank.icon}</span>
+                  </span>
+                  <span className="text-[9px] text-slate-500">
+                    {rank.name} • {u.liveCorrect || 0}
+                  </span>
+                </div>
               </div>
               <span
                 className={`text-[12px] font-extrabold ${isActive ? "text-black" : "text-sky-400"}`}
@@ -840,6 +848,25 @@ export default function App() {
         { type: "system", eventType: "left", username: u },
       ]),
     );
+    // === LIVE RANK LISTENERS - PASTE HERE ===
+    socket.on("live:user:rankUpdate", (data) => {
+      setRoomUsers((prev) =>
+        prev.map((u) =>
+          u.username === data.username
+            ? { ...u, liveCorrect: data.correctCount }
+            : u,
+        ),
+      );
+      if (data.username === username) {
+        showToast(`⬆️ Rank Up! ${data.newTierName} ${data.newIcon}`);
+      }
+    });
+    socket.on("live:rank:announcement", (data) => {
+      showToast(data.text);
+    });
+    socket.on("live:rank:inactive", (data) => {
+      console.log(`Rank needs 5 players, have ${data.have}`);
+    });
     return () => {
       socket.off("receive_message");
       socket.off("new_question");
@@ -853,6 +880,9 @@ export default function App() {
       socket.off("userLeft");
       socket.off("update_scores");
       socket.off("private_message");
+      socket.off("live:user:rankUpdate");
+      socket.off("live:rank:announcement");
+      socket.off("live:rank:inactive");
     };
   }, [room, username, isLocked, leaderboardData]);
 

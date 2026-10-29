@@ -57,7 +57,6 @@ router.post("/request-otp", async (req, res) => {
     res.json({
       success: true,
       message: "OTP sent to " + email,
-      devOtp: code,
     });
 
     setImmediate(async () => {

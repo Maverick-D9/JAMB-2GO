@@ -1,53 +1,49 @@
-// Otp.js - Mongo TTL Version (production ready - FIXED INDEXES)
+// Otp.js - Mongo TTL Version - FIXED NO LOOP
 const mongoose = require("mongoose");
 
 const otpSchema = new mongoose.Schema(
   {
-    email: {
-      type: String,
-      required: true,
-      lowercase: true,
-      trim: true,
-    },
-    code: {
-      type: String,
-      required: true,
-    },
-    attempts: {
-      type: Number,
-      default: 0,
-    },
-    expiresAt: {
-      type: Date,
-      required: true,
-    },
+    email: { type: String, required: true, lowercase: true, trim: true },
+    code: { type: String, required: true },
+    attempts: { type: Number, default: 0 },
+    expiresAt: { type: Date, required: true },
   },
   { timestamps: true },
 );
 
-// === INDEXES FOR SCALE - FIXED ===
 otpSchema.index({ email: 1 });
-otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 }); // TTL - auto deletes
+otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 otpSchema.statics.createOtp = async function (email, code) {
-  const key = email.toLowerCase().trim();
+  if (!email) throw new Error("Email required");
+  const rawEmail = typeof email === "object" ? email.email || "" : email;
+  const key = String(rawEmail || email)
+    .toLowerCase()
+    .trim();
+
   await this.deleteMany({ email: key });
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-  const doc = await this.create({
+
+  // FIX: Use .save() instead of this.create to avoid infinite loop
+  const doc = new this({
     email: key,
     code: String(code),
     attempts: 0,
     expiresAt,
   });
+  await doc.save();
   return doc;
 };
 
 otpSchema.statics.verifyOtp = async function (email, code) {
-  const key = email.toLowerCase().trim();
+  if (!email) return { ok: false, error: "Email required" };
+  const rawEmail = typeof email === "object" ? email.email || "" : email;
+  const key = String(rawEmail || email)
+    .toLowerCase()
+    .trim();
+
   const rec = await this.findOne({ email: key });
-  if (!rec) {
-    return { ok: false, error: "Code expired. Request a new one." };
-  }
+  if (!rec) return { ok: false, error: "Code expired. Request a new one." };
   if (new Date() > rec.expiresAt) {
     await this.deleteOne({ _id: rec._id });
     return { ok: false, error: "Code expired" };
@@ -65,12 +61,6 @@ otpSchema.statics.verifyOtp = async function (email, code) {
   return { ok: true };
 };
 
-otpSchema.statics.create = function (email, code) {
-  return this.createOtp(email, code);
-};
-
-otpSchema.statics.verify = function (email, code) {
-  return this.verifyOtp(email, code);
-};
+// REMOVED dangerous override of this.create
 
 module.exports = mongoose.model("Otp", otpSchema);

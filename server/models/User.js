@@ -4,9 +4,9 @@ const VITALS = require("../config/vitals");
 const userSchema = new mongoose.Schema(
   {
     userId: { type: String, unique: true },
-    id: { type: String }, // REMOVED index:true - duplicate of userId
+    id: { type: String },
     email: { type: String, unique: true, lowercase: true, required: true },
-    username: { type: String }, // REMOVED index:true, unique handles search
+    username: { type: String },
     password: String,
     fullName: String,
     subject: { type: String, default: "english-room" },
@@ -22,7 +22,6 @@ const userSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-// ONLY 2 indexes needed - email already unique
 userSchema.index({ subscriptionStatus: 1, subscriptionExpiresAt: 1 });
 
 userSchema.statics.findByEmail = function (email) {
@@ -93,25 +92,30 @@ userSchema.statics.checkUserAccess = function (user) {
   const subExpires = user.subscriptionExpiresAt
     ? new Date(user.subscriptionExpiresAt)
     : null;
+
   if (user.subscriptionStatus === "active" && subExpires && now < subExpires) {
     const daysLeft = Math.ceil((subExpires - now) / 86400000);
+    const cappedDays = Math.min(daysLeft, VITALS.SUBSCRIPTION.DURATION_DAYS);
     return {
       tier: VITALS.SUBSCRIPTION.TIER_NAME,
       status: "active",
-      daysLeft,
+      daysLeft: cappedDays,
       expiresAt: user.subscriptionExpiresAt,
       trialEndsAt: user.trialEndsAt,
     };
   }
+
   if (user.subscriptionStatus === "trial" && now < trialEnds) {
     const daysLeft = Math.ceil((trialEnds - now) / 86400000);
+    const cappedDays = Math.min(daysLeft, VITALS.TRIAL.DURATION_DAYS);
     return {
       tier: VITALS.SUBSCRIPTION.TIER_NAME,
       status: "trial",
-      daysLeft,
+      daysLeft: cappedDays,
       trialEndsAt: user.trialEndsAt,
     };
   }
+
   const isExpiredActive =
     user.subscriptionStatus === "active" && subExpires && now >= subExpires;
   return {

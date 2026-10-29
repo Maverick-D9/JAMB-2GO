@@ -12,7 +12,11 @@ const { registerLiveRankHandlers } = require("./sockets/liveRankHandler");
 
 mongoose
   .connect(VITALS.SYSTEM.MONGODB_URI, { dbName: VITALS.SYSTEM.MONGODB_DB_NAME })
-  .then(() => console.log("✅ MongoDB jamb-2go connected"));
+  .then(() => console.log("✅ MongoDB jamb-2go connected"))
+  .catch((e) => {
+    console.error("❌ MongoDB FAILED:", e.message);
+    console.error("Check MONGODB_URI in .env or config/vitals.js");
+  });
 const User = require("./models/User");
 
 async function hasFullAccessFor(usernameOrEmail) {
@@ -48,14 +52,25 @@ const corsOrigin =
     ? true
     : rawCors;
 console.log("CORS Origin config:", corsOrigin);
+const paymentRoutes = require("./routes/payment");
 
 app.use(cors({ origin: corsOrigin, credentials: true }));
-app.use(express.json({ limit: "10mb" }));
+
+// === CRITICAL FOR WEBHOOK - MUST BE BEFORE express.json ===
+app.use("/api/payment/webhook", express.raw({ type: "application/json" }));
+
+app.use(
+  express.json({
+    limit: "10mb",
+    verify: (req, res, buf) => {
+      req.rawBody = buf; // save raw for fallback
+    },
+  }),
+);
 
 const cbtRoutes = require("./routes/cbt");
 app.use("/api/cbt", cbtRoutes);
-const paymentRoutes = require("./routes/payment");
-app.use("/api/payment", paymentRoutes);
+app.use("/api/payment", paymentRoutes); // webhook route is inside here, but raw already handled above
 const drillRoutes = require("./routes/drill");
 app.use("/api/drill", drillRoutes);
 const authRoutes = require("./routes/auth");

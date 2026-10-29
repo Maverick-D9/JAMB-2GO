@@ -1468,7 +1468,7 @@ export default function App() {
                   : `Active Pass: ${access.daysLeft} days left`}
               </span>
               <span className="text-emerald-400 text-[11px]">
-                All 11 rooms unlocked
+                All rooms unlocked
               </span>
             </div>
           ) : (

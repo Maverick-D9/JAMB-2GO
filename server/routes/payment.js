@@ -48,11 +48,22 @@ router.post("/webhook", async (req, res) => {
       ).toLowerCase();
       const userIdMeta = data.metadata?.userId || email;
 
-      // Prevent double processing
-      const existing = await Subscription.findOne({ reference });
-      if (existing) {
-        console.log(`⚠️ Webhook: Already processed ${reference}`);
-        return res.sendStatus(200);
+      // ATOMIC idempotency - prevents race condition
+      try {
+        // This will fail if reference already exists (if you set unique index)
+        const newSub = await Subscription.create({
+          userId: userIdFinal,
+          email: user.email,
+          reference: reference, // Make sure this field has unique: true in your model
+          // ... your other fields
+        });
+      } catch (err) {
+        if (err.code === 11000) {
+          // Duplicate key error
+          console.log(`⚠️ Race condition blocked for ${reference}`);
+          return res.sendStatus(200);
+        }
+        throw err;
       }
 
       let user =

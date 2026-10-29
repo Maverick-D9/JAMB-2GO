@@ -1,4 +1,4 @@
-// server/config/vitals.js - SINGLE SOURCE FOR EVERYTHING
+// server/config/vitals.js - SINGLE SOURCE FOR EVERYTHING - FIXED TIER 1
 const PRICE = 2500;
 const DISPLAY = "₦2500";
 const DISPLAY_COMMA = "₦2,500";
@@ -28,10 +28,18 @@ module.exports = {
     MONGODB_URI: process.env.MONGODB_URI,
     MONGODB_DB_NAME: "jamb-2go",
     REDIS_URL: process.env.REDIS_URL || "redis://localhost:6379",
-    FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:5173",
+    FRONTEND_URL: process.env.FRONTEND_URL || "https://jamb-2-go.vercel.app",
+    // === FIXED: No more true (allow all) ===
     CORS_ORIGINS: process.env.CORS_ORIGINS
       ? process.env.CORS_ORIGINS.split(",")
-      : true, // ✅ FIXED: true = allow all, fixes Arena Loading
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [
+          "http://localhost:5173",
+          "http://localhost:3000",
+          "https://jamb-2-go.vercel.app",
+          "https://www.jamb-2-go.vercel.app",
+        ],
     CBT_CONFIG_FILE: "cbt_config.json",
     TOPICS_FILE: "topics.json",
     QUESTIONS_FOLDER: "questions",

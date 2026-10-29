@@ -46,16 +46,43 @@ function isEnglishRoom(room) {
 
 const app = express();
 
+// === FIXED CORS - Tier 1 Security ===
 const rawCors = VITALS.SYSTEM.CORS_ORIGINS;
-const corsOrigin =
-  rawCors === true || (Array.isArray(rawCors) && rawCors.includes("*"))
-    ? true
-    : rawCors;
+
+// Your real allowed frontends - CHANGE THIS TO YOUR VERCEL URL
+const ALLOWED_ORIGINS = [
+  "https://jamb-2go.vercel.app",
+  "https://www.jamb-2go.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:3000",
+];
+
+let corsOrigin;
+if (rawCors === true || (Array.isArray(rawCors) && rawCors.includes("*"))) {
+  // Even if vitals says *, we override to strict list for safety
+  console.log("⚠️ vitals had * - overriding to strict list");
+  corsOrigin = ALLOWED_ORIGINS;
+} else if (Array.isArray(rawCors)) {
+  corsOrigin = [...new Set([...rawCors, ...ALLOWED_ORIGINS])];
+} else {
+  corsOrigin = ALLOWED_ORIGINS;
+}
+
 console.log("CORS Origin config:", corsOrigin);
-const paymentRoutes = require("./routes/payment");
 
-app.use(cors({ origin: corsOrigin, credentials: true }));
-
+app.use(
+  cors({
+    origin: corsOrigin,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "x-admin-password",
+      "x-user-id",
+    ],
+  }),
+);
 // === CRITICAL FOR WEBHOOK - MUST BE BEFORE express.json ===
 app.use("/api/payment/webhook", express.raw({ type: "application/json" }));
 

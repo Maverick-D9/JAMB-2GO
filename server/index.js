@@ -94,13 +94,14 @@ app.use(
     },
   }),
 );
-
 const cbtRoutes = require("./routes/cbt");
-app.use("/api/cbt", cbtRoutes);
-app.use("/api/payment", paymentRoutes); // webhook route is inside here, but raw already handled above
+const paymentRoutes = require("./routes/payment");
 const drillRoutes = require("./routes/drill");
-app.use("/api/drill", drillRoutes);
 const authRoutes = require("./routes/auth");
+
+app.use("/api/cbt", cbtRoutes);
+app.use("/api/payment", paymentRoutes);
+app.use("/api/drill", drillRoutes);
 app.use("/api/auth", authRoutes);
 
 const server = http.createServer(app);

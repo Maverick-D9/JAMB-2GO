@@ -9,6 +9,7 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 const VITALS = require("./config/vitals");
 const { registerLiveRankHandlers } = require("./sockets/liveRankHandler");
+const rateLimit = require("express-rate-limit"); // <-- TIER 2 ADDED
 
 mongoose
   .connect(VITALS.SYSTEM.MONGODB_URI, { dbName: VITALS.SYSTEM.MONGODB_DB_NAME })
@@ -19,7 +20,6 @@ mongoose
   });
 const User = require("./models/User");
 
-// === TIER 2 FIXED: Only PAID active users can access non-english arenas & full CBT ===
 async function hasFullAccessFor(usernameOrEmail) {
   if (!usernameOrEmail) return false;
   try {
@@ -32,7 +32,6 @@ async function hasFullAccessFor(usernameOrEmail) {
     });
     if (user) {
       const now = new Date();
-      // ONLY active paid, NOT trial
       if (
         user.subscriptionStatus === "active" &&
         user.subscriptionExpiresAt &&
@@ -46,7 +45,6 @@ async function hasFullAccessFor(usernameOrEmail) {
   return false;
 }
 
-// Check if user has ANY valid access (trial or active) - for drill etc
 async function hasAnyAccessFor(usernameOrEmail) {
   if (!usernameOrEmail) return false;
   try {
@@ -55,7 +53,7 @@ async function hasAnyAccessFor(usernameOrEmail) {
     });
     if (!user) return false;
     const access = User.checkUserAccess(user);
-    return access.tier === VITALS.SUBSCRIPTION.TIER_NAME; // trial OR active
+    return access.tier === VITALS.SUBSCRIPTION.TIER_NAME;
   } catch {
     return false;
   }
@@ -66,22 +64,18 @@ function isEnglishRoom(room) {
 }
 
 const app = express();
-app.set("trust proxy", 1); // TIER 2: for rate limit + vercel
+app.set("trust proxy", 1);
 
-// === FIXED CORS - Tier 1 Security ===
 const rawCors = VITALS.SYSTEM.CORS_ORIGINS;
-
-// Your real allowed frontends - CHANGE THIS TO YOUR VERCEL URL
 const ALLOWED_ORIGINS = [
   "https://jamb-2go.vercel.app",
-  "https://www.jamb-2go.vercel.app",
+  "https://www.jamb-2-go.vercel.app",
   "http://localhost:5173",
   "http://localhost:3000",
 ];
 
 let corsOrigin;
 if (rawCors === true || (Array.isArray(rawCors) && rawCors.includes("*"))) {
-  // Even if vitals says *, we override to strict list for safety
   console.log("⚠️ vitals had * - overriding to strict list");
   corsOrigin = ALLOWED_ORIGINS;
 } else if (Array.isArray(rawCors)) {
@@ -105,21 +99,41 @@ app.use(
     ],
   }),
 );
-// TIER 2: Request timeout & memory protection
+
+// === TIER 2: RATE LIMITERS - BOUNCER ===
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { error: "Too many requests, try again later" },
+  standardHeaders: true,
+});
+
+const cbtStartLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  message: { error: "Too many CBT starts, slow down for 1 min" },
+  keyGenerator: (req) =>
+    req.ip + "-" + (req.body?.userId || req.headers["x-user-id"] || "anon"),
+});
+
+app.use("/api/", generalLimiter);
+app.use("/api/cbt/start", cbtStartLimiter);
+// === END RATE LIMITERS ===
+
 app.use((req, res, next) => {
   res.setTimeout(30000, () => {
     if (!res.headersSent) res.status(503).json({ error: "Request timeout" });
   });
   next();
 });
-// === CRITICAL FOR WEBHOOK - MUST BE BEFORE express.json ===
+
 app.use("/api/payment/webhook", express.raw({ type: "application/json" }));
 
 app.use(
   express.json({
     limit: "10mb",
     verify: (req, res, buf) => {
-      req.rawBody = buf; // save raw for fallback
+      req.rawBody = buf;
     },
   }),
 );
@@ -285,7 +299,6 @@ function countDrillFileQs(filePath) {
 }
 let drillCountsCache = {};
 
-// === PATCHED - THIS FIXES BIOLOGY BUG ===
 function rebuildDrillCache() {
   drillCountsCache = {};
   try {
@@ -540,7 +553,6 @@ app.post("/admin/upload-drill", checkAdmin, async (req, res) => {
     const topicName = topic.trim();
     const lockKey = `${subj}::${topicName.toLowerCase()}`;
 
-    // === KILL DOUBLE ===
     if (_activeLocks.has(lockKey)) {
       return res.status(429).json({ error: "Upload in progress" });
     }
@@ -568,7 +580,6 @@ app.post("/admin/upload-drill", checkAdmin, async (req, res) => {
     if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
     const filePath = path.join(folder, `${topicName}.csv`);
 
-    // === PARSE INCOMING ROWS ===
     let incomingRows = [];
     if (csvText) {
       let lines = csvText.split(/\r?\n/).filter((l) => l.trim() !== "");
@@ -589,7 +600,6 @@ app.post("/admin/upload-drill", checkAdmin, async (req, res) => {
       });
     }
 
-    // === READ EXISTING + DEDUP + APPEND ===
     let existingContent = "";
     let existingSet = new Set();
     let isNewFile = !fs.existsSync(filePath);
@@ -671,7 +681,6 @@ app.post("/admin/upload-drill", checkAdmin, async (req, res) => {
       totalQs: data.totalQs,
     });
   } catch (e) {
-    // make sure lock is freed on error
     try {
       _activeLocks.delete(
         `${normalizeSubject(req.body.subject)}::${req.body.topic?.trim().toLowerCase()}`,
@@ -899,27 +908,22 @@ app.get("/admin/metrics", checkAdmin, async (req, res) => {
   try {
     const Subscription = require("./models/Subscription");
     const totalUsers = await User.countDocuments();
-
-    // REAL DATA FROM SUBSCRIPTION COLLECTION
     const allSubs = await Subscription.find({ status: "active" });
     const activeSubsDocs = await Subscription.find({
       status: "active",
       expiresAt: { $gt: new Date() },
     });
-
-    const PRICE = VITALS.SUBSCRIPTION.PRICE; // 2500 from vitals.js
-    // Total revenue = sum of actual amounts paid (handles price changes later)
+    const PRICE = VITALS.SUBSCRIPTION.PRICE;
     const totalRevenueValue = allSubs.reduce(
       (sum, s) => sum + (s.amount || PRICE),
       0,
     );
     const activeCount = activeSubsDocs.length;
     const mrrValue = activeCount * PRICE;
-
     res.json({
       kpis: {
         totalUsers,
-        activeSubs: activeCount, // Will be 1 after you clean ghost, matching Paystack
+        activeSubs: activeCount,
         mrr: mrrValue,
         totalRevenue: totalRevenueValue,
         usersOnline: Math.floor(activeCount * 0.15) + 1,
@@ -1147,7 +1151,6 @@ io.on("connection", (socket) => {
     }
   });
   socket.on("leave_room", (payload) => {
-    // Handle both old: "english-room" and new: { room, username }
     let targetRoom, username;
     if (typeof payload === "string") {
       targetRoom = payload;
@@ -1164,18 +1167,8 @@ io.on("connection", (socket) => {
 
     if (targetRoom && username) {
       console.log(`🔴 LEAVE: ${username} -> ${targetRoom}`);
-      // This is what makes "← username left" appear
       io.to(targetRoom).emit("userLeft", { username });
       emitParticipants(targetRoom);
-    }
-
-    // Clean map if leaving current room
-    if (
-      socketUserMap[socket.id] &&
-      socketUserMap[socket.id].room === targetRoom
-    ) {
-      // keep map for a moment for disconnect, but you can delete if you want
-      // delete socketUserMap[socket.id];
     }
   });
   socket.on("answer_question", async ({ room, username, answer }) => {
@@ -1285,5 +1278,7 @@ app.get("/", (req, res) =>
   ),
 );
 server.listen(VITALS.SYSTEM.PORT, () =>
-  console.log(`Server on ${VITALS.SYSTEM.PORT} - FIXED CORS + ARENA LOADING`),
+  console.log(
+    `Server on ${VITALS.SYSTEM.PORT} - FIXED CORS + ARENA LOADING + TIER 2 RATE LIMIT`,
+  ),
 );

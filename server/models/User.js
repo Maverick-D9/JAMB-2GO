@@ -18,6 +18,11 @@ const userSchema = new mongoose.Schema(
     subscriptionStatus: { type: String, default: "trial" },
     subscriptionExpiresAt: { type: Date },
     lastPaymentReference: String,
+    // === TIER 2 ADD: daily 2-attempt counter for paid users ===
+    cbtDailyUsage: {
+      date: { type: String, default: "" }, // YYYY-MM-DD Lagos
+      count: { type: Number, default: 0 },
+    },
   },
   { timestamps: true },
 );

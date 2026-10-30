@@ -4,6 +4,30 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Otp = require("../models/Otp");
 const { sendOtp } = require("../utils/mailer");
+const rateLimit = require("express-rate-limit");
+
+// === TIER 2: Rate limit constants - ADD HERE ===
+const otpLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 5,
+  message: { error: "Too many OTP requests, try again in 10 mins" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+const loginLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 10,
+  message: { error: "Too many login attempts, try in 10 mins" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+const forgotLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 5,
+  message: { error: "Too many reset requests, try in 10 mins" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || "jamb2go_secret_change_this";
@@ -18,7 +42,7 @@ function genTrial() {
   return new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
 }
 
-router.post("/request-otp", async (req, res) => {
+router.post("/request-otp", otpLimiter, async (req, res) => {
   try {
     const { email, username, fullName, password, subject } = req.body;
     if (!email || !password || !username)
@@ -40,10 +64,7 @@ router.post("/request-otp", async (req, res) => {
       return res.status(409).json({ error: "Username already taken" });
 
     const code = genCode();
-
-    // === FIXED: Use new TTL model ===
     await Otp.createOtp(cleanEmail, code);
-
     const hashed = await bcrypt.hash(password, 10);
     global.pendingUsers.set(cleanEmail, {
       fullName,
@@ -54,10 +75,7 @@ router.post("/request-otp", async (req, res) => {
       trialEndsAt: genTrial(),
     });
 
-    res.json({
-      success: true,
-      message: "OTP sent to " + email,
-    });
+    res.json({ success: true, message: "OTP sent to " + email });
 
     setImmediate(async () => {
       try {
@@ -69,9 +87,8 @@ router.post("/request-otp", async (req, res) => {
     });
   } catch (e) {
     console.error("request-otp error:", e);
-    if (!res.headersSent) {
+    if (!res.headersSent)
       res.status(500).json({ error: "Failed to send OTP: " + e.message });
-    }
   }
 });
 
@@ -79,18 +96,14 @@ router.post("/verify-otp", async (req, res) => {
   try {
     const { email, code } = req.body;
     const cleanEmail = (email || "").toLowerCase().trim();
-
     const check = await Otp.verifyOtp(cleanEmail, String(code));
-
     if (!check.ok)
       return res.status(400).json({ error: check.error || "Invalid code" });
-
     const pending = global.pendingUsers.get(cleanEmail);
     if (!pending)
       return res
         .status(400)
         .json({ error: "Signup session expired. Signup again." });
-
     const user = await User.createUser({
       fullName: pending.fullName,
       username: pending.username,
@@ -99,9 +112,7 @@ router.post("/verify-otp", async (req, res) => {
       subject: pending.subject,
       trialEndsAt: pending.trialEndsAt,
     });
-
     global.pendingUsers.delete(cleanEmail);
-
     const token = jwt.sign(
       { email: user.email, username: user.username, userId: user.userId },
       JWT_SECRET,
@@ -124,7 +135,7 @@ router.post("/verify-otp", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", loginLimiter, async (req, res) => {
   try {
     const { emailOrUsername, password } = req.body;
     if (!emailOrUsername || !password)
@@ -140,10 +151,12 @@ router.post("/login", async (req, res) => {
     if (!user)
       return res.status(401).json({ error: "Invalid email or password." });
     if (!user.password) {
-      return res.status(401).json({
-        error:
-          "This account uses Google login. Use Continue with Google or Reset Password to set a password.",
-      });
+      return res
+        .status(401)
+        .json({
+          error:
+            "This account uses Google login. Use Continue with Google or Reset Password to set a password.",
+        });
     }
     const ok = await bcrypt.compare(password, user.password);
     if (!ok)
@@ -230,7 +243,7 @@ router.post("/google", async (req, res) => {
   }
 });
 
-router.post("/forgot-password", async (req, res) => {
+router.post("/forgot-password", forgotLimiter, async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) return res.status(400).json({ error: "Email required" });
@@ -238,17 +251,9 @@ router.post("/forgot-password", async (req, res) => {
     const user = await User.findOne({ email: cleanEmail });
     if (!user)
       return res.status(404).json({ error: "No account with this email" });
-
     const code = genCode();
-
-    // === FIXED: Only Mongo now, no Map ===
     await Otp.createOtp(cleanEmail, code);
-
-    res.json({
-      success: true,
-      message: "Reset code sent to " + cleanEmail,
-    });
-
+    res.json({ success: true, message: "Reset code sent to " + cleanEmail });
     setImmediate(() => {
       sendOtp(cleanEmail, code, "reset").catch((err) => {
         console.error(`[RESET BG FAIL] ${cleanEmail}:`, err.message);
@@ -256,11 +261,10 @@ router.post("/forgot-password", async (req, res) => {
     });
   } catch (e) {
     console.error("forgot-password error:", e);
-    if (!res.headersSent) {
+    if (!res.headersSent)
       res
         .status(500)
         .json({ error: "Failed to send reset email: " + e.message });
-    }
   }
 });
 
@@ -273,22 +277,16 @@ router.post("/reset-password", async (req, res) => {
       return res
         .status(400)
         .json({ error: "Password must be at least 6 characters" });
-
     const cleanEmail = email.toLowerCase().trim();
-
-    // === FIXED: Use new verifyOtp ===
     const check = await Otp.verifyOtp(cleanEmail, String(code));
     if (!check.ok)
       return res
         .status(400)
         .json({ error: check.error || "Invalid or expired code" });
-
     const user = await User.findOne({ email: cleanEmail });
     if (!user) return res.status(404).json({ error: "User not found" });
-
     const hashed = await bcrypt.hash(newPassword, 10);
     await User.updateOne({ _id: user._id }, { password: hashed });
-
     res.json({
       success: true,
       message: "Password reset successful. You can now login.",

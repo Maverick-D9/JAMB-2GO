@@ -26,59 +26,11 @@ function saveConfig() {
 function checkAdminPassword(req) {
   const passHeader =
     req.headers["x-admin-password"] ||
-    req.body.adminPassword ||
+    req.body?.adminPassword ||
     req.query?.adminPassword;
-  return passHeader === VITALS.ADMIN.PASSWORD;
-}
-
-async function checkSubscription(req, res, next) {
-  if (checkAdminPassword(req)) return next();
-  const userId =
-    req.body.userId ||
-    req.body.username ||
-    req.query.userId ||
-    req.headers["x-user-id"] ||
-    req.headers["x-user-email"] ||
-    req.headers["authorization"]?.replace("Bearer ", "");
-  if (!userId)
-    return res.status(401).json({ error: "Login required", code: "NO_USER" });
-  try {
-    let user = null;
-    try {
-      if (userId.includes(".")) {
-        const jwt = require("jsonwebtoken");
-        const payload = jwt.verify(
-          userId,
-          process.env.JWT_SECRET || "jamb2go_secret_change_this",
-        );
-        user = await User.findOne({ userId: payload.userId });
-      }
-    } catch {}
-    if (!user) {
-      user = await User.findByIdCustom(userId);
-      if (!user) user = await User.findByEmail(userId);
-    }
-    if (!user)
-      return res
-        .status(403)
-        .json({
-          error: "SUBSCRIPTION_REQUIRED",
-          code: "SUBSCRIPTION_REQUIRED",
-        });
-    const access = User.checkUserAccess(user);
-    if (access.tier !== VITALS.SUBSCRIPTION.TIER_NAME)
-      return res
-        .status(403)
-        .json({
-          error: "SUBSCRIPTION_REQUIRED",
-          code: "SUBSCRIPTION_REQUIRED",
-        });
-    req.mongoUser = user;
-    next();
-  } catch (e) {
-    console.error("checkSubscription error:", e);
-    return res.status(500).json({ error: e.message });
-  }
+  const adminPass =
+    VITALS?.ADMIN?.PASSWORD || VITALS?.ADMIN_PASSWORD || "JAMB2GO_2026";
+  return passHeader && passHeader === adminPass;
 }
 
 let cbtBankCache = {};
@@ -226,7 +178,85 @@ router.put("/config", (req, res) => {
   res.json({ success: true, config: CONFIG });
 });
 
-router.post("/start", checkSubscription, (req, res) => {
+function getLagosDateString() {
+  return new Date().toLocaleDateString("en-CA", { timeZone: "Africa/Lagos" });
+}
+
+async function checkSubscription(req, res, next) {
+  if (checkAdminPassword(req)) return next();
+  const userId =
+    req.body?.userId ||
+    req.body?.username ||
+    req.query?.userId ||
+    req.headers["x-user-id"] ||
+    req.headers["x-user-email"] ||
+    req.headers["authorization"]?.replace("Bearer ", "");
+  if (!userId)
+    return res.status(401).json({ error: "Login required", code: "NO_USER" });
+  try {
+    let user = null;
+    try {
+      if (userId.includes(".")) {
+        const jwt = require("jsonwebtoken");
+        const payload = jwt.verify(
+          userId,
+          process.env.JWT_SECRET || "jamb2go_secret_change_this",
+        );
+        user = await User.findOne({ userId: payload.userId });
+      }
+    } catch {}
+    if (!user) {
+      user = await User.findByIdCustom(userId);
+      if (!user) user = await User.findByEmail(userId);
+    }
+    if (!user)
+      return res.status(403).json({
+        error: "SUBSCRIPTION_REQUIRED",
+        code: "SUBSCRIPTION_REQUIRED",
+      });
+
+    const access = User.checkUserAccess(user);
+    if (
+      access.status !== "active" ||
+      access.tier !== VITALS.SUBSCRIPTION.TIER_NAME
+    ) {
+      return res.status(403).json({
+        error:
+          "Free trial limited to English Arena only. Subscribe for full CBT.",
+        code: "TRIAL_ENGLISH_ONLY",
+      });
+    }
+    req.mongoUser = user;
+    next();
+  } catch (e) {
+    console.error("checkSubscription error:", e);
+    return res.status(500).json({ error: e.message });
+  }
+}
+
+router.get("/status", checkSubscription, async (req, res) => {
+  try {
+    const user = req.mongoUser;
+    const today = getLagosDateString();
+    const count =
+      user.cbtDailyUsage?.date === today ? user.cbtDailyUsage.count : 0;
+    return res.json({
+      count,
+      limit: 2,
+      date: today,
+      attemptsLeft: Math.max(0, 2 - count),
+    });
+  } catch (e) {
+    return res.json({
+      count: 0,
+      limit: 2,
+      date: getLagosDateString(),
+      attemptsLeft: 2,
+    });
+  }
+});
+
+router.post("/start", checkSubscription, async (req, res) => {
   const { subjects } = req.body;
   if (!subjects || subjects.length !== 3)
     return res.status(400).json({ error: "Select 3 subjects" });
@@ -234,6 +264,31 @@ router.post("/start", checkSubscription, (req, res) => {
     return res
       .status(403)
       .json({ error: "CBT is currently disabled by admin" });
+
+  try {
+    const user = req.mongoUser;
+    const today = getLagosDateString();
+    if (!user.cbtDailyUsage || user.cbtDailyUsage.date !== today) {
+      user.cbtDailyUsage = { date: today, count: 0 };
+    }
+    if (user.cbtDailyUsage.count >= 2) {
+      return res.status(429).json({
+        error:
+          "Daily limit reached. You have used 2/2 full CBT attempts today. Try again tomorrow.",
+        code: "DAILY_LIMIT",
+        count: user.cbtDailyUsage.count,
+        limit: 2,
+      });
+    }
+    user.cbtDailyUsage.count += 1;
+    await user.save();
+    console.log(
+      `[CBT DAILY] ${user.email} -> ${user.cbtDailyUsage.count}/2 on ${today}`,
+    );
+  } catch (e) {
+    console.error("daily limit error:", e);
+  }
+
   const allSubjects = ["english", ...subjects.map((s) => s.toLowerCase())];
   const questions = {};
   allSubjects.forEach((sub) => {
@@ -245,6 +300,7 @@ router.post("/start", checkSubscription, (req, res) => {
     durationMinutes: CONFIG.durationMinutes,
     examId: Date.now().toString(),
     config: CONFIG,
+    cbtDailyUsage: req.mongoUser.cbtDailyUsage,
   });
 });
 
@@ -326,7 +382,6 @@ function calculateStreaks(allResults) {
   return streaks.sort((a, b) => b.streak - a.streak).slice(0, 10);
 }
 
-// === FINAL FIXED SAVE-RESULT: 1 doc guarantee + dynamic flag ===
 router.post("/save-result", checkSubscription, async (req, res) => {
   try {
     const {
@@ -351,7 +406,6 @@ router.post("/save-result", checkSubscription, async (req, res) => {
       rawTotal || subArray.reduce((a, b) => a + b.total, 0) || 20;
     const timeSec = Number(timeTaken) || 0;
 
-    // FIXED FLAG: 8 sec per Q min, but allow 60 sec for test mode <=40 Qs
     let isFlagged = false;
     const minAllowed = totalQuestions * 8;
     if (timeSec > 0 && timeSec < minAllowed) isFlagged = true;
@@ -361,7 +415,6 @@ router.post("/save-result", checkSubscription, async (req, res) => {
     const others = subArray.filter((s) => s.name.toLowerCase() !== "english");
     const finalUserId = req.mongoUser?.userId || userId || `anon_${Date.now()}`;
 
-    // === DEDUP CHECK 1: attemptId already exists ===
     if (attemptId) {
       const existing = await CbtResult.findOne({ attemptId });
       if (existing) {
@@ -375,7 +428,6 @@ router.post("/save-result", checkSubscription, async (req, res) => {
       }
     }
 
-    // === DEDUP CHECK 2: same user + same score in 90 sec ===
     const ninetyAgo = new Date(Date.now() - 90 * 1000);
     const recentDup = await CbtResult.findOne({
       userId: finalUserId,

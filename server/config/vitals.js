@@ -1,4 +1,4 @@
-// server/config/vitals.js - SINGLE SOURCE FOR EVERYTHING - FIXED TIER 1
+// server/config/vitals.js - SINGLE SOURCE - FIXED TIER 1 + TIER 2
 const PRICE = 2500;
 const DISPLAY = "₦2500";
 const DISPLAY_COMMA = "₦2,500";
@@ -29,7 +29,6 @@ module.exports = {
     MONGODB_DB_NAME: "jamb-2go",
     REDIS_URL: process.env.REDIS_URL || "redis://localhost:6379",
     FRONTEND_URL: process.env.FRONTEND_URL || "https://jamb-2-go.vercel.app",
-    // === FIXED: No more true (allow all) ===
     CORS_ORIGINS: process.env.CORS_ORIGINS
       ? process.env.CORS_ORIGINS.split(",")
           .map((s) => s.trim())
@@ -46,7 +45,14 @@ module.exports = {
     DRILL_FOLDER: "drill_questions",
   },
 
-  ADMIN: { PASSWORD: process.env.ADMIN_PASSWORD || "JAMB2GO_2026" },
+  ADMIN: {
+    PASSWORD: process.env.ADMIN_PASSWORD || "JAMB2GO_2026",
+    // Fallback for old code that checks ADMIN_PASSWORD directly
+    ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || "JAMB2GO_2026",
+  },
+  // Top-level fallback for any legacy imports
+  ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || "JAMB2GO_2026",
+
   PAYSTACK: { SECRET_KEY: process.env.PAYSTACK_SECRET_KEY },
 
   MESSAGES: {
@@ -60,6 +66,7 @@ module.exports = {
     FREE_ZONE_TITLE: `Unlock ${PASS_NAME}`,
     FREE_ZONE_DESC: `You're in Free Zone — only ENGLISH is free. Unlock all 10 subjects + CBT + Drill + Chat for`,
     PAY_BUTTON_SHORT: `Unlock Now — ${SUBSCRIPTION.LABEL}`,
+    PAY_BUTTON_FULL: `Unlock ${DISPLAY_COMMA} — 50 Days Full Access`,
     PASS_BADGE: `${SUBSCRIPTION.LABEL} Pass`,
     CBT_DISABLED: "CBT Mode is disabled by admin",
     ACCESS_DENIED_SUB: `Subscription expired or not found - please pay ${SUBSCRIPTION.LABEL}`,

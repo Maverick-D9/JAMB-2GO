@@ -19,32 +19,54 @@ mongoose
   });
 const User = require("./models/User");
 
+// === TIER 2 FIXED: Only PAID active users can access non-english arenas & full CBT ===
 async function hasFullAccessFor(usernameOrEmail) {
   if (!usernameOrEmail) return false;
   try {
     const user = await User.findOne({
-      $or: [{ email: usernameOrEmail }, { username: usernameOrEmail }],
+      $or: [
+        { email: usernameOrEmail },
+        { username: usernameOrEmail },
+        { userId: usernameOrEmail },
+      ],
     });
     if (user) {
       const now = new Date();
+      // ONLY active paid, NOT trial
       if (
         user.subscriptionStatus === "active" &&
         user.subscriptionExpiresAt &&
         new Date(user.subscriptionExpiresAt) > now
       )
         return true;
-      if (user.trialEndsAt && new Date(user.trialEndsAt) > now) return true;
     }
   } catch (e) {
     console.log("access check err", e.message);
   }
   return false;
 }
+
+// Check if user has ANY valid access (trial or active) - for drill etc
+async function hasAnyAccessFor(usernameOrEmail) {
+  if (!usernameOrEmail) return false;
+  try {
+    const user = await User.findOne({
+      $or: [{ email: usernameOrEmail }, { username: usernameOrEmail }],
+    });
+    if (!user) return false;
+    const access = User.checkUserAccess(user);
+    return access.tier === VITALS.SUBSCRIPTION.TIER_NAME; // trial OR active
+  } catch {
+    return false;
+  }
+}
+
 function isEnglishRoom(room) {
   return room === "english-room" || normalizeSubject(room) === "english";
 }
 
 const app = express();
+app.set("trust proxy", 1); // TIER 2: for rate limit + vercel
 
 // === FIXED CORS - Tier 1 Security ===
 const rawCors = VITALS.SYSTEM.CORS_ORIGINS;
@@ -83,6 +105,13 @@ app.use(
     ],
   }),
 );
+// TIER 2: Request timeout & memory protection
+app.use((req, res, next) => {
+  res.setTimeout(30000, () => {
+    if (!res.headersSent) res.status(503).json({ error: "Request timeout" });
+  });
+  next();
+});
 // === CRITICAL FOR WEBHOOK - MUST BE BEFORE express.json ===
 app.use("/api/payment/webhook", express.raw({ type: "application/json" }));
 

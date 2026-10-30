@@ -53,6 +53,11 @@ export default function CBTSetup() {
   const [paying, setPaying] = useState(false);
   const [palaceSubject, setPalaceSubject] = useState(null);
 
+  // NEW: Daily limit states
+  const [dailyCount, setDailyCount] = useState(0);
+  const [dailyLimit] = useState(2);
+  const [dailyLoading, setDailyLoading] = useState(true);
+
   const getUser = () => {
     try {
       const s = localStorage.getItem("jambite_user");
@@ -144,6 +149,23 @@ export default function CBTSetup() {
       });
   }, [palaceSubject, email, userId]);
 
+  // NEW: Fetch daily CBT usage
+  useEffect(() => {
+    if (!userId || hasSub !== true) {
+      setDailyLoading(false);
+      return;
+    }
+    fetch(`${API_BASE}/api/cbt/status`, {
+      headers: { "x-user-id": userId },
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        setDailyCount(d.count || 0);
+        setDailyLoading(false);
+      })
+      .catch(() => setDailyLoading(false));
+  }, [userId, hasSub]);
+
   const toggle = (subj) => {
     if (selected.includes(subj)) {
       if (subj === palaceSubject) {
@@ -189,6 +211,11 @@ export default function CBTSetup() {
 
   const start = async () => {
     if (selected.length !== 3) return alert("Select exactly 3 subjects");
+    if (dailyCount >= dailyLimit) {
+      return alert(
+        `Daily limit reached ${dailyCount}/${dailyLimit}. Come back tomorrow — 2 full CBTs per day.`,
+      );
+    }
     localStorage.removeItem("cbt_result");
     localStorage.removeItem("cbt_exam");
     sessionStorage.clear();
@@ -203,8 +230,17 @@ export default function CBTSetup() {
         setHasSub(false);
         return alert(VITALS.MESSAGES.EXPIRED_CBT);
       }
+      // NEW: Handle daily limit 429
+      if (res.status === 429 || data.code === "DAILY_LIMIT") {
+        setDailyCount(data.count || 2);
+        return alert(
+          data.error || `Daily limit reached 2/2. Come back tomorrow.`,
+        );
+      }
       return alert(data.error || "Failed to start CBT");
     }
+    // Update count from response if backend returns it
+    if (data.cbtDailyUsage) setDailyCount(data.cbtDailyUsage.count);
     localStorage.setItem("cbt_exam", JSON.stringify(data));
     window.location.href = "/cbt-exam";
   };
@@ -291,7 +327,7 @@ export default function CBTSetup() {
             }}
           >
             <div>✅ All 11 Live Rooms</div>
-            <div>✅ Unlimited CBT Attempts</div>
+            <div>✅ 2 Full CBTs per day (4 subjects)</div>
             <div>✅ Drill Palace • Topic Mastery</div>
             <div>✓ Real JAMB Timing ({config?.durationMinutes} mins)</div>
             <div>✓ Chat & DMs Unlocked</div>
@@ -338,6 +374,9 @@ export default function CBTSetup() {
     );
   }
 
+  const attemptsLeft = Math.max(0, dailyLimit - dailyCount);
+  const isLimitReached = dailyCount >= dailyLimit;
+
   return (
     <div
       style={{
@@ -381,6 +420,65 @@ export default function CBTSetup() {
             ✓ {VITALS.MESSAGES.PASS_BADGE} • {access?.daysLeft || 0}d left
           </span>
         </div>
+
+        {/* NEW: Daily Attempts Badge */}
+        <div
+          style={{
+            background: isLimitReached ? "#fef2f2" : "#eff6ff",
+            border: `1px solid ${isLimitReached ? "#fecaca" : "#bfdbfe"}`,
+            padding: "10px 14px",
+            borderRadius: 12,
+            marginBottom: 14,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 13,
+              fontWeight: 700,
+              color: isLimitReached ? "#991b1b" : "#1e40af",
+            }}
+          >
+            {dailyLoading
+              ? "Checking attempts..."
+              : `📝 Full CBT Today: ${dailyCount}/${dailyLimit}`}
+          </div>
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 800,
+              color: isLimitReached ? "#dc2626" : "#16a34a",
+            }}
+          >
+            {dailyLoading
+              ? ""
+              : isLimitReached
+                ? "Limit Reached"
+                : `${attemptsLeft} left`}
+          </div>
+        </div>
+
+        {isLimitReached && (
+          <div
+            style={{
+              background: "#fee2e2",
+              border: "1px solid #fca5a5",
+              padding: 12,
+              borderRadius: 12,
+              marginBottom: 14,
+              fontSize: 13,
+              color: "#7f1d1d",
+              fontWeight: 600,
+              textAlign: "center",
+            }}
+          >
+            ⏰ You have used 2/2 full CBT attempts today. Come back tomorrow.
+            Drill Palace is still unlimited!
+          </div>
+        )}
+
         {palaceSubject ? (
           <div
             style={{
@@ -488,6 +586,8 @@ export default function CBTSetup() {
                     isPalace && isSelected
                       ? "0 0 0 2px rgba(251,191,36,0.3)"
                       : "none",
+                  opacity: isLimitReached ? 0.5 : 1,
+                  pointerEvents: isLimitReached ? "none" : "auto",
                 }}
               >
                 {isSelected ? "✓ " : ""} {sub} {isPalace && " 👑"}
@@ -513,22 +613,28 @@ export default function CBTSetup() {
         </div>
         <button
           onClick={start}
-          disabled={selected.length !== 3}
+          disabled={selected.length !== 3 || isLimitReached}
           style={{
             width: "100%",
             padding: 14,
-            background: selected.length === 3 ? "#0A0F1A" : "#9ca3af",
+            background:
+              selected.length === 3 && !isLimitReached ? "#0A0F1A" : "#9ca3af",
             color: "#fff",
             borderRadius: 12,
             fontWeight: 800,
             border: "none",
-            cursor: "pointer",
+            cursor:
+              selected.length === 3 && !isLimitReached
+                ? "pointer"
+                : "not-allowed",
             letterSpacing: 0.3,
           }}
         >
-          {selected.length === 3
-            ? `Start CBT Exam — ${selected.join(", ").toUpperCase()} + ENGLISH 👑`
-            : `Select ${3 - selected.length} more subject(s)`}
+          {isLimitReached
+            ? `Daily Limit Reached 2/2 — Try Tomorrow`
+            : selected.length === 3
+              ? `Start CBT Exam — ${selected.join(", ").toUpperCase()} + ENGLISH 👑`
+              : `Select ${3 - selected.length} more subject(s)`}
         </button>
         <button
           onClick={() => (window.location.href = "/")}

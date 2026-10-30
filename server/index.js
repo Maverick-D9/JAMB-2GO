@@ -9,7 +9,7 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 const VITALS = require("./config/vitals");
 const { registerLiveRankHandlers } = require("./sockets/liveRankHandler");
-const rateLimit = require("express-rate-limit"); // <-- TIER 2 ADDED
+const { rateLimit, ipKeyGenerator } = require("express-rate-limit"); // <-- TIER 2 ADDED
 
 mongoose
   .connect(VITALS.SYSTEM.MONGODB_URI, { dbName: VITALS.SYSTEM.MONGODB_DB_NAME })
@@ -94,7 +94,10 @@ app.use(
     allowedHeaders: [
       "Content-Type",
       "Authorization",
-      "x-admin-password",
+      "X-User-ID",
+      "X-User-Email",
+      "X-Client-ID",
+      "x-user-email",
       "x-user-id",
     ],
   }),
@@ -107,13 +110,17 @@ const generalLimiter = rateLimit({
   message: { error: "Too many requests, try again later" },
   standardHeaders: true,
 });
-
 const cbtStartLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 10,
   message: { error: "Too many CBT starts, slow down for 1 min" },
-  keyGenerator: (req) =>
-    req.ip + "-" + (req.body?.userId || req.headers["x-user-id"] || "anon"),
+  keyGenerator: (req) => {
+    const ip = ipKeyGenerator(
+      req.ip || req.headers["x-forwarded-for"] || "anon",
+    );
+    const user = req.body?.userId || req.headers["x-user-id"] || "anon";
+    return `${ip}-${user}`;
+  },
 });
 
 app.use("/api/", generalLimiter);
@@ -965,9 +972,59 @@ app.get("/api/debug/questions/:subject", (req, res) => {
   const list = questionBank[subj] || [];
   res.json({ subject: subj, total: list.length });
 });
-
 let roomState = {};
 let socketUserMap = {};
+
+// === TIER 4: ROOM MEMORY LEAK FIX ===
+const ROOM_MAX_USERS = 50;
+const ROOM_IDLE_MS = 60 * 60 * 1000; // 1 hour idle -> auto delete
+const ROOM_CLEANUP_INTERVAL = 5 * 60 * 1000; // janitor every 5 mins
+
+function getActiveUsersInRoom(room) {
+  return Object.values(socketUserMap).filter((u) => u.room === room).length;
+}
+
+function cleanupRoomIfEmpty(room) {
+  if (!room) return;
+  const count = getActiveUsersInRoom(room);
+  if (count === 0) {
+    const state = roomState[room];
+    if (state) {
+      if (state.timer) {
+        clearInterval(state.timer);
+        console.log(`🧹 CLEANUP: Cleared timer for ${room}`);
+      }
+      console.log(`🧹 CLEANUP: Deleting empty room ${room}`);
+      delete roomState[room];
+    }
+    if (global.liveRooms && global.liveRooms.has(room)) {
+      global.liveRooms.delete(room);
+    }
+  }
+}
+
+// Janitor - kills orphaned rooms
+setInterval(() => {
+  let cleaned = 0;
+  for (const room of Object.keys(roomState)) {
+    const count = getActiveUsersInRoom(room);
+    const state = roomState[room];
+    const idle =
+      Date.now() - (state.lastActive || state.createdAt || Date.now());
+    if (count === 0 || idle > ROOM_IDLE_MS) {
+      if (state.timer) clearInterval(state.timer);
+      delete roomState[room];
+      if (global.liveRooms) global.liveRooms.delete(room);
+      cleaned++;
+    }
+  }
+  if (cleaned > 0) console.log(`🧹 JANITOR: Cleaned ${cleaned} rooms`);
+  console.log(
+    `📊 Rooms: ${Object.keys(roomState).length} | Sockets: ${Object.keys(socketUserMap).length}`,
+  );
+}, ROOM_CLEANUP_INTERVAL);
+// === END TIER 4 ===
+
 function getRandomQuestion(subject) {
   const canonical = normalizeSubject(subject);
   const list = questionBank[canonical];
@@ -1019,6 +1076,8 @@ function startQuizLoop(room, subject) {
       timer: null,
       currentQ: null,
       expiresAt: null,
+      createdAt: Date.now(),
+      lastActive: Date.now(),
     };
   let state = roomState[room];
   if (state.timer) clearInterval(state.timer);
@@ -1026,6 +1085,9 @@ function startQuizLoop(room, subject) {
   const calcSubjects = ["maths", "physics", "chemistry", "accounting"];
   const intervalTime = calcSubjects.includes(canonical) ? 60000 : 20000;
   const askQuestion = () => {
+    if (!roomState[room]) return; // room was cleaned up
+    state = roomState[room];
+    state.lastActive = Date.now();
     if (state.qCount > 0 && state.qCount % 10 === 0) {
       const leaderboard = buildLeaderboard(room);
       io.to(room).emit("show_leaderboard", {
@@ -1080,6 +1142,15 @@ io.on("connection", (socket) => {
         return;
       }
     }
+    // === TIER 4: CHECK ROOM FULL ===
+    const activeCount = getActiveUsersInRoom(room);
+    if (activeCount >= ROOM_MAX_USERS) {
+      socket.emit("room_full", {
+        message: `Room ${room} full (50/50) - try another subject`,
+      });
+      return;
+    }
+
     for (const r of socket.rooms) {
       if (r !== socket.id && r !== room && r.endsWith("-room")) socket.leave(r);
     }
@@ -1087,7 +1158,7 @@ io.on("connection", (socket) => {
     socket.username = username;
     socket.currentRoom = room;
     socket.roomId = room;
-    socketUserMap[socket.id] = { room, username };
+    socketUserMap[socket.id] = { room, username, joinedAt: Date.now() };
     if (!roomState[room])
       roomState[room] = {
         qCount: 0,
@@ -1101,7 +1172,10 @@ io.on("connection", (socket) => {
         timer: null,
         currentQ: null,
         expiresAt: null,
+        createdAt: Date.now(),
+        lastActive: Date.now(),
       };
+    roomState[room].lastActive = Date.now();
     if (roomState[room].scores[username] === undefined)
       roomState[room].scores[username] = 0;
     if (!roomState[room].userStats[username])
@@ -1117,7 +1191,9 @@ io.on("connection", (socket) => {
     socket.to(room).emit("userJoined", { username });
     const subject = normalizeSubject(room.replace("-room", "").toLowerCase());
     const bankLen = questionBank[subject]?.length || 0;
-    console.log(`📚 ${subject} bank=${bankLen}`);
+    console.log(
+      `📚 ${subject} bank=${bankLen} | room ${room} users=${activeCount + 1}`,
+    );
     if (bankLen === 0) {
       socket.emit("receive_message", {
         room,
@@ -1164,11 +1240,15 @@ io.on("connection", (socket) => {
     }
 
     if (targetRoom) socket.leave(targetRoom);
+    if (socketUserMap[socket.id]) delete socketUserMap[socket.id];
 
     if (targetRoom && username) {
       console.log(`🔴 LEAVE: ${username} -> ${targetRoom}`);
       io.to(targetRoom).emit("userLeft", { username });
       emitParticipants(targetRoom);
+      setTimeout(() => cleanupRoomIfEmpty(targetRoom), 1000);
+    } else if (targetRoom) {
+      setTimeout(() => cleanupRoomIfEmpty(targetRoom), 1000);
     }
   });
   socket.on("answer_question", async ({ room, username, answer }) => {
@@ -1181,6 +1261,7 @@ io.on("connection", (socket) => {
     }
     let state = roomState[room];
     if (!state || !state.currentQ) return;
+    state.lastActive = Date.now();
     if (!state.answered) state.answered = new Set();
     if (state.answered.has(username)) {
       socket.emit("answer_rejected", { reason: "You already answered" });
@@ -1245,6 +1326,8 @@ io.on("connection", (socket) => {
       const ok = await hasFullAccessFor(data.author || data.username);
       if (!ok) return;
     }
+    const st = roomState[data.room];
+    if (st) st.lastActive = Date.now();
     io.to(data.room).emit("receive_message", data);
   });
   socket.on("private_message", ({ room, to, from, message }) => {
@@ -1262,9 +1345,11 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     const data = socketUserMap[socket.id];
     if (data) {
+      console.log(`⚫ DISCONNECT: ${data.username} from ${data.room}`);
       socket.to(data.room).emit("userLeft", { username: data.username });
-      emitParticipants(data.room);
       delete socketUserMap[socket.id];
+      emitParticipants(data.room);
+      setTimeout(() => cleanupRoomIfEmpty(data.room), 1500);
     }
   });
 });
@@ -1279,6 +1364,6 @@ app.get("/", (req, res) =>
 );
 server.listen(VITALS.SYSTEM.PORT, () =>
   console.log(
-    `Server on ${VITALS.SYSTEM.PORT} - FIXED CORS + ARENA LOADING + TIER 2 RATE LIMIT`,
+    `Server on ${VITALS.SYSTEM.PORT} - TIER 2 + TIER 4 ROOM LEAK FIX READY`,
   ),
 );

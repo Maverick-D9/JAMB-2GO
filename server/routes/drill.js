@@ -4,6 +4,13 @@ const fsp = fs.promises;
 const path = require("path");
 const router = express.Router();
 const User = require("../models/User");
+const NodeCache = require("node-cache");
+
+// === TIER 3: CACHES ===
+// Access cache: 5 mins (so DB not hit every time)
+const accessCache = new NodeCache({ stdTTL: 300, checkperiod: 60 });
+// Questions cache: 1 hour (file content parsed once)
+const questionsCache = new NodeCache({ stdTTL: 3600, checkperiod: 600 });
 
 const SUBJECT_ALIASES = {
   mathematics: "maths",
@@ -81,11 +88,9 @@ function countFileQsSync(filePath) {
   }
 }
 
-// === PATCHED - FIXES BIOLOGY 0 TOPICS ===
 function rebuildDrillCache() {
   drillCache = {};
   try {
-    // Reload topics.json fresh each rebuild (so admin adds show instantly)
     try {
       if (fs.existsSync(TOPICS_DB_PATH)) {
         topicsCache = JSON.parse(fs.readFileSync(TOPICS_DB_PATH, "utf8"));
@@ -143,6 +148,8 @@ function rebuildDrillCache() {
       "subjects ->",
       Object.keys(drillCache).join(", "),
     );
+    // Clear questions cache when files change
+    questionsCache.flushAll();
   } catch (e) {
     console.log("drill rebuild err", e.message);
   }
@@ -161,21 +168,34 @@ async function canAccessSubject(email, subject) {
   const subj = normalizeSubject(subject);
   if (subj === "english") return true;
   if (!email) return false;
+
+  // TIER 3: Check cache first
+  const cacheKey = `${email}:${subj}`;
+  const cached = accessCache.get(cacheKey);
+  if (cached !== undefined) return cached;
+
   try {
     const cleanEmail = email.toLowerCase().trim();
     const user = await User.findOne({
       $or: [{ email: cleanEmail }, { username: cleanEmail }],
     });
-    if (!user) return false;
+    if (!user) {
+      accessCache.set(cacheKey, false);
+      return false;
+    }
     const now = new Date();
+    let hasAccess = false;
     if (
       user.subscriptionStatus === "active" &&
       user.subscriptionExpiresAt &&
       new Date(user.subscriptionExpiresAt) > now
     )
-      return true;
-    if (user.trialEndsAt && new Date(user.trialEndsAt) > now) return true;
-    return false;
+      hasAccess = true;
+    else if (user.trialEndsAt && new Date(user.trialEndsAt) > now)
+      hasAccess = true;
+
+    accessCache.set(cacheKey, hasAccess);
+    return hasAccess;
   } catch (e) {
     console.error("canAccessSubject error", e.message);
     return false;
@@ -210,7 +230,6 @@ router.get("/questions", async (req, res) => {
       email ||
       req.query.userId ||
       req.query.user_id ||
-      req.query.serid ||
       req.headers["x-user-email"] ||
       "";
     const identifier = (userEmail || "").toString().toLowerCase().trim();
@@ -259,20 +278,31 @@ router.get("/questions", async (req, res) => {
       });
     }
 
-    const content = await fsp.readFile(filePath, "utf8");
-    const lines = content.split("\n").filter((l) => l.trim() !== "");
-    if (lines.length < 2) return res.status(404).json({ error: "Empty file" });
+    // === TIER 3: CACHE FILE CONTENT ===
+    const qCacheKey = `${subject}:${topic.toLowerCase()}`;
+    let all = questionsCache.get(qCacheKey);
 
-    const header = parseCsvLine(lines[0]).map((h) => h.trim().toLowerCase());
-    let all = [];
-    for (let i = 1; i < lines.length; i++) {
-      const cols = parseCsvLine(lines[i]);
-      if (cols.length < 6) continue;
-      let obj = {};
-      header.forEach((h, idx) => (obj[h] = cols[idx] || ""));
-      if (obj.question_text) all.push(obj);
+    if (!all) {
+      const content = await fsp.readFile(filePath, "utf8");
+      const lines = content.split("\n").filter((l) => l.trim() !== "");
+      if (lines.length < 2)
+        return res.status(404).json({ error: "Empty file" });
+
+      const header = parseCsvLine(lines[0]).map((h) => h.trim().toLowerCase());
+      all = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cols = parseCsvLine(lines[i]);
+        if (cols.length < 6) continue;
+        let obj = {};
+        header.forEach((h, idx) => (obj[h] = cols[idx] || ""));
+        if (obj.question_text) all.push(obj);
+      }
+      questionsCache.set(qCacheKey, all);
     }
-    const shuffled = all.sort(() => 0.5 - Math.random()).slice(0, countNum);
+
+    const shuffled = [...all]
+      .sort(() => 0.5 - Math.random())
+      .slice(0, countNum);
     const out = shuffled.map((q, i) => ({
       id: `${subject}-${topic}-${i}`,
       subject,

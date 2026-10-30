@@ -102,6 +102,16 @@ app.use(
     ],
   }),
 );
+// === TIER 5 STEP 3: HEALTH CHECK - TOP ===
+app.get("/health", (req, res) => {
+  res.json({
+    status: "ok",
+    tier: "TIER 5 - 30k READY",
+    time: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
+});
+app.get("/", (req, res) => res.send("JAMB-2GO TIER 5 - 30k Arena Ready 🚀"));
 
 // === TIER 2: RATE LIMITERS - BOUNCER ===
 const generalLimiter = rateLimit({
@@ -159,19 +169,42 @@ const io = new Server(server, {
   cors: { origin: corsOrigin, credentials: true },
 });
 
-(async () => {
+// === TIER 5 STEP 1C + 2A: HARDENED ADAPTER + ARENA STORE ===
+const arenaRedis = require("./utils/arenaRedis");
+
+let redisPubClient, redisSubClient;
+async function initRedisAdapter() {
+  if (!VITALS.SYSTEM.REDIS_URL) {
+    console.log("⚠️ No REDIS_URL in vitals - single-server mode");
+    return;
+  }
   try {
     const { createAdapter } = require("@socket.io/redis-adapter");
     const { createClient } = require("redis");
-    const pubClient = createClient({ url: VITALS.SYSTEM.REDIS_URL });
-    const subClient = pubClient.duplicate();
-    await Promise.all([pubClient.connect(), subClient.connect()]);
-    io.adapter(createAdapter(pubClient, subClient));
-    console.log("✅ Redis adapter ready for 30k");
+
+    redisPubClient = createClient({
+      url: VITALS.SYSTEM.REDIS_URL,
+      socket: { reconnectStrategy: (retries) => Math.min(retries * 50, 1000) },
+    });
+    redisSubClient = redisPubClient.duplicate();
+
+    redisPubClient.on("error", (e) =>
+      console.error("Redis Pub Error:", e.message),
+    );
+    redisSubClient.on("error", (e) =>
+      console.error("Redis Sub Error:", e.message),
+    );
+
+    await Promise.all([redisPubClient.connect(), redisSubClient.connect()]);
+    io.adapter(createAdapter(redisPubClient, redisSubClient));
+    arenaRedis.setRedisClients(redisPubClient, redisSubClient);
+    console.log("✅ TIER 5: Redis adapter ready for 30k");
+    console.log("✅ TIER 5: Arena store wired");
   } catch (e) {
-    console.log("Redis not running, using single-server mode:", e.message);
+    console.log("⚠️ Redis adapter failed, single-server fallback:", e.message);
   }
-})();
+}
+// === END STEP 1C/2A ===
 
 const ADMIN_PASSWORD = VITALS.ADMIN.PASSWORD;
 function checkAdmin(req, res, next) {
@@ -977,8 +1010,8 @@ let socketUserMap = {};
 
 // === TIER 4: ROOM MEMORY LEAK FIX ===
 const ROOM_MAX_USERS = 50;
-const ROOM_IDLE_MS = 60 * 60 * 1000; // 1 hour idle -> auto delete
-const ROOM_CLEANUP_INTERVAL = 5 * 60 * 1000; // janitor every 5 mins
+const ROOM_IDLE_MS = 60 * 60 * 1000;
+const ROOM_CLEANUP_INTERVAL = 5 * 60 * 1000;
 
 function getActiveUsersInRoom(room) {
   return Object.values(socketUserMap).filter((u) => u.room === room).length;
@@ -996,6 +1029,10 @@ function cleanupRoomIfEmpty(room) {
       }
       console.log(`🧹 CLEANUP: Deleting empty room ${room}`);
       delete roomState[room];
+      // === TIER 5: Clear Redis too ===
+      try {
+        arenaRedis.clearRoomState(room);
+      } catch {}
     }
     if (global.liveRooms && global.liveRooms.has(room)) {
       global.liveRooms.delete(room);
@@ -1014,6 +1051,9 @@ setInterval(() => {
     if (count === 0 || idle > ROOM_IDLE_MS) {
       if (state.timer) clearInterval(state.timer);
       delete roomState[room];
+      try {
+        arenaRedis.clearRoomState(room);
+      } catch {}
       if (global.liveRooms) global.liveRooms.delete(room);
       cleaned++;
     }
@@ -1031,6 +1071,7 @@ function getRandomQuestion(subject) {
   if (!list || list.length === 0) return null;
   return list[Math.floor(Math.random() * list.length)];
 }
+
 function emitParticipants(room) {
   const state = roomState[room];
   if (!state) return;
@@ -1044,6 +1085,7 @@ function emitParticipants(room) {
   io.to(room).emit("update_users", usersArr);
   io.to(room).emit("update_scores", usersArr);
 }
+
 function buildLeaderboard(room) {
   const state = roomState[room];
   if (!state) return [];
@@ -1062,6 +1104,7 @@ function buildLeaderboard(room) {
   });
   return leaderboard;
 }
+
 function startQuizLoop(room, subject) {
   if (!roomState[room])
     roomState[room] = {
@@ -1084,8 +1127,9 @@ function startQuizLoop(room, subject) {
   const canonical = normalizeSubject(subject);
   const calcSubjects = ["maths", "physics", "chemistry", "accounting"];
   const intervalTime = calcSubjects.includes(canonical) ? 60000 : 20000;
+
   const askQuestion = () => {
-    if (!roomState[room]) return; // room was cleaned up
+    if (!roomState[room]) return;
     state = roomState[room];
     state.lastActive = Date.now();
     if (state.qCount > 0 && state.qCount % 10 === 0) {
@@ -1108,6 +1152,10 @@ function startQuizLoop(room, subject) {
     state.answered = new Set();
     state.is_question_locked = false;
     state.winner = null;
+
+    // === TIER 5: SAVE Q TO REDIS FOR ALL SERVERS ===
+    arenaRedis.saveRoomState(room, state).catch(() => {});
+
     console.log(
       `❓ [${room}] Q${state.qCount}: ${q.question_text?.slice(0, 50)}...`,
     );
@@ -1120,6 +1168,7 @@ function startQuizLoop(room, subject) {
       subject: canonical,
     });
   };
+
   askQuestion();
   state.timer = setInterval(askQuestion, intervalTime);
   console.log(`✅ Quiz loop started for ${room} every ${intervalTime / 1000}s`);
@@ -1142,7 +1191,6 @@ io.on("connection", (socket) => {
         return;
       }
     }
-    // === TIER 4: CHECK ROOM FULL ===
     const activeCount = getActiveUsersInRoom(room);
     if (activeCount >= ROOM_MAX_USERS) {
       socket.emit("room_full", {
@@ -1159,6 +1207,7 @@ io.on("connection", (socket) => {
     socket.currentRoom = room;
     socket.roomId = room;
     socketUserMap[socket.id] = { room, username, joinedAt: Date.now() };
+
     if (!roomState[room])
       roomState[room] = {
         qCount: 0,
@@ -1187,6 +1236,10 @@ io.on("connection", (socket) => {
     if (!roomState[room].streaks[username])
       roomState[room].streaks[username] = 0;
     if (!roomState[room].answered) roomState[room].answered = new Set();
+
+    // === TIER 5: SAVE ROOM STATE ===
+    arenaRedis.saveRoomState(room, roomState[room]).catch(() => {});
+
     emitParticipants(room);
     socket.to(room).emit("userJoined", { username });
     const subject = normalizeSubject(room.replace("-room", "").toLowerCase());
@@ -1226,6 +1279,7 @@ io.on("connection", (socket) => {
       }
     }
   });
+
   socket.on("leave_room", (payload) => {
     let targetRoom, username;
     if (typeof payload === "string") {
@@ -1238,10 +1292,8 @@ io.on("connection", (socket) => {
       targetRoom = socketUserMap[socket.id]?.room;
       username = socketUserMap[socket.id]?.username;
     }
-
     if (targetRoom) socket.leave(targetRoom);
     if (socketUserMap[socket.id]) delete socketUserMap[socket.id];
-
     if (targetRoom && username) {
       console.log(`🔴 LEAVE: ${username} -> ${targetRoom}`);
       io.to(targetRoom).emit("userLeft", { username });
@@ -1251,6 +1303,7 @@ io.on("connection", (socket) => {
       setTimeout(() => cleanupRoomIfEmpty(targetRoom), 1000);
     }
   });
+
   socket.on("answer_question", async ({ room, username, answer }) => {
     if (!isEnglishRoom(room)) {
       const ok = await hasFullAccessFor(username);
@@ -1277,6 +1330,7 @@ io.on("connection", (socket) => {
     let correct = state.currentQ.correct.trim().toUpperCase();
     let given = answer.trim().toUpperCase();
     let isCorrect = correct === given;
+
     if (isCorrect) {
       state.is_question_locked = true;
       state.winner = username;
@@ -1290,6 +1344,13 @@ io.on("connection", (socket) => {
       state.userStats[username].lastCorrectAt = Date.now();
       state.scores[username] = state.userStats[username].score;
       state.streaks[username] = (state.streaks[username] || 0) + 1;
+
+      // === TIER 5: SAVE SCORE TO REDIS ===
+      arenaRedis
+        .updateScore(room, username, username, state.scores[username])
+        .catch(() => {});
+      arenaRedis.saveRoomState(room, state).catch(() => {});
+
       io.to(room).emit("question_locked", {
         winner: username,
         answer: given,
@@ -1321,6 +1382,7 @@ io.on("connection", (socket) => {
     }
     emitParticipants(room);
   });
+
   socket.on("send_message", async (data) => {
     if (!isEnglishRoom(data.room)) {
       const ok = await hasFullAccessFor(data.author || data.username);
@@ -1330,6 +1392,7 @@ io.on("connection", (socket) => {
     if (st) st.lastActive = Date.now();
     io.to(data.room).emit("receive_message", data);
   });
+
   socket.on("private_message", ({ room, to, from, message }) => {
     let targetSocketId = null;
     for (const [sid, info] of Object.entries(socketUserMap)) {
@@ -1342,6 +1405,7 @@ io.on("connection", (socket) => {
     if (targetSocketId) io.to(targetSocketId).emit("private_message", payload);
     if (targetSocketId !== socket.id) socket.emit("private_message", payload);
   });
+
   socket.on("disconnect", () => {
     const data = socketUserMap[socket.id];
     if (data) {
@@ -1353,7 +1417,6 @@ io.on("connection", (socket) => {
     }
   });
 });
-
 app.get("/", (req, res) =>
   res.send(
     "JAMB-2go Bot Engine 30K READY: " +
@@ -1362,8 +1425,8 @@ app.get("/", (req, res) =>
         .join(", "),
   ),
 );
-server.listen(VITALS.SYSTEM.PORT, () =>
-  console.log(
-    `Server on ${VITALS.SYSTEM.PORT} - TIER 2 + TIER 4 ROOM LEAK FIX READY`,
-  ),
-);
+initRedisAdapter().then(() => {
+  server.listen(VITALS.SYSTEM.PORT, () =>
+    console.log(`Server on ${VITALS.SYSTEM.PORT} - TIER 5 STEP 1+2A READY`),
+  );
+});

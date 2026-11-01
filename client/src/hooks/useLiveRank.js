@@ -7,10 +7,8 @@ export function useLiveRank(socket) {
 
   useEffect(() => {
     if (!socket) return;
-
     const onUpdate = (data) => {
-      // Update user list in your room state here
-      // setRoomUsers(prev => prev.map(u => u._id===data.userId ? {...u, liveCorrect: data.correctCount} : u))
+      console.log("rankUpdate data:", data);
     };
 
     const onAnnounce = (data) => {

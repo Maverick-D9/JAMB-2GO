@@ -18,6 +18,51 @@ import ReviewFab from "./components/ReviewFab.jsx";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import { getLiveRank } from "./config/liveRanks";
 import TextHype from "./components/TextHype.jsx";
+function RankUpAnimation({ newRank, onClose }) {
+  if (!newRank) return null;
+
+  const isPublic = !!newRank.isPublic;
+  const title =
+    isPublic && newRank.displayName
+      ? `${newRank.displayName} is now ${newRank.icon} ${newRank.name}!`
+      : `You are now ${newRank.icon} ${newRank.name}!`;
+
+  const sub =
+    isPublic && newRank.displayName
+      ? `${newRank.displayName} has hit ${newRank.minCorrect}+ correct!`
+      : `You've hit ${newRank.minCorrect}+ correct!`;
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+      <div
+        className="relative bg-[#0F172A] border-2 rounded-[24px] p-8 text-center max-w-sm mx-4"
+        style={{
+          borderColor: newRank.color,
+          boxShadow: `0 0 60px ${newRank.color}60`,
+        }}
+      >
+        <div className="text-6xl animate-bounce">{newRank.icon}</div>
+        <p className="text-white/60 text-[12px] mt-4 font-bold tracking-widest">
+          {isPublic ? "PUBLIC FLEX!" : "RANK UP!"}
+        </p>
+        <h2
+          className="text-3xl font-black mt-2"
+          style={{ color: newRank.color }}
+        >
+          {title}
+        </h2>
+        <p className="text-white/80 text-[13px] mt-3">{sub}</p>
+        <button
+          onClick={onClose}
+          className="mt-6 w-full py-3 rounded-[12px] font-black text-black"
+          style={{ background: newRank.color }}
+        >
+          Continue 🔥
+        </button>
+      </div>
+    </div>
+  );
+}
 
 const API_BASE = VITALS.SYSTEM.API_BASE;
 const socket = io.connect(API_BASE);
@@ -194,13 +239,20 @@ function ParticipantsList({
                 </div>
                 <div className="flex flex-col">
                   <span
-                    className={`text-[13px] font-semibold truncate flex items-center gap-1 ${isActive ? "text-black" : "text-slate-300"}`}
+                    className={`text-[13px] font-semibold truncate flex items-center gap-1.5 ${isActive ? "text-black" : "text-slate-300"}`}
                   >
                     {u.username} {isMe && "(you)"}{" "}
-                    <span title={rank.name}>{rank.icon}</span>
-                  </span>
-                  <span className="text-[9px] text-slate-500">
-                    {rank.name} • {u.liveCorrect || 0}
+                    <span
+                      title={rank.name}
+                      style={{ filter: `drop-shadow(0 0 5px ${rank.color})` }}
+                    >
+                      {rank.icon}
+                    </span>
+                    {u.streak >= 2 && (
+                      <span className="text-[10px] bg-orange-500 text-white px-1.5 py-0.5 rounded-full font-black">
+                        🔥{u.streak}
+                      </span>
+                    )}
                   </span>
                 </div>
               </div>
@@ -450,15 +502,43 @@ function LeaderboardModal({
         <div className="px-3 mt-5 grid gap-2">
           {sorted.slice(0, 6).map((e, i) => {
             const isMe = e.user === username || e.username === username;
+            const playerStreak = isMe ? myStreak : e.streak || 0;
+            const rankInfo = getLiveRank(
+              e.correct || e.liveCorrect || e.score || 0,
+            );
+
             return (
               <div
                 key={e.user || i}
-                className={`flex justify-between items-center px-3 py-2.5 rounded-[12px] border text-[12px] ${isMe ? "bg-sky-400/10 border-sky-400/30 text-amber-200" : "bg-[#0F172A] border-white/10 text-white"}`}
+                className={`flex justify-between items-center px-3 py-2.5 rounded-[12px] border text-[12px] shadow-md transition-all ${rankInfo.bg} ${rankInfo.border} ${rankInfo.glow} ${isMe ? "ring-1 ring-sky-400/50" : ""}`}
               >
-                <span className="font-bold truncate">
-                  {isMe ? `👑 ${e.user} (you) 🔥 ${myStreak}` : `👨‍🎓 ${e.user}`}
+                <span className="font-bold truncate flex items-center gap-1.5">
+                  <span
+                    title={rankInfo.name}
+                    className="text-[14px]"
+                    style={{ filter: `drop-shadow(0 0 6px ${rankInfo.color})` }}
+                  >
+                    {e.icon || rankInfo.icon}
+                  </span>
+                  <span style={{ color: rankInfo.color }}>
+                    {isMe ? `${e.user} (you)` : e.user}
+                  </span>
+                  <span
+                    className="text-[8px] opacity-60 font-normal"
+                    style={{ color: rankInfo.color }}
+                  >
+                    {rankInfo.name}
+                  </span>
+                  {playerStreak >= 2 && (
+                    <span className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-black animate-pulse shadow-lg">
+                      🔥{playerStreak}
+                    </span>
+                  )}
                 </span>
-                <span className="text-sky-300 font-bold text-[11px] shrink-0 ml-2">
+                <span
+                  className="font-bold text-[11px] shrink-0 ml-2"
+                  style={{ color: rankInfo.color }}
+                >
                   {e.score} pts
                 </span>
               </div>
@@ -512,6 +592,8 @@ export default function App() {
   const [expiresAt, setExpiresAt] = useState(null);
   const [myScore, setMyScore] = useState(0);
   const [myStreak, setMyStreak] = useState(0);
+  const [prevRank, setPrevRank] = useState(null);
+  const [rankUp, setRankUp] = useState(null);
   const [selected, setSelected] = useState(null);
   const [feedback, setFeedback] = useState(null);
   const [toast, setToast] = useState(null);
@@ -529,6 +611,22 @@ export default function App() {
   const [unreadDMs, setUnreadDMs] = useState({});
   const [hovered, setHovered] = useState(false);
 
+  // RANK UP DETECTION - FIXED
+  useEffect(() => {
+    if (myScore === 0) return;
+    const currentRank = getLiveRank(myScore);
+    if (!prevRank) {
+      setPrevRank(currentRank);
+      return;
+    }
+    if (
+      prevRank.name !== currentRank.name &&
+      currentRank.tier > prevRank.tier
+    ) {
+      setRankUp(currentRank);
+    }
+    setPrevRank(currentRank);
+  }, [myScore]);
   const fetchAccess = async () => {
     const emailToUse = userEmail || userId;
     if (!emailToUse) return;
@@ -803,16 +901,47 @@ export default function App() {
       setLockedWinner(null);
       setTimer(Math.max(0, Math.ceil((d.expiresAt - Date.now()) / 1000)));
     });
+    // --- STREAK FIX - REPLACE YOUR OLD socket.on("answer_result") WITH THIS ---
     socket.on("answer_result", (d) => {
-      if (d.username === username) {
-        setMyScore(d.score);
-        setMyStreak((s) => (d.isCorrect ? s + 1 : 0));
+      console.log("🔍 FULL ANSWER_RESULT:", JSON.stringify(d, null, 2));
+      console.log(
+        "Client:",
+        username,
+        "Server:",
+        d.username,
+        "Correct:",
+        d.isCorrect,
+        "Streak from server:",
+        d.streak,
+      );
+
+      if (d.username?.toLowerCase() === username?.toLowerCase()) {
+        // 1. Score
+        setMyScore(d.score ?? d.correctCount ?? 0);
+
+        // 2. Streak - USE SERVER VALUE FIRST (most reliable)
+        if (typeof d.streak === "number") {
+          console.log(`🔥 SERVER STREAK: ${d.streak}`);
+          setMyStreak(d.streak);
+        } else {
+          // Fallback if server no send streak
+          setMyStreak((prev) => {
+            const next = d.isCorrect ? prev + 1 : 0;
+            console.log(`🔥 LOCAL STREAK: ${prev} -> ${next}`);
+            return next;
+          });
+        }
+
+        // 3. Feedback & Toast
         setFeedback({ correct: d.correct, isCorrect: d.isCorrect });
-        if (!isLocked)
+        if (!isLocked) {
           showToast(
             d.isCorrect ? `✅ CORRECT! +1` : `❌ WRONG! Correct: ${d.correct}`,
           );
-      } else if (d.isCorrect) showToast(`⚡ ${d.username} got it!`);
+        }
+      } else if (d.isCorrect) {
+        showToast(`⚡ ${d.username} got it!`);
+      }
     });
     socket.on("question_locked", (data) => {
       setIsLocked(true);
@@ -848,21 +977,32 @@ export default function App() {
         { type: "system", eventType: "left", username: u },
       ]),
     );
-    // === LIVE RANK LISTENERS - PASTE HERE ===
+    // === LIVE RANK LISTENERS - FIXED ===
     socket.on("live:user:rankUpdate", (data) => {
+      console.log("rankUpdate", data);
       setRoomUsers((prev) =>
         prev.map((u) =>
-          u.username === data.username
-            ? { ...u, liveCorrect: data.correctCount }
+          u.username.toLowerCase() === data.username.toLowerCase()
+            ? { ...u, liveCorrect: data.score, score: data.score }
             : u,
         ),
       );
-      if (data.username === username) {
-        showToast(`⬆️ Rank Up! ${data.newTierName} ${data.newIcon}`);
+      if (data.username.toLowerCase() === username.toLowerCase()) {
+        setMyScore(data.score); // <-- ADDED: fixes top 0 pts
+        showToast(`⬆️ ${data.displayName} — ${data.score} correct!`);
       }
     });
     socket.on("live:rank:announcement", (data) => {
       showToast(data.text);
+    });
+    socket.on("live:rank:public", (data) => {
+      console.log("PUBLIC FLEX:", data);
+      setRankUp({
+        ...data.newRank,
+        displayName: data.displayName,
+        username: data.username,
+        isPublic: data.username.toLowerCase() !== username.toLowerCase(),
+      });
     });
     socket.on("live:rank:inactive", (data) => {
       console.log(`Rank needs 5 players, have ${data.have}`);
@@ -885,7 +1025,6 @@ export default function App() {
       socket.off("live:rank:inactive");
     };
   }, [room, username, isLocked, leaderboardData]);
-
   useEffect(() => {
     if (!expiresAt) return;
     const iv = setInterval(
@@ -1697,6 +1836,9 @@ export default function App() {
           myStreak={myStreak}
           onClose={() => setShowLeaderboard(false)}
         />
+      )}
+      {rankUp && (
+        <RankUpAnimation newRank={rankUp} onClose={() => setRankUp(null)} />
       )}
       <div className="h-[76px] w-full bg-[#0A1224]/95 backdrop-blur-xl border-b border-white/[0.08] flex items-center justify-between px-5 md:px-7 z-20">
         <div className="flex items-center gap-3.5">

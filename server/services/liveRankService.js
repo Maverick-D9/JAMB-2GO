@@ -1,27 +1,27 @@
-const User = require("../models/User");
-const { getLiveRank, getDisplayName } = require("../config/liveRanks");
+// This file na wrapper — so liveRankHandler.js no go crash
+// It just forward everything to arenaRankService
+const arena = require("./arenaRankService");
+const {
+  getLiveRank,
+  getDisplayName,
+  getIconForScore,
+} = require("../config/liveRanks");
 
-async function handleLiveCorrectAnswer(userId) {
-  const user = await User.findByIdAndUpdate(
-    userId,
-    { $inc: { liveCorrect: 1 } },
-    { new: true, select: "username liveCorrect" },
-  );
-
-  const newCount = user.liveCorrect;
-  const oldCount = newCount - 1;
-  const oldRank = getLiveRank(oldCount);
-  const newRank = getLiveRank(newCount);
-
-  return {
-    userId: user._id,
-    username: user.username,
-    correctCount: newCount,
-    oldRank,
-    newRank,
-    displayName: getDisplayName(user.username, newCount),
-    leveledUp: oldRank.tier !== newRank.tier,
-  };
+async function handleLiveCorrectAnswer(userIdOrUsername) {
+  // support both id and username
+  const username =
+    typeof userIdOrUsername === "string"
+      ? userIdOrUsername
+      : userIdOrUsername?.username;
+  return arena.onCorrectAnswer(username);
 }
 
-module.exports = { handleLiveCorrectAnswer };
+module.exports = {
+  handleLiveCorrectAnswer,
+  onCorrectAnswer: arena.onCorrectAnswer,
+  getLiveRank,
+  getDisplayName,
+  getIconForScore,
+  getGlobalRanks: arena.getGlobalRanks,
+  rebuildIfEmpty: arena.rebuildIfEmpty,
+};

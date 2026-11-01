@@ -99,24 +99,24 @@ userSchema.statics.checkUserAccess = function (user) {
     : null;
 
   if (user.subscriptionStatus === "active" && subExpires && now < subExpires) {
+    // FIXED: Show real days left, not capped at 50
     const daysLeft = Math.ceil((subExpires - now) / 86400000);
-    const cappedDays = Math.min(daysLeft, VITALS.SUBSCRIPTION.DURATION_DAYS);
     return {
       tier: VITALS.SUBSCRIPTION.TIER_NAME,
       status: "active",
-      daysLeft: cappedDays,
+      daysLeft: daysLeft,
       expiresAt: user.subscriptionExpiresAt,
       trialEndsAt: user.trialEndsAt,
     };
   }
 
   if (user.subscriptionStatus === "trial" && now < trialEnds) {
+    // FIXED: Show real trial days left too
     const daysLeft = Math.ceil((trialEnds - now) / 86400000);
-    const cappedDays = Math.min(daysLeft, VITALS.TRIAL.DURATION_DAYS);
     return {
       tier: VITALS.SUBSCRIPTION.TIER_NAME,
       status: "trial",
-      daysLeft: cappedDays,
+      daysLeft: daysLeft,
       trialEndsAt: user.trialEndsAt,
     };
   }

@@ -17,9 +17,13 @@ function getLiveRank(correctCount = 0) {
   return current;
 }
 
-function getDisplayName(username, correctCount) {
-  const rank = getLiveRank(correctCount);
+function getIconForScore(count) {
+  return getLiveRank(count).icon;
+}
+
+function getDisplayName(username, count) {
+  const rank = getLiveRank(count);
   return `${username} ${rank.icon}`;
 }
 
-module.exports = { LIVE_RANKS, getLiveRank, getDisplayName };
+module.exports = { LIVE_RANKS, getLiveRank, getIconForScore, getDisplayName };

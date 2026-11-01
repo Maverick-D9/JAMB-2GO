@@ -1,11 +1,8 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 
-// Premium Config based on your spec
 const getHypeConfig = (username, streak, timeTaken) => {
   const name = username.toUpperCase();
-
-  // FAST < 3s - Neon Cyan Glow
   if (timeTaken < 3) {
     return {
       text: `⚡ TOO FAST! ${name}!`,
@@ -16,7 +13,6 @@ const getHypeConfig = (username, streak, timeTaken) => {
       borderGlow: "shadow-[0_0_40px_rgba(34,211,238,0.6)]",
     };
   }
-  // STREAK 3+ - Fire Gradient
   if (streak >= 3) {
     const fireText =
       streak >= 5 ? `🔥🔥🔥 RAMPAGE! ${name}!` : `🔥 ${name} IS ON FIRE!`;
@@ -29,7 +25,6 @@ const getHypeConfig = (username, streak, timeTaken) => {
       borderGlow: "shadow-[0_0_50px_rgba(239,68,68,0.7)]",
     };
   }
-  // NORMAL - Premium Gold (Your main spec)
   const normal = [
     `BOOM! ${name}! 💥`,
     `${name} SCORES! 🎯`,
@@ -78,7 +73,8 @@ export default function TextHype({
 
   useEffect(() => {
     if (!socket) return;
-    socket.on("answer_result", (d) => {
+
+    const handleAnswerResult = (d) => {
       if (!d.isCorrect) {
         if (d.username !== currentUser) return;
         setTrash(`Ouch! You missed! 😬 Correct: ${d.correct}`);
@@ -86,13 +82,14 @@ export default function TextHype({
         return;
       }
       if (d.username !== currentUser && Math.random() > 0.4) return;
-      const streak = d.username === currentUser ? 3 : 1;
-      const timeTaken = Math.random() * 5;
+      // FIXED: Use real streak from server
+      const streak = d.streak ?? 1;
+      const timeTaken = d.timeTaken ?? Math.random() * 5;
       const config = getHypeConfig(d.username, streak, timeTaken);
       showHype({ ...config, streak, username: d.username });
-    });
+    };
 
-    socket.on("question_locked", (data) => {
+    const handleQuestionLocked = (data) => {
       showHype({
         text: `🔒 ${data.winner.toUpperCase()} LOCKED IT!`,
         subText: "FIRST BLOOD!",
@@ -101,11 +98,15 @@ export default function TextHype({
         borderGlow: "shadow-[0_0_40px_rgba(220,38,38,0.6)]",
         isLock: true,
       });
-    });
+    };
+
+    socket.on("answer_result", handleAnswerResult);
+    socket.on("question_locked", handleQuestionLocked);
 
     return () => {
-      socket.off("answer_result");
-      socket.off("question_locked");
+      // FIXED: Only remove our own handlers, not everyone's
+      socket.off("answer_result", handleAnswerResult);
+      socket.off("question_locked", handleQuestionLocked);
     };
   }, [socket, isLeaderboardOpen, currentUser]);
 
@@ -120,7 +121,6 @@ export default function TextHype({
             WebkitBackdropFilter: "blur(8px)",
           }}
         >
-          {/* Premium Game Card */}
           <div
             className={`w-full max-w-3xl text-center py-8 px-8 rounded-[24px] border-4 border-white animate-pop ${hype.borderGlow} bg-[#0F172A]/90`}
           >
@@ -159,25 +159,13 @@ export default function TextHype({
         </div>
       )}
       <style>{`
-        @keyframes pop {
-          0% { transform: scale(0); opacity: 0; }
-          60% { transform: scale(1.2); }
-          100% { transform: scale(1); opacity: 1; }
-        }
+        @keyframes pop { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.2); } 100% { transform: scale(1); opacity: 1; } }
         .animate-pop { animation: pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.5) forwards; }
-        @keyframes wiggle {
-          0%, 100% { transform: rotate(-2deg); }
-          50% { transform: rotate(2deg); }
-        }
+        @keyframes wiggle { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
         .animate-wiggle { animation: wiggle 0.35s ease-in-out infinite; }
-        @keyframes slide {
-          from { transform: translate(-50%, 15px); opacity: 0; }
-          to { transform: translate(-50%, 0); opacity: 1; }
-        }
+        @keyframes slide { from { transform: translate(-50%, 15px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
         .animate-slide { animation: slide 0.25s ease-out; }
-        @media (max-width: 768px) {
-          h1 { font-size: 2.5rem !important; }
-        }
+        @media (max-width: 768px) { h1 { font-size: 2.5rem !important; } }
       `}</style>
     </>
   );

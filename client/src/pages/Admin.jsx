@@ -217,37 +217,26 @@ function DashboardStats() {
 function StorageMonitor({ adminPass }) {
   const [stats, setStats] = useState(null);
   const [preview, setPreview] = useState(null);
-
-  // FORCE CORRECT BASE - this fixes your Cannot GET error
   const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
   useEffect(() => {
     if (!adminPass) return;
-    const load = async () => {
-      const r = await fetch(`${API_BASE}/api/admin/storage`, {
-        headers: { "x-admin-password": adminPass },
-      });
-      const d = await r.json();
-      setStats(d);
-    };
-    load();
+    fetch(`${API_BASE}/api/admin/storage`, {
+      headers: { "x-admin-password": adminPass },
+    })
+      .then((r) => r.json())
+      .then(setStats);
   }, [adminPass]);
 
   const check = async () => {
     const r = await fetch(`${API_BASE}/api/admin/cleanup-preview`, {
       headers: { "x-admin-password": adminPass },
     });
-    const data = await r.json();
-    console.log("preview:", data);
-    setPreview(data);
+    setPreview(await r.json());
   };
-
   const clean = async () => {
     if (
-      !preview ||
-      !confirm(
-        `Delete ${preview.oldCount} subs older than ${preview.totalDays} days?`,
-      )
+      !confirm(`Delete ${preview.oldCount} older than ${preview.totalDays}d?`)
     )
       return;
     const r = await fetch(`${API_BASE}/api/admin/cleanup`, {
@@ -255,46 +244,85 @@ function StorageMonitor({ adminPass }) {
       headers: { "x-admin-password": adminPass },
     });
     const d = await r.json();
-    alert(
-      `✅ Deleted ${d.deleted} - freed space | Total was ${d.totalDays} days`,
-    );
+    alert(`Deleted ${d.deleted}`);
     setPreview(null);
-    const r2 = await fetch(`${API_BASE}/api/admin/storage`, {
-      headers: { "x-admin-password": adminPass },
-    });
-    setStats(await r2.json());
   };
 
-  if (!stats)
-    return <div className="text-[11px] text-white/50">Loading storage...</div>;
+  if (!stats) return null;
 
   return (
-    <div className="bg-[#121A2E]/70 rounded-[20px] border border-cyan-500/20 p-5 mb-6">
-      <h3 className="text-white font-black text-[12px]">
-        📦 DB: {stats.mongo?.dataSize || stats.mongo?.dataMB || "0 MB"} / 512 MB
-        ({stats.mongo?.percentUsed || "0"}%)
-      </h3>
-      <div className="mt-3 flex gap-3 items-center flex-wrap">
-        <button
-          onClick={check}
-          className="bg-white/10 px-4 py-2 rounded-lg text-[11px] text-white hover:bg-white/20"
-        >
-          Check Old Subs (DURATION+TRIAL)
-        </button>
-        {preview && (
-          <>
-            <span className="text-[11px] text-amber-300">
-              Found {preview.oldCount}/{preview.total} older than{" "}
-              {preview.totalDays}d ({preview.duration}+{preview.trial})
-            </span>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      {/* DB */}
+      <div className="bg-[#121A2E]/70 rounded-[20px] border border-cyan-500/20 p-4">
+        <h4 className="text-[11px] text-white/60 font-bold">
+          🗄️ MONGO DB (Persistent)
+        </h4>
+        <p className="text-white font-black text-[14px] mt-1">
+          {stats.mongo.dataSize} / 512 MB ({stats.mongo.percentUsed}%)
+        </p>
+        <p className="text-[10px] text-white/40">
+          {stats.mongo.objects} docs | storage: {stats.mongo.storageMB} MB
+        </p>
+        <div className="mt-3 flex gap-2">
+          <button
+            onClick={check}
+            className="bg-white/10 px-3 py-1.5 rounded-lg text-[10px] text-white"
+          >
+            Check Old Subs
+          </button>
+          {preview && (
             <button
               onClick={clean}
-              className="bg-red-500/20 px-4 py-2 rounded-lg text-[11px] text-red-200"
+              className="bg-red-500/20 px-3 py-1.5 rounded-lg text-[10px] text-red-200"
             >
               Delete {preview.oldCount}
             </button>
-          </>
+          )}
+        </div>
+        {preview && (
+          <p className="text-[10px] text-amber-300 mt-2">
+            Found {preview.oldCount}/{preview.total} older than{" "}
+            {preview.totalDays}d ({preview.duration}+{preview.trial})
+          </p>
         )}
+      </div>
+
+      {/* SERVER RAM */}
+      <div className="bg-[#121A2E]/70 rounded-[20px] border border-purple-500/20 p-4">
+        <h4 className="text-[11px] text-white/60 font-bold">
+          💾 RENDER RAM / NODE
+        </h4>
+        <p className="text-white font-black text-[14px] mt-1">
+          Heap: {stats.server.heapUsedMB} / {stats.server.heapTotalMB} MB
+        </p>
+        <p className="text-[10px] text-white/40">
+          RSS: {stats.server.rssMB} MB | System: {stats.server.usedPercent}%
+          used ({stats.server.freeMB}MB free / {stats.server.totalMB}MB)
+        </p>
+        <p className="text-[10px] text-white/40 mt-1">
+          CPU: {stats.server.cpuCount} cores | Load: {stats.server.loadAvg} |
+          Uptime: {stats.server.uptimeHrs}h
+        </p>
+      </div>
+
+      {/* DISK + REDIS */}
+      <div className="bg-[#121A2E]/70 rounded-[20px] border border-amber-500/20 p-4">
+        <h4 className="text-[11px] text-white/60 font-bold">
+          📦 RENDER DISK + REDIS
+        </h4>
+        <p className="text-white font-black text-[14px] mt-1">
+          Disk: Ephemeral (resets on deploy)
+        </p>
+        <p className="text-[10px] text-white/40">
+          Limit ~512 MB free tier. No persistent storage — don't store uploads
+          locally.
+        </p>
+        <p className="text-[10px] text-white/40 mt-2">
+          Redis: {stats.server.redis || "Not configured (you don't use Redis)"}
+        </p>
+        <p className="text-[10px] text-white/40">
+          Node {stats.server.node} on {stats.server.platform}
+        </p>
       </div>
     </div>
   );

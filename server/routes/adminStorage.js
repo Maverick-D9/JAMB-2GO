@@ -1,89 +1,96 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const os = require("os");
 const router = express.Router();
+
+// Replace with your vitals import
 const VITALS = require("../config/vitals");
-
-// CORRECT PATH - from routes/ to utils/
-const arenaRedisModule = require("../utils/arenaRedis");
-
-// Handle different export styles
-const redisClient =
-  arenaRedisModule.redis ||
-  arenaRedisModule.client ||
-  arenaRedisModule.redisClient ||
-  arenaRedisModule.default ||
-  arenaRedisModule;
+// or if vitals is in client, copy values:
+// const DURATION = 50, TRIAL = 2
 
 router.get("/storage", async (req, res) => {
   try {
     const db = mongoose.connection.db;
-    const mongoStats = await db.stats();
-    const collections = await db.listCollections().toArray();
+    const stats = await db.stats();
 
-    let redisInfo = { used_memory_human: "N/A" };
-    try {
-      if (redisClient && redisClient.info) {
-        const info = await redisClient.info("memory");
-        const line = info
-          .split("\r\n")
-          .find((l) => l.startsWith("used_memory_human"));
-        redisInfo.used_memory_human = line ? line.split(":")[1] : "Connected";
-      }
-    } catch (e) {
-      redisInfo.used_memory_human = "Error: " + e.message;
-    }
+    // --- MONGO (persistent) ---
+    const dataMB = (stats.dataSize / 1024 / 1024).toFixed(2);
+    const storageMB = (stats.storageSize / 1024 / 1024).toFixed(2);
+
+    // --- SERVER (Render / Node) ---
+    const mem = process.memoryUsage();
+    const sysMem = {
+      freeMB: (os.freemem() / 1024 / 1024).toFixed(0),
+      totalMB: (os.totalmem() / 1024 / 1024).toFixed(0),
+      usedPercent: (
+        ((os.totalmem() - os.freemem()) / os.totalmem) *
+        100
+      ).toFixed(1),
+    };
+
+    const server = {
+      platform: os.platform(),
+      node: process.version,
+      uptimeHrs: (os.uptime() / 3600).toFixed(1),
+      cpuCount: os.cpus().length,
+      loadAvg: os.loadavg()[0].toFixed(2),
+      heapUsedMB: (mem.heapUsed / 1024 / 1024).toFixed(1),
+      heapTotalMB: (mem.heapTotal / 1024 / 1024).toFixed(1),
+      rssMB: (mem.rss / 1024 / 1024).toFixed(1),
+      ...sysMem,
+    };
+
+    // --- RENDER DISK (ephemeral, 512MB warning) ---
+    // Render free tier has ~512MB disk that resets on deploy
+    // We can't get exact disk on all hosts, but we show what we can
 
     res.json({
       mongo: {
-        dataSize: `${(mongoStats.dataSize / 1024 / 1024).toFixed(2)} MB`,
-        storageSize: `${(mongoStats.storageSize / 1024 / 1024).toFixed(2)} MB`,
-        collections: collections.length,
-        objects: mongoStats.objects,
-        percentUsed: (
-          (mongoStats.storageSize / (512 * 1024 * 1024)) *
-          100
-        ).toFixed(1),
+        dataMB,
+        storageMB,
+        dataSize: `${dataMB} MB`,
+        percentUsed: ((stats.dataSize / (512 * 1024 * 1024)) * 100).toFixed(1),
+        objects: stats.objects,
       },
-      redis: redisInfo,
-      server: {
-        heapUsed: `${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`,
-        heapTotal: `${(process.memoryUsage().heapTotal / 1024 / 1024).toFixed(2)} MB`,
-        uptime: `${(process.uptime() / 3600).toFixed(2)} hours`,
+      server,
+      render: {
+        note: "Render free disk is ephemeral & resets on deploy. Only Mongo 512MB is persistent limit.",
+        diskLimitMB: 512,
       },
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
+// --- Your existing cleanup routes (keep them, using VITALS) ---
 router.get("/cleanup-preview", async (req, res) => {
-  try {
-    const DURATION = VITALS.SUBSCRIPTION.DURATION_DAYS; // 50
-    const TRIAL = VITALS.TRIAL.DURATION_DAYS; // 2
-    const TOTAL_DAYS = DURATION + TRIAL; // 52
+  const duration = VITALS?.SUBSCRIPTION?.DURATION_DAYS || 50;
+  const trial = VITALS?.TRIAL?.DURATION_DAYS || 2;
+  const totalDays = duration + trial;
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - totalDays);
 
-    const cutoff = new Date(Date.now() - TOTAL_DAYS * 24 * 60 * 60 * 1000);
-    const Subscription = mongoose.model("Subscription");
-    
-    const oldCount = await Subscription.countDocuments({ expiresAt: { $lt: cutoff } });
-    const total = await Subscription.countDocuments();
-    res.json({ oldCount, total, cutoff, totalDays: TOTAL_DAYS, duration: DURATION, trial: TRIAL });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  const Subscription = mongoose.model("Subscription");
+  const total = await Subscription.countDocuments();
+  const oldCount = await Subscription.countDocuments({
+    updatedAt: { $lt: cutoff },
+  });
+
+  res.json({ oldCount, total, cutoff, duration, trial, totalDays });
 });
 
 router.delete("/cleanup", async (req, res) => {
-  try {
-    const DURATION = VITALS.SUBSCRIPTION.DURATION_DAYS;
-    const TRIAL = VITALS.TRIAL.DURATION_DAYS;
-    const TOTAL_DAYS = DURATION + TRIAL;
+  const duration = VITALS?.SUBSCRIPTION?.DURATION_DAYS || 50;
+  const trial = VITALS?.TRIAL?.DURATION_DAYS || 2;
+  const totalDays = duration + trial;
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - totalDays);
 
-    const cutoff = new Date(Date.now() - TOTAL_DAYS * 24 * 60 * 60 * 1000);
-    const Subscription = mongoose.model("Subscription");
-    
-    const result = await Subscription.deleteMany({ expiresAt: { $lt: cutoff } });
-    res.json({ deleted: result.deletedCount, totalDays: TOTAL_DAYS, cutoff });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  const Subscription = mongoose.model("Subscription");
+  const result = await Subscription.deleteMany({ updatedAt: { $lt: cutoff } });
+
+  res.json({ deleted: result.deletedCount, totalDays });
 });
 
-module.exports = router; 
+module.exports = router;

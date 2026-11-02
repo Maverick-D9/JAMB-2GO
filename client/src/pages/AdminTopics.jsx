@@ -200,6 +200,8 @@ export default function AdminTopics() {
                   "crs",
                   "geography",
                   "history",
+                  "agriculture",
+                  "marketing",
                 ].map((s) => (
                   <button
                     key={s}

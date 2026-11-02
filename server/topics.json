@@ -196,5 +196,38 @@
     "Business Finance Institutions",
     "Consumer Protection",
     "International Organisations and Trade Blocs"
+  ],
+  "geography": [
+    "Map Reading and Interpretation",
+    "The Earth's Structure,Rocks and Landforms",
+    "Climate and Vegetation",
+    "Population and Settlement",
+    "Agriculture",
+    "Industry",
+    "Transportation and Communication",
+    "Regional Geography of Nigeria and West Africa",
+    "Regional Geography of Africa and the World",
+    "Environmental Issues and Resource Management",
+    "Economic Geography",
+    "Physical Geography-Oceans,Atmosphere and Biosphere",
+    "Regional Geography of Europe,Asia and the Americas",
+    "Soils"
+  ],
+  "marketing": [
+    "Nature and Scope of Marketing",
+    "Marketing Mix- Product",
+    "Marketing Mix- Price",
+    "Marketing Mix- Distribution",
+    "Marketing Mix- Promotion",
+    "Consumer Behaviour and Market Segmentation",
+    "Market Research",
+    "Marketing Environment",
+    "Services Marketing and Relationship Marketing",
+    "International Marketing and E-Commerce",
+    "Marketing Planning and Strategy",
+    "Business Environment and Social Responsibility",
+    "Commodity Exchange",
+    "Trade Associations",
+    "Money(Evolutions and Forms)"
   ]
 }

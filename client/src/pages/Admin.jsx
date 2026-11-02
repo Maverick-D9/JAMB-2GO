@@ -214,7 +214,91 @@ function DashboardStats() {
     </>
   );
 }
+function StorageMonitor({ adminPass }) {
+  const [stats, setStats] = useState(null);
+  const [preview, setPreview] = useState(null);
 
+  // FORCE CORRECT BASE - this fixes your Cannot GET error
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+  useEffect(() => {
+    if (!adminPass) return;
+    const load = async () => {
+      const r = await fetch(`${API_BASE}/api/admin/storage`, {
+        headers: { "x-admin-password": adminPass },
+      });
+      const d = await r.json();
+      setStats(d);
+    };
+    load();
+  }, [adminPass]);
+
+  const check = async () => {
+    const r = await fetch(`${API_BASE}/api/admin/cleanup-preview`, {
+      headers: { "x-admin-password": adminPass },
+    });
+    const data = await r.json();
+    console.log("preview:", data);
+    setPreview(data);
+  };
+
+  const clean = async () => {
+    if (
+      !preview ||
+      !confirm(
+        `Delete ${preview.oldCount} subs older than ${preview.totalDays} days?`,
+      )
+    )
+      return;
+    const r = await fetch(`${API_BASE}/api/admin/cleanup`, {
+      method: "DELETE",
+      headers: { "x-admin-password": adminPass },
+    });
+    const d = await r.json();
+    alert(
+      `✅ Deleted ${d.deleted} - freed space | Total was ${d.totalDays} days`,
+    );
+    setPreview(null);
+    const r2 = await fetch(`${API_BASE}/api/admin/storage`, {
+      headers: { "x-admin-password": adminPass },
+    });
+    setStats(await r2.json());
+  };
+
+  if (!stats)
+    return <div className="text-[11px] text-white/50">Loading storage...</div>;
+
+  return (
+    <div className="bg-[#121A2E]/70 rounded-[20px] border border-cyan-500/20 p-5 mb-6">
+      <h3 className="text-white font-black text-[12px]">
+        📦 DB: {stats.mongo?.dataSize || stats.mongo?.dataMB || "0 MB"} / 512 MB
+        ({stats.mongo?.percentUsed || "0"}%)
+      </h3>
+      <div className="mt-3 flex gap-3 items-center flex-wrap">
+        <button
+          onClick={check}
+          className="bg-white/10 px-4 py-2 rounded-lg text-[11px] text-white hover:bg-white/20"
+        >
+          Check Old Subs (DURATION+TRIAL)
+        </button>
+        {preview && (
+          <>
+            <span className="text-[11px] text-amber-300">
+              Found {preview.oldCount}/{preview.total} older than{" "}
+              {preview.totalDays}d ({preview.duration}+{preview.trial})
+            </span>
+            <button
+              onClick={clean}
+              className="bg-red-500/20 px-4 py-2 rounded-lg text-[11px] text-red-200"
+            >
+              Delete {preview.oldCount}
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
 export default function Admin() {
   const [isAuthed, setIsAuthed] = useState(
     () => localStorage.getItem("admin_ok") === "yes",
@@ -588,6 +672,7 @@ export default function Admin() {
           </button>
         </div>
         <DashboardStats />
+        <StorageMonitor adminPass={adminPass} />
         <div className="bg-[#121A2E]/70 backdrop-blur-xl rounded-[20px] border border-white/10 p-5 mb-6 relative overflow-hidden">
           <div className="flex justify-between items-center mb-4">
             <h3

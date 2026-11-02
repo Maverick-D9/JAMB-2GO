@@ -1659,7 +1659,7 @@ export default function App() {
               </span>
               <div className="flex items-center gap-2">
                 <span className="text-emerald-400 text-[11px] hidden md:inline">
-                  All 11 rooms unlocked
+                  All rooms unlocked
                 </span>
                 {access.status === "trial" && (
                   <button

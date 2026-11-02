@@ -8,6 +8,7 @@ const path = require("path");
 require("dotenv").config();
 const mongoose = require("mongoose");
 const VITALS = require("./config/vitals");
+const User = require("./models/User");
 const { registerLiveRankHandlers } = require("./sockets/liveRankHandler");
 const { rateLimit } = require("express-rate-limit");
 const {
@@ -16,6 +17,7 @@ const {
   getLiveRank,
 } = require("./config/liveRanks");
 const arenaRankService = require("./services/arenaRankService");
+const arenaRedis = require("./utils/arenaRedis");
 const monitorService = require("./services/systemMonitorService");
 
 mongoose
@@ -25,31 +27,43 @@ mongoose
     console.error("❌ MongoDB FAILED:", e.message);
   });
 
-const User = require("./models/User");
 async function hasFullAccessFor(usernameOrEmail) {
   if (!usernameOrEmail) return false;
   try {
     const user = await User.findOne({
       $or: [
-        { email: usernameOrEmail },
-        { username: usernameOrEmail },
+        { email: usernameOrEmail.toLowerCase().trim() },
+        { username: new RegExp(`^${usernameOrEmail}$`, "i") },
         { userId: usernameOrEmail },
       ],
     });
-    if (user) {
-      const now = new Date();
-      if (
-        user.subscriptionStatus === "active" &&
-        user.subscriptionExpiresAt &&
-        new Date(user.subscriptionExpiresAt) > now
-      )
-        return true;
+    if (!user) return false;
+
+    const now = new Date();
+
+    // Paid users
+    if (
+      user.subscriptionStatus === "active" &&
+      user.subscriptionExpiresAt &&
+      new Date(user.subscriptionExpiresAt) > now
+    ) {
+      return true;
+    }
+
+    // Trial users — THIS FIXES JAGO
+    if (
+      user.subscriptionStatus === "trial" &&
+      user.trialEndsAt &&
+      new Date(user.trialEndsAt) > now
+    ) {
+      return true;
     }
   } catch (e) {
     console.log("access check err", e.message);
   }
   return false;
 }
+
 function isEnglishRoom(room) {
   return room === "english-room" || normalizeSubject(room) === "english";
 }
@@ -138,17 +152,19 @@ const cbtRoutes = require("./routes/cbt");
 const paymentRoutes = require("./routes/payment");
 const drillRoutes = require("./routes/drill");
 const authRoutes = require("./routes/auth");
+const adminStorageRoutes = require("./routes/adminStorage");
+
 app.use("/api/cbt", cbtRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/drill", drillRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminStorageRoutes);
 
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: corsOrigin, credentials: true },
 });
 
-const arenaRedis = require("./utils/arenaRedis");
 let redisPubClient, redisSubClient;
 async function initRedisAdapter() {
   if (!VITALS.SYSTEM.REDIS_URL) {
@@ -867,7 +883,16 @@ function getRandomQuestion(subject) {
 function emitParticipants(room) {
   const state = roomState[room];
   if (!state) return;
-  const usersArr = Object.entries(state.scores).map(([username, score]) => {
+
+  // Build from ACTIVE sockets + scores to avoid ghost counts
+  const activeUsernames = new Set(
+    Object.values(socketUserMap)
+      .filter((u) => u.room === room)
+      .map((u) => u.username),
+  );
+
+  const usersArr = Array.from(activeUsernames).map((username) => {
+    const score = state.scores[username] || 0;
     const stats = state.userStats?.[username] || {};
     const correct = stats.correct || score;
     let displayName = username;
@@ -883,13 +908,30 @@ function emitParticipants(room) {
       correct,
       liveCorrect: correct,
       icon,
-      streak: state.streaks[username] || 0, // <- ADD THIS
+      streak: state.streaks[username] || 0,
       lastCorrectAt: stats.lastCorrectAt || 0,
+      isActive: true,
     };
   });
+
+  console.log(
+    `👥 EMIT ${room}: ${usersArr.length} users ->`,
+    usersArr.map((u) => u.username),
+  );
+
+  // Emit ALL possible events so frontend gets it regardless of what it listens to
   io.to(room).emit("roomUsers", usersArr);
   io.to(room).emit("update_users", usersArr);
   io.to(room).emit("update_scores", usersArr);
+  io.to(room).emit("live:participants", {
+    count: usersArr.length,
+    users: usersArr,
+  });
+  io.to(room).emit("room:participants", usersArr);
+  io.to(room).emit("participants:update", {
+    count: usersArr.length,
+    users: usersArr,
+  });
 }
 function buildLeaderboard(room) {
   const state = roomState[room];
@@ -943,7 +985,7 @@ function startQuizLoop(room, subject) {
   const intervalTime = ["maths", "physics", "chemistry", "accounting"].includes(
     canonical,
   )
-    ? 60000
+    ? 30000
     : 20000;
   const ask = () => {
     if (!roomState[room]) return;
@@ -990,10 +1032,14 @@ io.on("connection", (socket) => {
     if (!isEnglishRoom(room)) {
       const ok = await hasFullAccessFor(username);
       if (!ok) {
+        console.log(`🚫 ACCESS DENIED: ${username} -> ${room}`);
         socket.emit("access_denied", {
-          reason: "Subscribe",
+          reason: VITALS.MESSAGES.ACCESS_DENIED_SUB,
+          message: VITALS.MESSAGES.ACCESS_DENIED_SUB,
           code: "SUBSCRIPTION_REQUIRED",
         });
+        // Still emit participants so admin sees who tried
+        emitParticipants(room);
         return;
       }
     }
@@ -1135,7 +1181,9 @@ io.on("connection", (socket) => {
     if (!isEnglishRoom(room)) {
       const ok = await hasFullAccessFor(username);
       if (!ok) {
-        socket.emit("access_denied", { reason: "Subscription required" });
+        socket.emit("access_denied", {
+          reason: VITALS.MESSAGES.ACCESS_DENIED_SUB,
+        });
         return;
       }
     }

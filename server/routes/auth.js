@@ -5,6 +5,7 @@ const User = require("../models/User");
 const Otp = require("../models/Otp");
 const { sendOtp } = require("../utils/mailer");
 const rateLimit = require("express-rate-limit");
+const VITALS = require("../config/vitals");
 
 // === TIER 2: Rate limit constants - ADD HERE ===
 const otpLimiter = rateLimit({
@@ -39,7 +40,9 @@ function genCode() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 function genTrial() {
-  return new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+  return new Date(
+    Date.now() + VITALS.TRIAL.DURATION_DAYS * 24 * 60 * 60 * 1000,
+  );
 }
 
 router.post("/request-otp", otpLimiter, async (req, res) => {
@@ -151,12 +154,10 @@ router.post("/login", loginLimiter, async (req, res) => {
     if (!user)
       return res.status(401).json({ error: "Invalid email or password." });
     if (!user.password) {
-      return res
-        .status(401)
-        .json({
-          error:
-            "This account uses Google login. Use Continue with Google or Reset Password to set a password.",
-        });
+      return res.status(401).json({
+        error:
+          "This account uses Google login. Use Continue with Google or Reset Password to set a password.",
+      });
     }
     const ok = await bcrypt.compare(password, user.password);
     if (!ok)

@@ -28,7 +28,7 @@ export const VITALS = {
     DRILL_LOCKED_TITLE: "Drill Palace Locked 🔒",
     DRILL_LOCKED_DESC: `Unlock ${DISPLAY_COMMA}/${DAYS}days ${PASS_NAME} to access Drill Palace + CBT + All Live Rooms.`,
     FREE_ZONE_TITLE: `Unlock ${PASS_NAME}`,
-    FREE_ZONE_DESC: `You're in Free Zone — only ENGLISH is free. Unlock all 10 subjects + CBT + Drill + Chat for`,
+    FREE_ZONE_DESC: `You're in Free Zone — only ENGLISH is free. Unlock all  subjects + CBT + Drill + Chat for`,
     PAY_BUTTON_FULL: `Pay ${DISPLAY} with Paystack - Unlock All`,
     PAY_BUTTON_SHORT: `Unlock Now — ${DISPLAY_COMMA}/${DAYS}days`,
     PASS_BADGE: `${DISPLAY_COMMA}/${DAYS}days Pass`,

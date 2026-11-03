@@ -4,6 +4,7 @@ const {
   getIconForScore,
   getLiveRank,
 } = require("../config/liveRanks");
+const VITALS = require("../config/vitals");
 
 const LiveRankSchema = new mongoose.Schema(
   {
@@ -24,24 +25,23 @@ const LiveRank =
 async function getUserRank(username) {
   if (!username) return null;
   let doc = await LiveRank.findOne({ username });
-  if (!doc) {
+  if (!doc)
     return {
       username,
       score: 0,
       correct: 0,
       displayName: username,
       icon: "🐣",
+      tier: "NOVICE",
     };
-  }
   return doc;
 }
 
 async function onCorrectAnswer(username) {
   if (!username) return { score: 0, displayName: username, icon: "🐣" };
   let doc = await LiveRank.findOne({ username });
-  if (!doc) {
-    doc = new LiveRank({ username, score: 1, correct: 1 });
-  } else {
+  if (!doc) doc = new LiveRank({ username, score: 1, correct: 1 });
+  else {
     doc.score += 1;
     doc.correct += 1;
     doc.lastCorrectAt = new Date();
@@ -61,17 +61,14 @@ async function onCorrectAnswer(username) {
 }
 
 async function getGlobalRanks(limit = 100) {
-  const ranks = await LiveRank.find().sort({ score: -1 }).limit(limit);
-  return ranks;
+  return await LiveRank.find().sort({ score: -1 }).limit(limit);
 }
-
 async function rebuildIfEmpty() {
   const count = await LiveRank.countDocuments();
   console.log(`[ArenaRank] LiveRank count: ${count}`);
   return count;
 }
-
-async function updateScore(room, username, displayName, score) {
+async function updateScore() {
   return true;
 }
 

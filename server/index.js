@@ -932,7 +932,49 @@ function emitParticipants(room) {
     count: usersArr.length,
     users: usersArr,
   });
+} // === ARENA QUIZ - OPTION 2 FIX (per-player shuffle, text judge) ===
+const crypto = require("crypto");
+
+function strongShuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = crypto.randomInt(0, i + 1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
+
+function getShuffledQuestion(baseQ) {
+  if (!baseQ) return null;
+  const rawCorrect = (baseQ.correct || baseQ.correct_answer || "A")
+    .toString()
+    .trim()
+    .toUpperCase();
+  const origLetter = ["A", "B", "C", "D"].includes(rawCorrect)
+    ? rawCorrect
+    : "A";
+  const opts = [
+    { letter: "A", text: baseQ.option_a },
+    { letter: "B", text: baseQ.option_b },
+    { letter: "C", text: baseQ.option_c },
+    { letter: "D", text: baseQ.option_d },
+  ];
+  const correctText =
+    opts.find((o) => o.letter === origLetter)?.text || opts[0].text;
+  const shuffled = strongShuffle(opts);
+  let newCorrect = "A";
+  const newQ = { ...baseQ };
+  ["A", "B", "C", "D"].forEach((nl, i) => {
+    newQ["option_" + nl.toLowerCase()] = shuffled[i].text;
+    if (shuffled[i].text === correctText) newCorrect = nl;
+  });
+  newQ.correct = newCorrect;
+  newQ.correct_answer = newCorrect;
+  newQ.correctText = correctText;
+  newQ.id = `${baseQ.topic || "q"}-${crypto.randomBytes(4).toString("hex")}`;
+  return newQ;
+}
+
 function buildLeaderboard(room) {
   const state = roomState[room];
   if (!state) return [];
@@ -952,7 +994,7 @@ function buildLeaderboard(room) {
       correct,
       liveCorrect: correct,
       icon,
-      streak: state.streaks[user] || 0, // <- ADD THIS
+      streak: state.streaks[user] || 0,
       lastCorrectAt: data.lastCorrectAt || 0,
     };
   });
@@ -962,6 +1004,7 @@ function buildLeaderboard(room) {
   });
   return lb;
 }
+
 function startQuizLoop(room, subject) {
   if (!roomState[room])
     roomState[room] = {
@@ -975,6 +1018,8 @@ function startQuizLoop(room, subject) {
       winner: null,
       timer: null,
       currentQ: null,
+      baseQ: null,
+      correctText: null,
       expiresAt: null,
       createdAt: Date.now(),
       lastActive: Date.now(),
@@ -987,6 +1032,7 @@ function startQuizLoop(room, subject) {
   )
     ? 30000
     : 20000;
+
   const ask = () => {
     if (!roomState[room]) return;
     state = roomState[room];
@@ -998,9 +1044,18 @@ function startQuizLoop(room, subject) {
         qNumber: state.qCount,
       });
     }
-    const q = getRandomQuestion(canonical);
-    if (!q) return;
-    state.currentQ = q;
+    const baseQ = getRandomQuestion(canonical);
+    if (!baseQ) return;
+    const baseCorrect = (baseQ.correct || baseQ.correct_answer || "A")
+      .toString()
+      .toUpperCase()
+      .trim();
+    const correctText =
+      baseQ["option_" + baseCorrect.toLowerCase()] || baseQ.option_a;
+
+    state.baseQ = baseQ;
+    state.correctText = correctText;
+    state.currentQ = { ...baseQ, correctText };
     state.qCount += 1;
     state.questionStart = Date.now();
     state.expiresAt = state.questionStart + intervalTime;
@@ -1009,24 +1064,46 @@ function startQuizLoop(room, subject) {
     state.is_question_locked = false;
     state.winner = null;
     arenaRedis.saveRoomState(room, state).catch(() => {});
-    console.log(`❓ [${room}] Q${state.qCount}`);
-    io.to(room).emit("new_question", {
-      qNumber: state.qCount,
-      question: q,
-      time: intervalTime / 1000,
-      expiresAt: state.expiresAt,
-      serverTime: Date.now(),
-      subject: canonical,
-    });
+
+    // OPTION 2: different A/B/C/D per socket, same correctText
+    const socketsInRoom = io.sockets.adapter.rooms.get(room);
+    if (socketsInRoom) {
+      for (const sid of socketsInRoom) {
+        const shuffledQ = getShuffledQuestion(baseQ);
+        io.to(sid).emit("new_question", {
+          qNumber: state.qCount,
+          question: shuffledQ,
+          time: intervalTime / 1000,
+          expiresAt: state.expiresAt,
+          serverTime: Date.now(),
+          subject: canonical,
+        });
+      }
+    } else {
+      io.to(room).emit("new_question", {
+        qNumber: state.qCount,
+        question: getShuffledQuestion(baseQ),
+        time: intervalTime / 1000,
+        expiresAt: state.expiresAt,
+        serverTime: Date.now(),
+        subject: canonical,
+      });
+    }
+    console.log(
+      `❓ [${room}] Q${state.qCount} correctText="${correctText.slice(0, 30)}"`,
+    );
   };
   ask();
   state.timer = setInterval(ask, intervalTime);
-  console.log(`✅ Quiz loop started for ${room}`);
+  console.log(`✅ Quiz loop started for ${room} - OPTION 2`);
 }
+
 const liveRooms = global.liveRooms || new Map();
 global.liveRooms = liveRooms;
+
 io.on("connection", (socket) => {
   registerLiveRankHandlers(io, socket, liveRooms);
+
   socket.on("join_room", async ({ room, username }) => {
     console.log(`🔵 JOIN: ${username} -> ${room}`);
     if (!isEnglishRoom(room)) {
@@ -1038,7 +1115,6 @@ io.on("connection", (socket) => {
           message: VITALS.MESSAGES.ACCESS_DENIED_SUB,
           code: "SUBSCRIPTION_REQUIRED",
         });
-        // Still emit participants so admin sees who tried
         emitParticipants(room);
         return;
       }
@@ -1068,13 +1144,14 @@ io.on("connection", (socket) => {
         winner: null,
         timer: null,
         currentQ: null,
+        baseQ: null,
+        correctText: null,
         expiresAt: null,
         createdAt: Date.now(),
         lastActive: Date.now(),
       };
     roomState[room].lastActive = Date.now();
 
-    // === PERSISTENT RANK LOAD - FIX FOR RESET BUG ===
     let persistentScore = 0;
     let persistentDisplay = username;
     let persistentIcon = "🐣";
@@ -1084,18 +1161,16 @@ io.on("connection", (socket) => {
         persistentScore = liveData.score || liveData.correct || 0;
         persistentDisplay = liveData.displayName || username;
         persistentIcon = liveData.icon || getIconForScore(persistentScore);
-        console.log(
-          `📈 Loaded rank for ${username}: ${persistentScore} ${persistentIcon}`,
-        );
       }
     } catch (e) {
       console.log("load rank err", e.message);
     }
-    if (roomState[room].scores[username] === undefined) {
+
+    if (roomState[room].scores[username] === undefined)
       roomState[room].scores[username] = persistentScore;
-    } else if (persistentScore > roomState[room].scores[username]) {
+    else if (persistentScore > roomState[room].scores[username])
       roomState[room].scores[username] = persistentScore;
-    }
+
     if (!roomState[room].userStats[username]) {
       roomState[room].userStats[username] = {
         score: persistentScore,
@@ -1117,6 +1192,7 @@ io.on("connection", (socket) => {
     arenaRedis.saveRoomState(room, roomState[room]).catch(() => {});
     emitParticipants(room);
     socket.to(room).emit("userJoined", { username });
+
     const subject = normalizeSubject(room.replace("-room", "").toLowerCase());
     const bankLen = questionBank[subject]?.length || 0;
     console.log(
@@ -1137,9 +1213,10 @@ io.on("connection", (socket) => {
       const st = roomState[room];
       if (st.currentQ && st.expiresAt) {
         const rem = Math.max(0, st.expiresAt - Date.now());
+        const shuffledForJoiner = getShuffledQuestion(st.baseQ || st.currentQ);
         socket.emit("new_question", {
           qNumber: st.qCount,
-          question: st.currentQ,
+          question: shuffledForJoiner,
           time: Math.ceil(rem / 1000),
           expiresAt: st.expiresAt,
           serverTime: Date.now(),
@@ -1149,11 +1226,13 @@ io.on("connection", (socket) => {
           socket.emit("question_locked", {
             winner: st.winner,
             message: `🔒 Locked by ${st.winner}`,
-            correct: st.currentQ.correct,
+            correct: st.correctText || st.currentQ.correct,
+            correctText: st.correctText,
           });
       }
     }
   });
+
   socket.on("leave_room", (payload) => {
     let targetRoom, username;
     if (typeof payload === "string") {
@@ -1177,140 +1256,177 @@ io.on("connection", (socket) => {
       setTimeout(() => cleanupRoomIfEmpty(targetRoom), 1000);
     }
   });
-  socket.on("answer_question", async ({ room, username, answer }) => {
-    if (!isEnglishRoom(room)) {
-      const ok = await hasFullAccessFor(username);
-      if (!ok) {
-        socket.emit("access_denied", {
-          reason: VITALS.MESSAGES.ACCESS_DENIED_SUB,
+
+  socket.on(
+    "answer_question",
+    async ({ room, username, answer, answerText }) => {
+      if (!isEnglishRoom(room)) {
+        const ok = await hasFullAccessFor(username);
+        if (!ok) {
+          socket.emit("access_denied", {
+            reason: VITALS.MESSAGES.ACCESS_DENIED_SUB,
+          });
+          return;
+        }
+      }
+      let state = roomState[room];
+      if (!state || !state.currentQ) return;
+      state.lastActive = Date.now();
+      if (!state.answered) state.answered = new Set();
+      if (state.answered.has(username)) {
+        socket.emit("answer_rejected", { reason: "Already answered" });
+        return;
+      }
+      if (state.is_question_locked === true) {
+        socket.emit("answer_rejected", {
+          reason: `Locked by ${state.winner}`,
+          winner: state.winner,
         });
         return;
       }
-    }
-    let state = roomState[room];
-    if (!state || !state.currentQ) return;
-    state.lastActive = Date.now();
-    if (!state.answered) state.answered = new Set();
-    if (state.answered.has(username)) {
-      socket.emit("answer_rejected", { reason: "Already answered" });
-      return;
-    }
-    if (state.is_question_locked === true) {
-      socket.emit("answer_rejected", {
-        reason: `Locked by ${state.winner}`,
-        winner: state.winner,
-      });
-      return;
-    }
-    let correct = state.currentQ.correct.trim().toUpperCase();
-    let given = answer.trim().toUpperCase();
-    let isCorrect = correct === given;
-    if (isCorrect) {
-      state.is_question_locked = true;
-      state.winner = username;
-      state.answered.add(username);
-      if (!state.userStats[username])
-        state.userStats[username] = { score: 0, correct: 0, lastCorrectAt: 0 };
-      state.userStats[username].score =
-        (state.userStats[username].score || 0) + 1;
-      state.userStats[username].correct =
-        (state.userStats[username].correct || 0) + 1;
-      state.userStats[username].lastCorrectAt = Date.now();
-      state.scores[username] = state.userStats[username].score;
-      state.streaks[username] = (state.streaks[username] || 0) + 1;
-      arenaRedis
-        .updateScore(room, username, username, state.scores[username])
-        .catch(() => {});
-      arenaRedis.saveRoomState(room, state).catch(() => {});
-      let displayName = username;
-      let icon = "🐣";
-      let newScore = state.userStats[username].correct;
-      try {
-        const live = await arenaRankService.onCorrectAnswer(username);
-        displayName =
-          live.displayName || getDisplayName(username, live.score || newScore);
-        icon = live.icon || getIconForScore(live.score || newScore);
-        newScore = live.score || newScore;
-        const rankInfo = getLiveRank(newScore);
-        io.to(room).emit("live:user:rankUpdate", {
-          username,
-          displayName,
-          icon,
-          score: newScore,
-          correct: newScore,
-          correctCount: newScore,
+      const correctText = (
+        state.correctText ||
+        state.currentQ.correctText ||
+        ""
+      ).trim();
+      const givenText = (answerText || "").trim();
+      const givenLetter = (answer || "").trim().toUpperCase();
+
+      // REJECT if frontend didn't send text — this forces text-only
+      if (!givenText) {
+        console.log(
+          `⚠️ ${username} sent no answerText, only letter ${givenLetter} — rejecting`,
+        );
+        socket.emit("answer_rejected", {
+          reason: "Update frontend to send answerText",
         });
-        io.to(room).emit("live_rank_update", {
-          username,
-          displayName,
-          icon,
-          score: newScore,
-          correct: newScore,
-        });
-        if ([20, 60, 200, 500, 1200, 2500].includes(newScore)) {
-          io.to(room).emit("live:rank:announcement", {
-            text: `🚀 ${displayName} is now ${icon} ${rankInfo.name}!`,
-            username,
-            icon,
-            tier: rankInfo.tier,
-          });
-          io.to(room).emit("live:rank:public", {
+        return;
+      }
+
+      const isCorrect = givenText.toLowerCase() === correctText.toLowerCase();
+
+      console.log(
+        `📝 JUDGE [${room}] Q${state.qCount}: correctText="${correctText}" | given="${givenText}" (${givenLetter}) => ${isCorrect ? "✅" : "❌"}`,
+      );
+
+      if (isCorrect) {
+        state.is_question_locked = true;
+        state.winner = username;
+        state.answered.add(username);
+        if (!state.userStats[username])
+          state.userStats[username] = {
+            score: 0,
+            correct: 0,
+            lastCorrectAt: 0,
+          };
+        state.userStats[username].score += 1;
+        state.userStats[username].correct += 1;
+        state.userStats[username].lastCorrectAt = Date.now();
+        state.scores[username] = state.userStats[username].score;
+        state.streaks[username] = (state.streaks[username] || 0) + 1;
+        arenaRedis
+          .updateScore(room, username, username, state.scores[username])
+          .catch(() => {});
+        arenaRedis.saveRoomState(room, state).catch(() => {});
+        let displayName = username;
+        let icon = "🐣";
+        let newScore = state.userStats[username].correct;
+        try {
+          const live = await arenaRankService.onCorrectAnswer(username);
+          displayName =
+            live.displayName ||
+            getDisplayName(username, live.score || newScore);
+          icon = live.icon || getIconForScore(live.score || newScore);
+          newScore = live.score || newScore;
+          const rankInfo = getLiveRank(newScore);
+          io.to(room).emit("live:user:rankUpdate", {
             username,
             displayName,
-            newRank: rankInfo,
-            text: `${displayName} is now ${rankInfo.name}!`,
+            icon,
+            score: newScore,
+            correct: newScore,
+            correctCount: newScore,
           });
+          io.to(room).emit("live_rank_update", {
+            username,
+            displayName,
+            icon,
+            score: newScore,
+            correct: newScore,
+          });
+          if ([20, 60, 200, 500, 1200, 2500].includes(newScore)) {
+            io.to(room).emit("live:rank:announcement", {
+              text: `🚀 ${displayName} is now ${icon} ${rankInfo.name}!`,
+              username,
+              icon,
+              tier: rankInfo.tier,
+            });
+            io.to(room).emit("live:rank:public", {
+              username,
+              displayName,
+              newRank: rankInfo,
+              text: `${displayName} is now ${rankInfo.name}!`,
+            });
+          }
+        } catch (e) {
+          console.log("rank save error", e.message);
         }
-      } catch (e) {
-        console.log("rank save error", e.message);
-      }
-      io.to(room).emit("question_locked", {
-        winner: username,
-        winnerDisplay: displayName,
-        answer: given,
-        correct,
-        message: `🏆 ${displayName} wins! Answer: ${correct}`,
-      });
-      io.to(room).emit("answer_result", {
-        username,
-        displayName,
-        answer: given,
-        correct,
-        isCorrect,
-        score: state.scores[username],
-        correctCount: state.userStats[username].correct,
-        streak: state.streaks[username],
-        lastCorrectAt: state.userStats[username].lastCorrectAt,
-      });
-    } else {
-      state.answered.add(username);
-      state.streaks[username] = 0;
-      if (!state.userStats[username])
-        state.userStats[username] = { score: 0, correct: 0, lastCorrectAt: 0 };
+        io.to(room).emit("question_locked", {
+          winner: username,
+          winnerDisplay: displayName,
+          answer: givenLetter,
+          answerText: answerText,
+          correct: correctText,
+          correctText: correctText,
+          message: `🏆 ${displayName} wins! Answer: ${correctText}`,
+        });
 
-      // FIX: create displayName for wrong answer case
-      let failDisplayName = username;
-      try {
-        failDisplayName = getDisplayName(
+        io.to(room).emit("answer_result", {
           username,
-          state.userStats[username].correct || 0,
-        );
-      } catch {}
-
-      io.to(room).emit("answer_result", {
-        username,
-        displayName: failDisplayName,
-        answer: given,
-        correct,
-        isCorrect,
-        score: state.scores[username] || 0,
-        correctCount: state.userStats[username].correct || 0,
-        streak: 0,
-        lastCorrectAt: state.userStats[username].lastCorrectAt || 0,
-      });
-    }
-    emitParticipants(room);
-  });
+          displayName,
+          answer: givenLetter,
+          answerText,
+          correct: correctText,
+          correctText: correctText,
+          isCorrect,
+          score: state.scores[username],
+          correctCount: state.userStats[username].correct,
+          streak: state.streaks[username],
+          lastCorrectAt: state.userStats[username].lastCorrectAt,
+        });
+      } else {
+        state.answered.add(username);
+        state.streaks[username] = 0;
+        if (!state.userStats[username])
+          state.userStats[username] = {
+            score: 0,
+            correct: 0,
+            lastCorrectAt: 0,
+          };
+        let failDisplayName = username;
+        try {
+          failDisplayName = getDisplayName(
+            username,
+            state.userStats[username].correct || 0,
+          );
+        } catch {}
+        io.to(room).emit("answer_result", {
+          username,
+          displayName: failDisplayName,
+          answer: givenLetter,
+          answerText,
+          correct: state.currentQ.correct,
+          correctText,
+          isCorrect,
+          score: state.scores[username] || 0,
+          correctCount: state.userStats[username].correct || 0,
+          streak: 0,
+          lastCorrectAt: state.userStats[username].lastCorrectAt || 0,
+        });
+      }
+      emitParticipants(room);
+    },
+  );
   socket.on("send_message", async (data) => {
     if (!isEnglishRoom(data.room)) {
       const ok = await hasFullAccessFor(data.author || data.username);
@@ -1320,6 +1436,7 @@ io.on("connection", (socket) => {
     if (st) st.lastActive = Date.now();
     io.to(data.room).emit("receive_message", data);
   });
+
   socket.on("private_message", ({ room, to, from, message }) => {
     let target = null;
     for (const [sid, info] of Object.entries(socketUserMap)) {
@@ -1332,6 +1449,7 @@ io.on("connection", (socket) => {
     if (target) io.to(target).emit("private_message", payload);
     if (target !== socket.id) socket.emit("private_message", payload);
   });
+
   socket.on("disconnect", () => {
     const data = socketUserMap[socket.id];
     if (data) {
@@ -1343,17 +1461,34 @@ io.on("connection", (socket) => {
     }
   });
 });
+
 app.get("/admin/live", checkAdmin, (req, res) => {
-  res.json(monitorService.getLive(io, socketUserMap, roomState));
+  // Don't leak correctText to admin UI - strip it
+  const safeState = {};
+  for (const [room, st] of Object.entries(roomState)) {
+    safeState[room] = {
+      qCount: st.qCount,
+      userCount: Object.keys(st.scores || {}).length,
+      isLocked: st.is_question_locked,
+      winner: st.winner,
+      correctText: st.correctText ? `${st.correctText.slice(0, 20)}...` : null, // masked
+    };
+  }
+  res.json(monitorService.getLive(io, socketUserMap, safeState));
 });
+
 app.get("/admin/storage", checkAdmin, async (req, res) => {
   res.json(await monitorService.getStorage());
 });
+
 app.get("/admin/ranks", checkAdmin, async (req, res) => {
   res.json(await arenaRankService.getGlobalRanks(100));
 });
+
 initRedisAdapter().then(() => {
   server.listen(VITALS.SYSTEM.PORT, () =>
-    console.log(`Server on ${VITALS.SYSTEM.PORT} - TIER 6 PERSIST FIXED`),
+    console.log(
+      `Server on ${VITALS.SYSTEM.PORT} - TIER 6 OPTION 2 correctText FIXED`,
+    ),
   );
 });

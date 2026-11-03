@@ -587,6 +587,7 @@ export default function App() {
   const [room, setRoom] = useState(() => authedUser?.subject || "english-room");
   const [palaceMode, setPalaceMode] = useState("arena");
   const [currentQ, setCurrentQ] = useState(null);
+  const currentQRef = useRef(null);
   const [qNumber, setQNumber] = useState(0);
   const [timer, setTimer] = useState(60);
   const [expiresAt, setExpiresAt] = useState(null);
@@ -837,7 +838,16 @@ export default function App() {
       o.start();
       o.stop(ctx.currentTime + 0.08);
     } catch {}
-    socket.emit("answer_question", { room, username, answer: opt });
+    // OPTION 2: send both letter and text - FIXED with Ref
+    const q = currentQRef.current || currentQ;
+    const textForOpt = q ? q[`option_${opt.toLowerCase()}`] : "";
+    console.log("[SEND]", opt, "=>", textForOpt);
+    socket.emit("answer_question", {
+      room,
+      username,
+      answer: opt,
+      answerText: textForOpt,
+    });
   };
   const handleLogout = () => {
     localStorage.removeItem("jambite_user");
@@ -891,6 +901,7 @@ export default function App() {
       const current = room.replace("-room", "").toLowerCase();
       const norm = (s) => (s === "mathematics" ? "maths" : s);
       if (incoming && norm(incoming) !== norm(current)) return;
+      currentQRef.current = d.question;
       setCurrentQ(d.question);
       setQNumber(d.qNumber);
       setExpiresAt(d.expiresAt);
@@ -946,8 +957,9 @@ export default function App() {
     socket.on("question_locked", (data) => {
       setIsLocked(true);
       setLockedWinner(data.winner);
-      showToast(data.message);
-      setFeedback((p) => ({ ...p, correct: data.correct }));
+      const text = data.correctText || data.correct;
+      showToast(data.message || `${data.winner} got it: ${text}`);
+      setFeedback((p) => ({ ...p, correct: text, correctText: text }));
     });
     socket.on("answer_rejected", (data) => {
       showToast(`🔒 ${data.reason}`);

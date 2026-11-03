@@ -1415,7 +1415,7 @@ io.on("connection", (socket) => {
           displayName: failDisplayName,
           answer: givenLetter,
           answerText,
-          correct: state.currentQ.correct,
+          correct: correctText,
           correctText,
           isCorrect,
           score: state.scores[username] || 0,

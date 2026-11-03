@@ -944,7 +944,11 @@ export default function App() {
         }
 
         // 3. Feedback & Toast
-        setFeedback({ correct: d.correct, isCorrect: d.isCorrect });
+        setFeedback({
+          correct: d.correctText || d.correct,
+          correctText: d.correctText || d.correct,
+          isCorrect: d.isCorrect,
+        });
         if (!isLocked) {
           showToast(
             d.isCorrect ? `✅ CORRECT! +1` : `❌ WRONG! Correct: ${d.correct}`,
@@ -1963,7 +1967,15 @@ export default function App() {
                 <div className="grid gap-3.5 mt-7">
                   {opts.map((o) => {
                     const isSelected = selected === o.k;
-                    const isCorrect = feedback?.correct === o.k;
+                    const correctText =
+                      feedback?.correctText || feedback?.correct || "";
+                    // If server sent a letter (A/B/C/D), fall back to letter. If it sent text, use text.
+                    const isCorrect =
+                      feedback &&
+                      (correctText.length === 1
+                        ? correctText.toUpperCase() === o.k
+                        : String(correctText).trim().toLowerCase() ===
+                          String(o.v).trim().toLowerCase());
                     const isWrongSelected =
                       isSelected && feedback && !feedback.isCorrect;
                     let wrap = "bg-[#0F172A] border-white/10 text-slate-200";

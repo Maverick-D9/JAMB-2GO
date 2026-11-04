@@ -23,6 +23,43 @@ module.exports = {
   SUBSCRIPTION,
   TRIAL: { DURATION_DAYS: 2 },
 
+  // === CBT - SINGLE SOURCE FOR ALL CBT TUNABLES ===
+  CBT: {
+    DAILY_LIMIT: 40, // <-- change here only, cbt.js picks it up
+    DURATION_MINUTES: 120,
+    QUESTIONS_PER_SUBJECT: 40,
+    ENABLED: true,
+    MIN_SECONDS_PER_QUESTION: 8, // anti-cheat: flag if faster than this per Q
+    DUPLICATE_WINDOW_MS: 90 * 1000, // ignore same-score save within 90s
+    DAY_MS: 24 * 60 * 60 * 1000,
+    JAMB_MAX_SCORE: 400,
+    SUBJECTS: [
+      "english",
+      "maths",
+      "mathematics",
+      "physics",
+      "chemistry",
+      "biology",
+      "commerce",
+      "economics",
+      "government",
+      "accounting",
+      "literature",
+      "crs",
+      "irs",
+      "geography",
+      "agric",
+    ],
+    REQUIRED_SUBJECTS_COUNT: 3, // user picks 3 + english = 4 total
+    LEADERBOARD_LIMIT: 100,
+    STREAK_LIMIT: 10,
+    STREAK_FETCH_LIMIT: 5000,
+  },
+
+  AUTH: {
+    JWT_SECRET: process.env.JWT_SECRET || "jamb2go_secret_change_this",
+  },
+
   SYSTEM: {
     PORT: parseInt(process.env.PORT) || 5000,
     MONGODB_URI: process.env.MONGODB_URI,
@@ -47,10 +84,8 @@ module.exports = {
 
   ADMIN: {
     PASSWORD: process.env.ADMIN_PASSWORD || "JAMB2GO_2026",
-    // Fallback for old code that checks ADMIN_PASSWORD directly
     ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || "JAMB2GO_2026",
   },
-  // Top-level fallback for any legacy imports
   ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || "JAMB2GO_2026",
 
   PAYSTACK: { SECRET_KEY: process.env.PAYSTACK_SECRET_KEY },
@@ -71,5 +106,7 @@ module.exports = {
     CBT_DISABLED: "CBT Mode is disabled by admin",
     ACCESS_DENIED_SUB: `Subscription expired or not found - please pay ${SUBSCRIPTION.LABEL}`,
     TRIAL_ENDED: "Trial Ended — Stay a Jambite!",
+    DAILY_LIMIT_REACHED: (count, limit) =>
+      `Daily limit reached. You have used ${count}/${limit} full CBT attempts today. Try again tomorrow.`,
   },
 };

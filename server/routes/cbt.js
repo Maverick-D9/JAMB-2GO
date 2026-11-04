@@ -7,8 +7,19 @@ const CbtResult = require("../models/CbtResult");
 const User = require("../models/User");
 const VITALS = require("../config/vitals");
 
+// === ALL TUNABLES FROM VITALS - DO NOT HARDCODE HERE ===
+const CBT = VITALS.CBT;
+const DAILY_LIMIT = CBT.DAILY_LIMIT;
+const ADMIN_PASS = VITALS.ADMIN.PASSWORD;
+const JWT_SECRET = VITALS.AUTH.JWT_SECRET;
+
 const CONFIG_PATH = path.join(__dirname, `../${VITALS.SYSTEM.CBT_CONFIG_FILE}`);
-let CONFIG = { enabled: true, durationMinutes: 120, questionsPerSubject: 40 };
+
+let CONFIG = {
+  enabled: CBT.ENABLED,
+  durationMinutes: CBT.DURATION_MINUTES,
+  questionsPerSubject: CBT.QUESTIONS_PER_SUBJECT,
+};
 try {
   if (fs.existsSync(CONFIG_PATH)) {
     CONFIG = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf8"));
@@ -28,9 +39,7 @@ function checkAdminPassword(req) {
     req.headers["x-admin-password"] ||
     req.body?.adminPassword ||
     req.query?.adminPassword;
-  const adminPass =
-    VITALS?.ADMIN?.PASSWORD || VITALS?.ADMIN_PASSWORD || "JAMB2GO_2026";
-  return passHeader && passHeader === adminPass;
+  return passHeader && passHeader === ADMIN_PASS;
 }
 
 let cbtBankCache = {};
@@ -67,24 +76,7 @@ function findFileSync(sub) {
 }
 function loadAllCbtBanks() {
   cbtBankCache = {};
-  const subjects = [
-    "english",
-    "maths",
-    "mathematics",
-    "physics",
-    "chemistry",
-    "biology",
-    "commerce",
-    "economics",
-    "government",
-    "accounting",
-    "literature",
-    "crs",
-    "irs",
-    "geography",
-    "agric",
-  ];
-  subjects.forEach((sub) => {
+  CBT.SUBJECTS.forEach((sub) => {
     const file = findFileSync(sub);
     if (file) {
       try {
@@ -98,6 +90,7 @@ function loadAllCbtBanks() {
     cbtBankCache["mathematics"] = cbtBankCache["maths"];
 }
 loadAllCbtBanks();
+
 const DUMMY = {
   english: Array.from({ length: 60 }, (_, i) => ({
     question_text: `English Q${i + 1}`,
@@ -118,6 +111,7 @@ const DUMMY = {
     subject: "mathematics",
   })),
 };
+
 function strongShuffle(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -151,7 +145,7 @@ function getQs(subject, n) {
     let newCorrect = "A";
     const newOptionsMap = {};
     ["A", "B", "C", "D"].forEach((newLetter, i) => {
-      newOptionsMap[`option_${newLetter.toLowerCase()}`] = shuffledOpts[i].text;
+      newOptionsMap["option_" + newLetter.toLowerCase()] = shuffledOpts[i].text;
       if (shuffledOpts[i].text === correctText) newCorrect = newLetter;
     });
     return {
@@ -160,7 +154,14 @@ function getQs(subject, n) {
       explanation: q.explanation || "",
       ...newOptionsMap,
       correct_answer: newCorrect,
-      id: `${subject}-${crypto.randomBytes(4).toString("hex")}-${idx}-${Date.now()}`,
+      id:
+        subject +
+        "-" +
+        crypto.randomBytes(4).toString("hex") +
+        "-" +
+        idx +
+        "-" +
+        Date.now(),
     };
   });
 }
@@ -190,7 +191,7 @@ async function checkSubscription(req, res, next) {
     req.query?.userId ||
     req.headers["x-user-id"] ||
     req.headers["x-user-email"] ||
-    req.headers["authorization"]?.replace("Bearer ", "");
+    (req.headers["authorization"] || "").replace("Bearer ", "");
   if (!userId)
     return res.status(401).json({ error: "Login required", code: "NO_USER" });
   try {
@@ -198,35 +199,34 @@ async function checkSubscription(req, res, next) {
     try {
       if (userId.includes(".")) {
         const jwt = require("jsonwebtoken");
-        const payload = jwt.verify(
-          userId,
-          process.env.JWT_SECRET || "jamb2go_secret_change_this",
-        );
+        const payload = jwt.verify(userId, JWT_SECRET);
         user = await User.findOne({ userId: payload.userId });
       }
-    } catch {}
+    } catch (e) {}
     if (!user) {
       user = await User.findByIdCustom(userId);
       if (!user) user = await User.findByEmail(userId);
     }
     if (!user)
       return res.status(403).json({
-        error: "SUBSCRIPTION_REQUIRED",
+        error: VITALS.MESSAGES.ACCESS_DENIED_SUB,
         code: "SUBSCRIPTION_REQUIRED",
       });
-
     const access = User.checkUserAccess(user);
     if (
-      access.status !== "active" ||
-      access.tier !== VITALS.SUBSCRIPTION.TIER_NAME
+      (access.status !== "active" && access.status !== "trial") ||
+      (access.daysLeft || 0) <= 0
     ) {
       return res.status(403).json({
-        error:
-          "Free trial limited to English Arena only. Subscribe for full CBT.",
-        code: "TRIAL_ENGLISH_ONLY",
+        error: VITALS.MESSAGES.EXPIRED_CBT,
+        code: "SUBSCRIPTION_REQUIRED",
+        status: access.status,
+        daysLeft: access.daysLeft,
+        label: VITALS.SUBSCRIPTION.LABEL,
       });
     }
     req.mongoUser = user;
+    req.access = access;
     next();
   } catch (e) {
     console.error("checkSubscription error:", e);
@@ -242,53 +242,52 @@ router.get("/status", checkSubscription, async (req, res) => {
       user.cbtDailyUsage?.date === today ? user.cbtDailyUsage.count : 0;
     return res.json({
       count,
-      limit: 2,
+      limit: DAILY_LIMIT,
       date: today,
-      attemptsLeft: Math.max(0, 2 - count),
+      attemptsLeft: Math.max(0, DAILY_LIMIT - count),
+      access: req.access,
+      label: VITALS.SUBSCRIPTION.LABEL,
+      trialDays: VITALS.TRIAL.DURATION_DAYS,
     });
   } catch (e) {
     return res.json({
       count: 0,
-      limit: 2,
+      limit: DAILY_LIMIT,
       date: getLagosDateString(),
-      attemptsLeft: 2,
+      attemptsLeft: DAILY_LIMIT,
     });
   }
 });
 
 router.post("/start", checkSubscription, async (req, res) => {
   const { subjects } = req.body;
-  if (!subjects || subjects.length !== 3)
-    return res.status(400).json({ error: "Select 3 subjects" });
-  if (!CONFIG.enabled)
+  if (!subjects || subjects.length !== CBT.REQUIRED_SUBJECTS_COUNT)
     return res
-      .status(403)
-      .json({ error: "CBT is currently disabled by admin" });
-
+      .status(400)
+      .json({ error: `Select ${CBT.REQUIRED_SUBJECTS_COUNT} subjects` });
+  if (!CONFIG.enabled)
+    return res.status(403).json({ error: VITALS.MESSAGES.CBT_DISABLED });
   try {
     const user = req.mongoUser;
     const today = getLagosDateString();
-    if (!user.cbtDailyUsage || user.cbtDailyUsage.date !== today) {
+    if (!user.cbtDailyUsage || user.cbtDailyUsage.date !== today)
       user.cbtDailyUsage = { date: today, count: 0 };
-    }
-    if (user.cbtDailyUsage.count >= 2) {
+    if (user.cbtDailyUsage.count >= DAILY_LIMIT) {
       return res.status(429).json({
-        error:
-          "Daily limit reached. You have used 2/2 full CBT attempts today. Try again tomorrow.",
+        error: VITALS.MESSAGES.DAILY_LIMIT_REACHED(
+          user.cbtDailyUsage.count,
+          DAILY_LIMIT,
+        ),
         code: "DAILY_LIMIT",
         count: user.cbtDailyUsage.count,
-        limit: 2,
+        limit: DAILY_LIMIT,
       });
     }
     user.cbtDailyUsage.count += 1;
     await user.save();
-    console.log(
-      `[CBT DAILY] ${user.email} -> ${user.cbtDailyUsage.count}/2 on ${today}`,
-    );
   } catch (e) {
     console.error("daily limit error:", e);
   }
-
   const allSubjects = ["english", ...subjects.map((s) => s.toLowerCase())];
   const questions = {};
   allSubjects.forEach((sub) => {
@@ -301,6 +300,7 @@ router.post("/start", checkSubscription, async (req, res) => {
     examId: Date.now().toString(),
     config: CONFIG,
     cbtDailyUsage: req.mongoUser.cbtDailyUsage,
+    access: req.access,
   });
 });
 
@@ -329,7 +329,7 @@ router.post("/submit", checkSubscription, (req, res) => {
     score,
     total,
     breakdown,
-    jambScore: Math.round((score / (total || 1)) * 400),
+    jambScore: Math.round((score / (total || 1)) * CBT.JAMB_MAX_SCORE),
   });
 });
 
@@ -342,7 +342,9 @@ function calculateStreaks(allResults) {
   const streaks = [];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  Object.entries(grouped).forEach(([userId, results]) => {
+  Object.entries(grouped).forEach((entry) => {
+    const userId = entry[0];
+    const results = entry[1];
     const days = [
       ...new Set(
         results.map((r) => {
@@ -356,30 +358,30 @@ function calculateStreaks(allResults) {
     let currentStreak = 0;
     let checkDate = today.getTime();
     const lastDay = days[0];
-    const diff = (today.getTime() - lastDay) / 86400000;
+    const diff = (today.getTime() - lastDay) / CBT.DAY_MS;
     if (diff > 1) currentStreak = 0;
     else {
       for (let d of days) {
         if (
           d === checkDate ||
-          (currentStreak === 0 && d === checkDate - 86400000)
+          (currentStreak === 0 && d === checkDate - CBT.DAY_MS)
         ) {
-          if (d !== checkDate && currentStreak === 0) checkDate -= 86400000;
+          if (d !== checkDate && currentStreak === 0) checkDate -= CBT.DAY_MS;
           currentStreak++;
-          checkDate -= 86400000;
+          checkDate -= CBT.DAY_MS;
         } else if (d < checkDate) break;
       }
     }
     if (currentStreak > 0)
       streaks.push({
-        userId,
+        userId: userId,
         name: results[0].name || "Anon",
         streak: currentStreak,
         lastActive: new Date(days[0]),
         totalExams: results.length,
       });
   });
-  return streaks.sort((a, b) => b.streak - a.streak).slice(0, 10);
+  return streaks.sort((a, b) => b.streak - a.streak).slice(0, CBT.STREAK_LIMIT);
 }
 
 router.post("/save-result", checkSubscription, async (req, res) => {
@@ -396,28 +398,24 @@ router.post("/save-result", checkSubscription, async (req, res) => {
     } = req.body;
     if (!breakdown)
       return res.status(400).json({ error: "breakdown required" });
-
-    const subArray = Object.entries(breakdown).map(([sName, data]) => ({
-      name: sName,
-      score: data.score || 0,
-      total: data.total || 0,
+    const subArray = Object.entries(breakdown).map((entry) => ({
+      name: entry[0],
+      score: entry[1].score || 0,
+      total: entry[1].total || 0,
     }));
     const totalQuestions =
       rawTotal || subArray.reduce((a, b) => a + b.total, 0) || 20;
     const timeSec = Number(timeTaken) || 0;
-
     let isFlagged = false;
-    const minAllowed = totalQuestions * 8;
+    const minAllowed = totalQuestions * CBT.MIN_SECONDS_PER_QUESTION;
     if (timeSec > 0 && timeSec < minAllowed) isFlagged = true;
     if (totalQuestions <= 40 && timeSec >= 60) isFlagged = false;
-
     const english = subArray.find((s) => s.name.toLowerCase() === "english");
     const others = subArray.filter((s) => s.name.toLowerCase() !== "english");
-    const finalUserId = req.mongoUser?.userId || userId || `anon_${Date.now()}`;
-
+    const finalUserId = req.mongoUser?.userId || userId || "anon_" + Date.now();
     if (attemptId) {
       const existing = await CbtResult.findOne({ attemptId });
-      if (existing) {
+      if (existing)
         return res.json({
           success: true,
           isFlagged: existing.isFlagged,
@@ -425,17 +423,15 @@ router.post("/save-result", checkSubscription, async (req, res) => {
           attemptId: existing.attemptId,
           duplicate: true,
         });
-      }
     }
-
-    const ninetyAgo = new Date(Date.now() - 90 * 1000);
+    const ninetyAgo = new Date(Date.now() - CBT.DUPLICATE_WINDOW_MS);
     const recentDup = await CbtResult.findOne({
       userId: finalUserId,
       rawScore,
       rawTotal: totalQuestions,
       date: { $gte: ninetyAgo },
     });
-    if (recentDup) {
+    if (recentDup)
       return res.json({
         success: true,
         isFlagged: recentDup.isFlagged,
@@ -443,22 +439,24 @@ router.post("/save-result", checkSubscription, async (req, res) => {
         attemptId: recentDup.attemptId,
         duplicate: true,
       });
-    }
-
     const generateId = () =>
-      `att_${Date.now()}_${crypto.randomBytes(4).toString("hex")}_${String(finalUserId).slice(-4)}`;
+      "att_" +
+      Date.now() +
+      "_" +
+      crypto.randomBytes(4).toString("hex") +
+      "_" +
+      String(finalUserId).slice(-4);
     let finalAttemptId =
       attemptId && String(attemptId).startsWith("att_")
         ? attemptId
         : generateId();
-
     const makePayload = (id) => ({
       userId: finalUserId,
       name: (req.mongoUser?.fullName || name || "Anonymous").slice(0, 30),
       date: new Date(),
       totalScore:
         Number(totalScore) ||
-        Math.round((rawScore / (totalQuestions || 1)) * 400),
+        Math.round((rawScore / (totalQuestions || 1)) * CBT.JAMB_MAX_SCORE),
       rawScore: rawScore || 0,
       rawTotal: totalQuestions,
       englishScore: english?.score || 0,
@@ -475,7 +473,6 @@ router.post("/save-result", checkSubscription, async (req, res) => {
       userAnswers: {},
       questionsSnapshot: null,
     });
-
     try {
       const doc = await CbtResult.create(makePayload(finalAttemptId));
       return res.json({
@@ -524,7 +521,7 @@ router.get("/leaderboard", async (req, res) => {
         { $group: { _id: "$userId", doc: { $first: "$$ROOT" } } },
         { $replaceRoot: { newRoot: "$doc" } },
         { $sort: { totalScore: -1, timeTaken: 1 } },
-        { $limit: 100 },
+        { $limit: CBT.LEADERBOARD_LIMIT },
       ]);
       return res.json(ranked);
     }
@@ -544,7 +541,7 @@ router.get("/leaderboard", async (req, res) => {
           },
         },
         { $sort: { subjectScore: -1 } },
-        { $limit: 100 },
+        { $limit: CBT.LEADERBOARD_LIMIT },
         {
           $replaceRoot: {
             newRoot: {
@@ -564,14 +561,14 @@ router.get("/leaderboard", async (req, res) => {
     if (type === "streak") {
       const recent = await CbtResult.find({ isFlagged: false })
         .sort({ date: -1 })
-        .limit(5000)
+        .limit(CBT.STREAK_FETCH_LIMIT)
         .lean();
       return res.json(calculateStreaks(recent));
     }
     if (type === "improved") {
       const recent = await CbtResult.find({ isFlagged: false })
         .sort({ date: -1 })
-        .limit(5000)
+        .limit(CBT.STREAK_FETCH_LIMIT)
         .lean();
       const grouped = {};
       recent.forEach((r) => {
@@ -579,7 +576,9 @@ router.get("/leaderboard", async (req, res) => {
         grouped[r.userId].push(r);
       });
       const improved = [];
-      Object.entries(grouped).forEach(([userId, arr]) => {
+      Object.entries(grouped).forEach((entry) => {
+        const userId = entry[0];
+        const arr = entry[1];
         if (arr.length < 2) return;
         arr.sort((a, b) => new Date(a.date) - new Date(b.date));
         const first = arr[0].totalScore;
@@ -588,7 +587,7 @@ router.get("/leaderboard", async (req, res) => {
         const percent = ((highest - first) / first) * 100;
         if (percent > 0)
           improved.push({
-            userId,
+            userId: userId,
             name: arr[0].name,
             firstScore: first,
             highestScore: highest,
@@ -599,7 +598,7 @@ router.get("/leaderboard", async (req, res) => {
       return res.json(
         improved
           .sort((a, b) => b.percentIncrease - a.percentIncrease)
-          .slice(0, 100),
+          .slice(0, CBT.LEADERBOARD_LIMIT),
       );
     }
     res.json([]);
@@ -623,7 +622,7 @@ router.post("/reload-cache", (req, res) => {
   res.json({
     success: true,
     cached: Object.keys(cbtBankCache).map(
-      (k) => `${k}:${cbtBankCache[k].length}`,
+      (k) => k + ":" + cbtBankCache[k].length,
     ),
   });
 });

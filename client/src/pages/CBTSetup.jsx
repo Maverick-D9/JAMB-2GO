@@ -2,24 +2,14 @@ import { useState, useEffect } from "react";
 import { VITALS } from "../config/vitals";
 
 const API_BASE = VITALS.SYSTEM.API_BASE;
+const CBT = VITALS.CBT;
 
-const ALL_SUBJECTS = [
-  "mathematics",
-  "physics",
-  "chemistry",
-  "biology",
-  "geography",
-  "economics",
-  "government",
-  "literature",
-  "commerce",
-  "accounting",
-  "history",
-  "agriculture",
-  "marketing",
-  "yoruba",
-  "irs",
-];
+// Aligned with backend VITALS.CBT.SUBJECTS
+// Backend has both "maths" + "mathematics" as aliases - show only "mathematics" once
+// "english" is compulsory, so exclude it from selectable list
+const ALL_SUBJECTS = CBT.SUBJECTS.filter(
+  (s) => s !== "english" && s !== "maths",
+);
 
 const PALACE_MAP = {
   "english-room": "english",
@@ -34,14 +24,83 @@ const PALACE_MAP = {
   "govt-room": "government",
   "literature-room": "literature",
   "accounting-room": "accounting",
-  "crs-room": "history",
-  crs: "history",
+  "crs-room": "crs",
+  crs: "crs",
   "geography-room": "geography",
-  "agric-room": "agriculture",
-  "marketing-room": "marketing",
-  "yoruba-room": "yoruba",
+  "agric-room": "agric",
+  "agriculture-room": "agric",
+  "marketing-room": "commerce",
+  "yoruba-room": "english",
   "irs-room": "irs",
 };
+
+// --- STRONG SHUFFLE UTILS ---
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function strongShuffleQuestions(questions) {
+  let shuffled = shuffleArray(questions);
+  for (let i = 1; i < shuffled.length; i++) {
+    const prev = (
+      shuffled[i - 1].question_text ||
+      shuffled[i - 1].question ||
+      ""
+    ).slice(0, 22);
+    const curr = (
+      shuffled[i].question_text ||
+      shuffled[i].question ||
+      ""
+    ).slice(0, 22);
+    if (prev === curr) {
+      let k = i + 1;
+      while (
+        k < shuffled.length &&
+        (shuffled[k].question_text || shuffled[k].question || "").slice(
+          0,
+          22,
+        ) === curr
+      )
+        k++;
+      if (k < shuffled.length) {
+        [shuffled[i], shuffled[k]] = [shuffled[k], shuffled[i]];
+      }
+    }
+  }
+  return shuffled;
+}
+
+function shuffleOptionsForQuestion(q) {
+  const rawCorrect = q.correct_answer || q.correct || "A";
+  const key = String(rawCorrect).toLowerCase().replace("option_", "").charAt(0);
+  const correctText = q[`option_${key}`] || q.option_a;
+
+  const opts = [
+    { text: q.option_a },
+    { text: q.option_b },
+    { text: q.option_c },
+    { text: q.option_d },
+  ].filter((o) => o.text);
+
+  const shuffled = shuffleArray(opts);
+  const newIdx = shuffled.findIndex((o) => o.text === correctText);
+  const newLabel = ["A", "B", "C", "D"][newIdx >= 0 ? newIdx : 0];
+
+  return {
+    ...q,
+    option_a: shuffled[0]?.text || "",
+    option_b: shuffled[1]?.text || "",
+    option_c: shuffled[2]?.text || "",
+    option_d: shuffled[3]?.text || "",
+    correct_answer: newLabel,
+    correct: newLabel,
+  };
+}
 
 export default function CBTSetup() {
   const [config, setConfig] = useState(null);
@@ -52,10 +111,9 @@ export default function CBTSetup() {
   const [checkingSub, setCheckingSub] = useState(true);
   const [paying, setPaying] = useState(false);
   const [palaceSubject, setPalaceSubject] = useState(null);
-
-  // NEW: Daily limit states
   const [dailyCount, setDailyCount] = useState(0);
-  const [dailyLimit] = useState(2);
+  // Fallback = frontend VITALS, truth = backend /cbt/status limit
+  const [dailyLimit, setDailyLimit] = useState(CBT.DAILY_LIMIT);
   const [dailyLoading, setDailyLoading] = useState(true);
 
   const getUser = () => {
@@ -70,6 +128,8 @@ export default function CBTSetup() {
   const userId =
     authed.userId || authed.username || localStorage.getItem("userId") || "";
   const email = authed.email || "";
+  const REQUIRED = CBT.REQUIRED_SUBJECTS_COUNT; // 3
+  const TOTAL_SUBJECTS = REQUIRED + 1; // + english
 
   useEffect(() => {
     fetch(`${API_BASE}/api/cbt/config`)
@@ -139,8 +199,12 @@ export default function CBTSetup() {
       .then((r) => r.json())
       .then((data) => {
         setAccess(data);
-        const isFull = data.tier === "full_access";
-        setHasSub(isFull);
+        const hasValidPass =
+          data.tier === "full_access" ||
+          (data.tier === "trial" && (data.daysLeft ?? 0) > 0) ||
+          data.isActive === true;
+
+        setHasSub(hasValidPass);
         setCheckingSub(false);
       })
       .catch(() => {
@@ -149,7 +213,6 @@ export default function CBTSetup() {
       });
   }, [palaceSubject, email, userId]);
 
-  // NEW: Fetch daily CBT usage
   useEffect(() => {
     if (!userId || hasSub !== true) {
       setDailyLoading(false);
@@ -161,6 +224,7 @@ export default function CBTSetup() {
       .then((r) => r.json())
       .then((d) => {
         setDailyCount(d.count || 0);
+        if (d.limit) setDailyLimit(d.limit); // backend is truth
         setDailyLoading(false);
       })
       .catch(() => setDailyLoading(false));
@@ -173,8 +237,10 @@ export default function CBTSetup() {
       }
       setSelected(selected.filter((s) => s !== subj));
     } else {
-      if (selected.length >= 3)
-        return alert("You can select only 3 subjects + English is compulsory");
+      if (selected.length >= REQUIRED)
+        return alert(
+          `You can select only ${REQUIRED} subjects + English is compulsory`,
+        );
       setSelected([...selected, subj]);
     }
   };
@@ -210,11 +276,10 @@ export default function CBTSetup() {
   };
 
   const start = async () => {
-    if (selected.length !== 3) return alert("Select exactly 3 subjects");
+    if (selected.length !== REQUIRED)
+      return alert(`Select exactly ${REQUIRED} subjects`);
     if (dailyCount >= dailyLimit) {
-      return alert(
-        `Daily limit reached ${dailyCount}/${dailyLimit}. Come back tomorrow — 2 full CBTs per day.`,
-      );
+      return alert(VITALS.MESSAGES.DAILY_LIMIT_REACHED(dailyCount, dailyLimit));
     }
     localStorage.removeItem("cbt_result");
     localStorage.removeItem("cbt_exam");
@@ -230,17 +295,31 @@ export default function CBTSetup() {
         setHasSub(false);
         return alert(VITALS.MESSAGES.EXPIRED_CBT);
       }
-      // NEW: Handle daily limit 429
       if (res.status === 429 || data.code === "DAILY_LIMIT") {
-        setDailyCount(data.count || 2);
+        if (data.count != null) setDailyCount(data.count);
+        if (data.limit) setDailyLimit(data.limit);
         return alert(
-          data.error || `Daily limit reached 2/2. Come back tomorrow.`,
+          data.error ||
+            VITALS.MESSAGES.DAILY_LIMIT_REACHED(
+              data.count ?? dailyCount,
+              data.limit ?? dailyLimit,
+            ),
         );
       }
       return alert(data.error || "Failed to start CBT");
     }
-    // Update count from response if backend returns it
     if (data.cbtDailyUsage) setDailyCount(data.cbtDailyUsage.count);
+
+    if (data.questions) {
+      const fixed = {};
+      Object.entries(data.questions).forEach(([sub, arr]) => {
+        const withShuffledOpts = arr.map((q) => shuffleOptionsForQuestion(q));
+        fixed[sub] = strongShuffleQuestions(withShuffledOpts);
+      });
+      data.questions = fixed;
+      data.papers = fixed;
+    }
+
     localStorage.setItem("cbt_exam", JSON.stringify(data));
     window.location.href = "/cbt-exam";
   };
@@ -294,9 +373,9 @@ export default function CBTSetup() {
           <p style={{ color: "#555", marginBottom: 20 }}>
             Unlock{" "}
             <b>
-              {VITALS.SUBSCRIPTION.DISPLAY}/month {VITALS.SUBSCRIPTION.NAME}
+              {VITALS.SUBSCRIPTION.LABEL} {VITALS.SUBSCRIPTION.NAME}
             </b>{" "}
-            to get Live Rooms + Unlimited CBT + Drill Palace.
+            to get Live Rooms + {CBT.DAILY_LIMIT} CBTs/day + Drill Palace.
           </p>
           {palaceSubject && (
             <div
@@ -326,12 +405,14 @@ export default function CBTSetup() {
               lineHeight: 1.6,
             }}
           >
-            <div>✅ All 11 Live Rooms</div>
-            <div>✅ 2 Full CBTs per day (4 subjects)</div>
+            <div>✅ All Live Rooms</div>
+            <div>
+              ✅ {CBT.DAILY_LIMIT} Full CBTs per day ({TOTAL_SUBJECTS} subjects)
+            </div>
             <div>✅ Drill Palace • Topic Mastery</div>
             <div>✓ Real JAMB Timing ({config?.durationMinutes} mins)</div>
             <div>✓ Chat & DMs Unlocked</div>
-            <div>✓ Valid for 30 days</div>
+            <div>✓ Valid for {VITALS.SUBSCRIPTION.DURATION_DAYS} days</div>
           </div>
           <button
             onClick={handlePay}
@@ -421,7 +502,6 @@ export default function CBTSetup() {
           </span>
         </div>
 
-        {/* NEW: Daily Attempts Badge */}
         <div
           style={{
             background: isLimitReached ? "#fef2f2" : "#eff6ff",
@@ -474,7 +554,7 @@ export default function CBTSetup() {
               textAlign: "center",
             }}
           >
-            ⏰ You have used 2/2 full CBT attempts today. Come back tomorrow.
+            ⏰ {VITALS.MESSAGES.DAILY_LIMIT_REACHED(dailyCount, dailyLimit)}{" "}
             Drill Palace is still unlimited!
           </div>
         )}
@@ -526,12 +606,12 @@ export default function CBTSetup() {
             fontSize: 13,
           }}
         >
-          English is compulsory. Select 3 other subjects.
+          English is compulsory. Select {REQUIRED} other subjects.
           <br />
           Duration: <b>{config.durationMinutes} mins</b> • Per subject:{" "}
           <b>{config.questionsPerSubject} Qs</b> •{" "}
           <span style={{ color: "#16a34a", fontWeight: 800 }}>
-            Total: {config.questionsPerSubject * 4} Qs
+            Total: {config.questionsPerSubject * TOTAL_SUBJECTS} Qs
           </span>
         </p>
         <div
@@ -605,36 +685,41 @@ export default function CBTSetup() {
             border: "1px solid #e2e8f0",
           }}
         >
-          Selected: <b>{selected.length}/3</b> -{" "}
-          {selected.join(", ") || "None yet"}{" "}
+          Selected:{" "}
+          <b>
+            {selected.length}/{REQUIRED}
+          </b>{" "}
+          - {selected.join(", ") || "None yet"}{" "}
           {palaceSubject &&
             selected.length > 0 &&
             ` • 👑 ${palaceSubject} from Palace`}
         </div>
         <button
           onClick={start}
-          disabled={selected.length !== 3 || isLimitReached}
+          disabled={selected.length !== REQUIRED || isLimitReached}
           style={{
             width: "100%",
             padding: 14,
             background:
-              selected.length === 3 && !isLimitReached ? "#0A0F1A" : "#9ca3af",
+              selected.length === REQUIRED && !isLimitReached
+                ? "#0A0F1A"
+                : "#9ca3af",
             color: "#fff",
             borderRadius: 12,
             fontWeight: 800,
             border: "none",
             cursor:
-              selected.length === 3 && !isLimitReached
+              selected.length === REQUIRED && !isLimitReached
                 ? "pointer"
                 : "not-allowed",
             letterSpacing: 0.3,
           }}
         >
           {isLimitReached
-            ? `Daily Limit Reached 2/2 — Try Tomorrow`
-            : selected.length === 3
+            ? `Daily Limit Reached ${dailyCount}/${dailyLimit} — Try Tomorrow`
+            : selected.length === REQUIRED
               ? `Start CBT Exam — ${selected.join(", ").toUpperCase()} + ENGLISH 👑`
-              : `Select ${3 - selected.length} more subject(s)`}
+              : `Select ${REQUIRED - selected.length} more subject(s)`}
         </button>
         <button
           onClick={() => (window.location.href = "/")}

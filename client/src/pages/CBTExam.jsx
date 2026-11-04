@@ -23,6 +23,7 @@ export default function CBTExam() {
     }
     try {
       const data = JSON.parse(saved);
+      // IMPORTANT: DO NOT SHUFFLE HERE - already shuffled in CBTSetup.jsx
       setExamData(data);
       setCurrentSubject(data.subjects?.[0] || "english");
       const duration =
@@ -31,6 +32,7 @@ export default function CBTExam() {
       setTimeLeft(duration);
       localStorage.setItem("cbt_timeTaken", "0");
     } catch (e) {
+      console.error(e);
       alert("Corrupt exam file. Go to setup.");
       window.location.href = "/cbt-setup";
     }
@@ -45,7 +47,6 @@ export default function CBTExam() {
         localStorage.setItem("cbt_timeTaken", String(taken > 0 ? taken : 0));
         if (next <= 0) {
           clearInterval(t);
-          // use flag to avoid double call
           setTimeout(() => handleSubmit(true), 100);
           return 0;
         }
@@ -95,7 +96,7 @@ export default function CBTExam() {
         if (
           answers[q.id] &&
           String(answers[q.id]).toUpperCase() ===
-            String(q.correct_answer).toUpperCase()
+            String(q.correct_answer || q.correct).toUpperCase()
         ) {
           score++;
           subScore++;
@@ -115,7 +116,6 @@ export default function CBTExam() {
       JSON.parse(localStorage.getItem("jambite_user") || "{}").username ||
       "JAMBite";
 
-    // FIXED: unique attemptId per submission
     const attemptId = `att_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
     const payloadLeaderboard = {

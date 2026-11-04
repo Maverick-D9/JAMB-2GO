@@ -35,7 +35,9 @@ export default function CBTDrill() {
     return () => clearInterval(t);
   }, [timeLeft, config]);
 
-  const selectAnswer = (opt) => setAnswers({ ...answers, [index]: opt });
+  const selectAnswer = (opt) => {
+    setAnswers((prev) => ({ ...prev, [index]: opt }));
+  };
 
   const finishDrill = () => {
     localStorage.setItem("drillAnswers", JSON.stringify(answers));
@@ -55,8 +57,6 @@ export default function CBTDrill() {
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute w-[600px] h-[400px] -top-[100px] left-[20%] bg-[radial-gradient(ellipse_at_center,_rgba(56,189,248,0.18),_transparent_70%)] blur-[40px]" />
       </div>
-
-      {/* TOP BAR - NOW FULL WIDTH */}
       <div className="sticky top-0 z-20 bg-[#070B18]/90 backdrop-blur-xl border-b border-white/10 w-full">
         <div className="w-full max-w-[98vw] mx-auto px-3 md:px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -103,10 +103,7 @@ export default function CBTDrill() {
           />
         </div>
       </div>
-
-      {/* QUESTION - WIDER, NO SIDE SPACE */}
       <div className="w-full max-w-[98vw] mx-auto px-2 md:px-4 py-4 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
-        {/* MAIN CARD */}
         <div className="w-full">
           <div className="flex gap-1.5 mb-4 overflow-x-auto scrollbar-none">
             {questions.map((_, i) => (
@@ -116,7 +113,6 @@ export default function CBTDrill() {
               />
             ))}
           </div>
-
           <div className="bg-[#121A2E]/80 backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[28px] p-5 md:p-8 shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent" />
             <div
@@ -125,14 +121,12 @@ export default function CBTDrill() {
             >
               Q{index + 1} • {config?.topic?.toUpperCase()}
             </div>
-
             <div
               className="text-[19px] md:text-[22px] font-bold leading-[1.35] mb-7"
               dangerouslySetInnerHTML={{
                 __html: q.question_text || q.question,
               }}
             />
-
             <div className="grid gap-3">
               {["A", "B", "C", "D"].map((k) => {
                 const key = `option_${k.toLowerCase()}`;
@@ -159,7 +153,6 @@ export default function CBTDrill() {
                 );
               })}
             </div>
-
             <div className="flex justify-between items-center mt-8 pt-6 border-t border-white/5">
               <button
                 onClick={() => setIndex((i) => Math.max(0, i - 1))}
@@ -189,8 +182,6 @@ export default function CBTDrill() {
             </div>
           </div>
         </div>
-
-        {/* RIGHT PALETTE - FULL WIDTH ON MOBILE, SIDEBAR ON DESKTOP */}
         <div className="bg-[#121A2E]/60 backdrop-blur-xl border border-white/10 rounded-[20px] p-4 h-fit lg:sticky lg:top-[76px]">
           <div className="flex justify-between items-center mb-3">
             <div className="text-[11px] font-black tracking-widest text-slate-500 uppercase">

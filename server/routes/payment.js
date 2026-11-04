@@ -10,14 +10,15 @@ const VITALS = require("../config/vitals");
 
 const PAYSTACK_SECRET =
   VITALS.PAYSTACK.SECRET_KEY || process.env.PAYSTACK_SECRET_KEY;
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+const FRONTEND_URL =
+  VITALS.SYSTEM.FRONTEND_URL ||
+  process.env.FRONTEND_URL ||
+  "http://localhost:5173";
 
 // === WEBHOOK - RAW ALREADY HANDLED IN index.js ===
 router.post("/webhook", async (req, res) => {
   try {
     const secret = PAYSTACK_SECRET;
-
-    // req.body is Buffer from index.js raw middleware
     const rawBody = Buffer.isBuffer(req.body)
       ? req.body
       : req.rawBody || Buffer.from(JSON.stringify(req.body));
@@ -48,22 +49,11 @@ router.post("/webhook", async (req, res) => {
       ).toLowerCase();
       const userIdMeta = data.metadata?.userId || email;
 
-      // ATOMIC idempotency - prevents race condition
-      try {
-        // This will fail if reference already exists (if you set unique index)
-        const newSub = await Subscription.create({
-          userId: userIdFinal,
-          email: user.email,
-          reference: reference, // Make sure this field has unique: true in your model
-          // ... your other fields
-        });
-      } catch (err) {
-        if (err.code === 11000) {
-          // Duplicate key error
-          console.log(`⚠️ Race condition blocked for ${reference}`);
-          return res.sendStatus(200);
-        }
-        throw err;
+      // Idempotency: block duplicate webhook calls
+      const existing = await Subscription.findOne({ reference });
+      if (existing) {
+        console.log(`⚠️ Duplicate webhook blocked for ${reference}`);
+        return res.sendStatus(200);
       }
 
       let user =
@@ -97,7 +87,9 @@ router.post("/webhook", async (req, res) => {
         console.log("mail error", e.message);
       }
 
-      console.log(`✅ WEBHOOK ACTIVATED: ${user.email} - ${reference} - LIVE`);
+      console.log(
+        `✅ WEBHOOK ACTIVATED: ${user.email} - ${reference} - ${VITALS.SUBSCRIPTION.NAME} LIVE`,
+      );
     }
 
     res.sendStatus(200);
@@ -171,6 +163,7 @@ router.post("/subscribe/verify", async (req, res) => {
     if (!user) return res.json({ success: false, message: "User not found" });
 
     const userIdFinal = user.userId || user.id || email;
+
     const existingSub = await Subscription.findOne({ reference });
     if (existingSub) {
       const access = await Subscription.getAccess(userIdFinal);
@@ -191,7 +184,7 @@ router.post("/subscribe/verify", async (req, res) => {
     }
 
     console.log(
-      `✅ VERIFY ACTIVATED: ${user.email} - ${reference} - ${VITALS.SUBSCRIPTION.NAME} ₦${VITALS.SUBSCRIPTION.PRICE}`,
+      `✅ VERIFY ACTIVATED: ${user.email} - ${reference} - ${VITALS.SUBSCRIPTION.LABEL}`,
     );
     return res.json({
       success: true,
@@ -213,28 +206,35 @@ router.get("/access/:email", async (req, res) => {
     if (!user) {
       return res.json({
         hasAccess: false,
-        tier: "english_only",
+        tier: VITALS.SUBSCRIPTION.FREE_TIER_NAME,
         status: "free",
         daysLeft: 0,
         email,
+        price: VITALS.SUBSCRIPTION.PRICE,
+        plan: VITALS.SUBSCRIPTION.NAME,
+        label: VITALS.SUBSCRIPTION.LABEL,
       });
     }
     const access = User.checkUserAccess(user);
-    const isFull = access.tier === VITALS.SUBSCRIPTION.TIER_NAME;
+    const isFull =
+      (access.status === "active" || access.status === "trial") &&
+      (access.daysLeft ?? 0) > 0;
     res.json({
       ...access,
       hasAccess: isFull,
       email,
       price: VITALS.SUBSCRIPTION.PRICE,
       plan: VITALS.SUBSCRIPTION.NAME,
+      label: VITALS.SUBSCRIPTION.LABEL,
     });
   } catch (e) {
     console.log("access err", e.message);
     res.json({
       hasAccess: false,
-      tier: "english_only",
+      tier: VITALS.SUBSCRIPTION.FREE_TIER_NAME,
       status: "free",
       daysLeft: 0,
+      price: VITALS.SUBSCRIPTION.PRICE,
     });
   }
 });

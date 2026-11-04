@@ -3,6 +3,74 @@ import { VITALS } from "../config/vitals";
 
 const API_BASE = VITALS.SYSTEM.API_BASE;
 
+// --- STRONG SHUFFLE ---
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function strongShuffleQuestions(questions) {
+  let shuffled = shuffleArray(questions);
+  for (let i = 1; i < shuffled.length; i++) {
+    const prev = (
+      shuffled[i - 1].question_text ||
+      shuffled[i - 1].question ||
+      ""
+    ).slice(0, 22);
+    const curr = (
+      shuffled[i].question_text ||
+      shuffled[i].question ||
+      ""
+    ).slice(0, 22);
+    if (prev === curr) {
+      let k = i + 1;
+      while (
+        k < shuffled.length &&
+        (shuffled[k].question_text || shuffled[k].question || "").slice(
+          0,
+          22,
+        ) === curr
+      )
+        k++;
+      if (k < shuffled.length)
+        [shuffled[i], shuffled[k]] = [shuffled[k], shuffled[i]];
+    }
+  }
+  return shuffled;
+}
+
+function shuffleOptionsForQuestion(q) {
+  const rawCorrect = q.correct_answer || q.correct || q.answer || "A";
+  const key = String(rawCorrect).toLowerCase().replace("option_", "").charAt(0);
+  const correctText = q[`option_${key}`] || q.option_a;
+
+  const opts = [
+    { text: q.option_a },
+    { text: q.option_b },
+    { text: q.option_c },
+    { text: q.option_d },
+  ].filter((o) => o.text);
+
+  const shuffled = shuffleArray(opts);
+  const newIdx = shuffled.findIndex((o) => o.text === correctText);
+  const newLabel = ["A", "B", "C", "D"][newIdx >= 0 ? newIdx : 0];
+
+  return {
+    ...q,
+    option_a: shuffled[0]?.text || "",
+    option_b: shuffled[1]?.text || "",
+    option_c: shuffled[2]?.text || "",
+    option_d: shuffled[3]?.text || "",
+    correct_answer: newLabel,
+    correct: newLabel,
+    answer: newLabel,
+  };
+}
+
 export default function CBTDrillSetup() {
   const [subject, setSubject] = useState("");
   const [topics, setTopics] = useState([]);
@@ -155,7 +223,13 @@ export default function CBTDrillSetup() {
       }
       if (!data.questions || data.questions.length === 0)
         return alert("No questions found");
-      localStorage.setItem("drillQuestions", JSON.stringify(data.questions));
+
+      // --- BREAK AAAABBBB PATTERN HERE ---
+      const shuffled = strongShuffleQuestions(
+        data.questions.map((q) => shuffleOptionsForQuestion(q)),
+      );
+
+      localStorage.setItem("drillQuestions", JSON.stringify(shuffled));
       localStorage.setItem(
         "drillConfig",
         JSON.stringify({

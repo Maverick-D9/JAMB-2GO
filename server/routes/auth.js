@@ -7,6 +7,57 @@ const { sendOtp } = require("../utils/mailer");
 const rateLimit = require("express-rate-limit");
 const VITALS = require("../config/vitals");
 
+const DISPOSABLE_DOMAINS = new Set([
+  // Group A - Most used by Nigerian students
+  "tempmail.com",
+  "temp-mail.org",
+  "temp-mail.io",
+  "temp-mail.net",
+  "10minutemail.com",
+  "10minutemail.net",
+  "guerrillamail.com",
+  "guerrillamail.net",
+  "guerrillamail.org",
+  "guerrillamail.biz",
+  "mailinator.com",
+  "mailinator.net",
+  "mailinator.org",
+  "yopmail.com",
+  "yopmail.fr",
+  "yopmail.net",
+  "throwawaymail.com",
+
+  // Group B - Other popular disposable
+  "getnada.com",
+  "nada.ltd",
+  "trashmail.com",
+  "trashmail.net",
+  "fakeinbox.com",
+  "fakemail.net",
+  "dispostable.com",
+  "sharklasers.com",
+  "grr.la",
+  "maildrop.cc",
+  "mailnesia.com",
+  "mintemail.com",
+  "mytemp.email",
+  "tempmailaddress.com",
+  "tempmailo.com",
+  "tempinbox.com",
+
+  // Group C - Extra ones wey dey show up for JAMB groups
+  "mailcatch.com",
+  "mailtemp.com",
+  "tempemail.com",
+  "tempemail.net",
+  "emailondeck.com",
+  "moakt.com",
+  "mohmal.com",
+  "inboxbear.com",
+  "tmail.com",
+  "tmail.ws",
+]);
+
 // === TIER 2: Rate limit constants - ADD HERE ===
 const otpLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
@@ -53,6 +104,23 @@ router.post("/request-otp", otpLimiter, async (req, res) => {
 
     const cleanEmail = email.toLowerCase().trim();
     const cleanUsername = username.toLowerCase().trim();
+    // === Block disposable / temp emails ===
+    const emailDomain = cleanEmail.split("@")[1] || "";
+    const isDisposable =
+      DISPOSABLE_DOMAINS.has(emailDomain) ||
+      emailDomain.includes("temp") ||
+      emailDomain.includes("trash") ||
+      emailDomain.includes("throwaway") ||
+      emailDomain.includes("10min") ||
+      emailDomain.includes("dispos") ||
+      emailDomain.includes("fake") ||
+      emailDomain.includes("guerrilla");
+    if (isDisposable) {
+      return res.status(400).json({
+        error:
+          "Please use a real Gmail / Yahoo email. Temporary emails are not allowed.",
+      });
+    }
 
     const existingEmail = await User.findOne({ email: cleanEmail });
     if (existingEmail)

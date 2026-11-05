@@ -121,6 +121,13 @@ router.post("/request-otp", otpLimiter, async (req, res) => {
           "Please use a real Gmail / Yahoo email. Temporary emails are not allowed.",
       });
     }
+    // === Per-email cooldown: 60 secs ===
+    const lastOtp = global.lastOtpRequest?.get(cleanEmail);
+    if (lastOtp && Date.now() - lastOtp < 60 * 1000) {
+      return res.status(429).json({
+        error: "Please wait 60 seconds before requesting another OTP.",
+      });
+    }
 
     const existingEmail = await User.findOne({ email: cleanEmail });
     if (existingEmail)
@@ -145,7 +152,8 @@ router.post("/request-otp", otpLimiter, async (req, res) => {
       subject: subject || "english-room",
       trialEndsAt: genTrial(),
     });
-
+    global.lastOtpRequest = global.lastOtpRequest || new Map();
+    global.lastOtpRequest.set(cleanEmail, Date.now());
     res.json({ success: true, message: "OTP sent to " + email });
 
     setImmediate(async () => {

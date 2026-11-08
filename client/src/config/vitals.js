@@ -34,7 +34,7 @@ export const VITALS = {
   // Keep these numbers identical to server/config/vitals.js
   // Backend is source of truth, this is just so UI doesn't hardcode 40 / 120 everywhere.
   CBT: {
-    DAILY_LIMIT: 40,
+    DAILY_LIMIT: 2,
     DURATION_MINUTES: 120,
     QUESTIONS_PER_SUBJECT: 40,
     ENABLED: true,

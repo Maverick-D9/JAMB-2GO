@@ -25,7 +25,7 @@ module.exports = {
 
   // === CBT - SINGLE SOURCE FOR ALL CBT TUNABLES ===
   CBT: {
-    DAILY_LIMIT: 40, // <-- change here only, cbt.js picks it up
+    DAILY_LIMIT: 2, // <-- change here only, cbt.js picks it up
     DURATION_MINUTES: 120,
     QUESTIONS_PER_SUBJECT: 40,
     ENABLED: true,

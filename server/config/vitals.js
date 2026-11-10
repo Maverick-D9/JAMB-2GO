@@ -21,7 +21,7 @@ const SUBSCRIPTION = {
 
 module.exports = {
   SUBSCRIPTION,
-  TRIAL: { DURATION_DAYS: 2 },
+  TRIAL: { DURATION_DAYS: 3 },
 
   // === CBT - SINGLE SOURCE FOR ALL CBT TUNABLES ===
   CBT: {

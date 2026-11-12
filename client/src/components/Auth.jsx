@@ -914,11 +914,16 @@ export default function Auth({ onAuth }) {
                             className="mt-1 accent-[#38BDF8]"
                           />
                           <span className="text-slate-400 text-[12px] leading-[1.4]">
-                            I agree to the{" "}
-                            <span className="text-sky-400 underline">
-                              Terms of Service
-                            </span>{" "}
-                            and Privacy Policy
+                            I agree to the Terms of Service and{" "}
+                            <a
+                              href="/privacy-policy"
+                              target="_blank"
+                              rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="text-sky-400 underline"
+                            >
+                              Privacy Policy
+                            </a>
                           </span>
                         </label>
                       </>

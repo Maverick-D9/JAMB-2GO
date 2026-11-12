@@ -1856,17 +1856,17 @@ export default function App() {
       {rankUp && (
         <RankUpAnimation newRank={rankUp} onClose={() => setRankUp(null)} />
       )}
-      <div className="h-[76px] w-full bg-[#0A1224]/95 backdrop-blur-xl border-b border-white/[0.08] flex items-center justify-between px-5 md:px-7 z-20">
-        <div className="flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-[12px] bg-gradient-to-br from-sky-400 to-cyan-300 grid place-items-center font-black text-black text-[14px] shadow-[0_0_24px_rgba(56,189,248,0.6)]">
+      <div className="h-[76px] w-full bg-[#0A1224]/95 backdrop-blur-xl border-b border-white/[0.08] flex items-center justify-between px-2 sm:px-5 md:px-7 z-20 gap-1">
+        <div className="flex items-center gap-1.5 sm:gap-3.5 min-w-0 flex-1">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 shrink-0 rounded-[10px] sm:rounded-[12px] bg-gradient-to-br from-sky-400 to-cyan-300 grid place-items-center font-black text-black text-[13px] sm:text-[14px] shadow-[0_0_24px_rgba(56,189,248,0.6)]">
             {username[0]?.toUpperCase()}
           </div>
-          <div className="flex items-center gap-2">
-            <div className="px-3.5 py-1.5 rounded-full bg-white/[0.08] border border-white/10 text-white text-[11px] font-black tracking-widest flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+            <div className="shrink-0 px-2 sm:px-3.5 py-1.5 rounded-full bg-white/[0.08] border border-white/10 text-white text-[10px] sm:text-[11px] font-black tracking-widest flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-[glow-pulse_1s_infinite]" />
               {room.replace("-room", "").toUpperCase()}
             </div>
-            <div className="px-3.5 py-1.5 rounded-full bg-[#1e293b] border border-amber-400/30 text-white text-[11px] font-black tracking-wide flex items-center gap-1">
+            <div className="shrink-0 px-2 sm:px-3.5 py-1.5 rounded-full bg-[#1e293b] border border-amber-400/30 text-white text-[10px] sm:text-[11px] font-black tracking-wide flex items-center gap-1">
               <span>{myStreak}</span>
               <span
                 style={{
@@ -1876,27 +1876,29 @@ export default function App() {
               >
                 🔥
               </span>
-              <span className="text-amber-300">STREAK</span>
+              <span className="text-amber-300 hidden min-[400px]:inline">
+                STREAK
+              </span>
             </div>
-            <div className="flex px-3 py-1.5 rounded-full bg-[#0F172A] text-slate-400 text-[11px] font-bold">
+            <div className="flex shrink-0 px-2 sm:px-3 py-1.5 rounded-full bg-[#0F172A] text-slate-400 text-[10px] sm:text-[11px] font-bold whitespace-nowrap">
               {myScore} pts •{" "}
               <button
                 onClick={handleBackToLobby}
-                className="ml-2 text-sky-400 hover:text-white"
+                className="ml-1 sm:ml-2 text-sky-400 hover:text-white"
               >
                 ← Lobby
               </button>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
           {isLocked && (
             <div className="hidden md:flex px-3.5 py-1.5 rounded-full bg-red-500/15 border border-red-500/30 text-red-300 text-[11px] font-black tracking-widest">
               🔒 LOCKED by {lockedWinner}
             </div>
           )}
           <div
-            className="relative w-[62px] h-[62px] grid place-items-center"
+            className="relative w-[42px] h-[42px] sm:w-[62px] sm:h-[62px] shrink-0 grid place-items-center"
             style={urgent ? { animation: "pulse-red 0.85s infinite" } : {}}
           >
             <svg
@@ -1927,7 +1929,7 @@ export default function App() {
               />
             </svg>
             <div
-              className={`font-black text-[14px] tracking-tighter ${urgent ? "text-[#EF4444]" : "text-white"}`}
+              className={`font-black text-[11px] sm:text-[14px] tracking-tighter ${urgent ? "text-[#EF4444]" : "text-white"}`}
               style={{ fontFamily: "Space Grotesk" }}
             >
               {timer}s

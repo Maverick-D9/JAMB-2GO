@@ -1878,7 +1878,7 @@ export default function App() {
               </span>
               <span className="text-amber-300">STREAK</span>
             </div>
-            <div className="hidden md:flex px-3 py-1.5 rounded-full bg-[#0F172A] text-slate-400 text-[11px] font-bold">
+            <div className="flex px-3 py-1.5 rounded-full bg-[#0F172A] text-slate-400 text-[11px] font-bold">
               {myScore} pts •{" "}
               <button
                 onClick={handleBackToLobby}

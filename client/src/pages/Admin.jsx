@@ -327,6 +327,197 @@ function StorageMonitor({ adminPass }) {
     </div>
   );
 }
+function TrialManager({ adminPass }) {
+  const [stats, setStats] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [search, setSearch] = useState("");
+  const [days, setDays] = useState(5);
+  const [loading, setLoading] = useState(false);
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const headers = {
+    "Content-Type": "application/json",
+    "x-admin-password": adminPass,
+  };
+
+  const loadStats = async () => {
+    try {
+      const r = await fetch(`${API_BASE}/api/admin/trial-stats`, {
+        headers: { "x-admin-password": adminPass },
+      });
+      const j = await r.json();
+      if (!j.error) setStats(j);
+    } catch {}
+  };
+  const loadUsers = async () => {
+    setLoading(true);
+    try {
+      const r = await fetch(
+        `${API_BASE}/api/admin/users?search=${encodeURIComponent(search)}&limit=50`,
+        { headers: { "x-admin-password": adminPass } },
+      );
+      const j = await r.json();
+      setUsers(j.users || []);
+    } catch {}
+    setLoading(false);
+  };
+  useEffect(() => {
+    if (adminPass) {
+      loadStats();
+      loadUsers();
+    }
+  }, [adminPass]);
+
+  const resetOne = async (identifier) => {
+    if (!confirm(`Give ${identifier} ${days} days FREE trial?`)) return;
+    const r = await fetch(`${API_BASE}/api/admin/reset-trial`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ identifier, days: parseInt(days) }),
+    });
+    const j = await r.json();
+    alert(j.message || j.error);
+    loadUsers();
+    loadStats();
+  };
+  const resetAll = async () => {
+    if (
+      !confirm(
+        `⚠️ Reset ALL users (except active PAID) to ${days} days trial?\n\nThis na your current task.`,
+      )
+    )
+      return;
+    if (!confirm(`Confirm again: Reset everybody to ${days} days?`)) return;
+    const r = await fetch(`${API_BASE}/api/admin/reset-all-trials`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ days: parseInt(days), skipPaid: true }),
+    });
+    const j = await r.json();
+    alert(j.message || j.error);
+    loadUsers();
+    loadStats();
+  };
+
+  return (
+    <div className="bg-[#121A2E]/70 backdrop-blur-xl rounded-[20px] border border-amber-500/20 p-5 mb-6 relative overflow-hidden">
+      <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/30 to-transparent" />
+      <h3
+        className="text-white font-black text-[14px] flex items-center gap-2"
+        style={{ fontFamily: "Cinzel" }}
+      >
+        🔥 FREE TRIAL MANAGER
+        <span className="text-[9px] bg-amber-500/15 text-amber-300 px-2.5 py-1 rounded-full border border-amber-500/20 font-sans">
+          LIVE
+        </span>
+      </h3>
+
+      {stats && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+          <div className="bg-[#0F172A] border border-white/10 rounded-xl p-3">
+            <p className="text-[10px] text-slate-500 font-bold">TOTAL USERS</p>
+            <p className="text-white font-black text-lg">{stats.total}</p>
+          </div>
+          <div className="bg-[#0F172A] border border-emerald-500/20 rounded-xl p-3">
+            <p className="text-[10px] text-slate-500 font-bold">ACTIVE TRIAL</p>
+            <p className="text-emerald-400 font-black text-lg">
+              {stats.activeTrial}
+            </p>
+          </div>
+          <div className="bg-[#0F172A] border border-red-500/20 rounded-xl p-3">
+            <p className="text-[10px] text-slate-500 font-bold">
+              EXPIRED TRIAL
+            </p>
+            <p className="text-red-400 font-black text-lg">
+              {stats.expiredTrial}
+            </p>
+          </div>
+          <div className="bg-[#0F172A] border border-sky-500/20 rounded-xl p-3">
+            <p className="text-[10px] text-slate-500 font-bold">ACTIVE PAID</p>
+            <p className="text-sky-400 font-black text-lg">
+              {stats.activePaid}
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-wrap gap-3 mt-5 items-end">
+        <div>
+          <label className="text-[10px] font-bold tracking-widest text-slate-500">
+            DAYS TO GIVE
+          </label>
+          <input
+            type="number"
+            value={days}
+            onChange={(e) => setDays(e.target.value)}
+            className="w-[100px] ml-2 px-4 py-3 rounded-full bg-[#0F172A] border border-amber-400/30 text-white font-bold outline-none"
+          />
+        </div>
+        <button
+          onClick={resetAll}
+          className="px-6 py-3 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 text-black font-black text-sm"
+        >
+          🔥 Reset ALL Users to {days} Days
+        </button>
+        <button
+          onClick={loadUsers}
+          className="px-5 py-3 rounded-full bg-[#0F172A] border border-white/10 text-slate-300 text-sm font-bold"
+        >
+          🔄 Refresh
+        </button>
+      </div>
+
+      <div className="flex gap-2 mt-4">
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && loadUsers()}
+          placeholder="Search email / username / full name..."
+          className="flex-1 px-4 py-3 rounded-full bg-[#0F172A] border border-white/10 text-white text-sm outline-none"
+        />
+        <button
+          onClick={loadUsers}
+          className="px-5 py-3 rounded-full bg-white/10 text-white text-sm font-bold"
+        >
+          {loading ? "..." : "Search"}
+        </button>
+      </div>
+
+      <div className="mt-4 space-y-2 max-h-[400px] overflow-y-auto">
+        {users.length === 0 && (
+          <p className="text-slate-500 text-[12px]">
+            No users found. Press Search / Refresh.
+          </p>
+        )}
+        {users.map((u) => (
+          <div
+            key={u._id}
+            className="bg-[#0F172A] border border-white/10 rounded-xl px-4 py-3 flex flex-wrap justify-between items-center gap-2"
+          >
+            <div>
+              <p className="text-white font-bold text-[13px]">
+                {u.username}{" "}
+                <span className="text-slate-500 font-normal">• {u.email}</span>
+              </p>
+              <p className="text-[11px] text-slate-500">
+                {u.statusLabel} • Trial ends:{" "}
+                {u.trialEndsAt
+                  ? new Date(u.trialEndsAt).toLocaleDateString()
+                  : "none"}{" "}
+                • Joined: {new Date(u.createdAt).toLocaleDateString()}
+              </p>
+            </div>
+            <button
+              onClick={() => resetOne(u.email)}
+              className="px-4 py-2 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 text-[12px] font-bold"
+            >
+              Give {days} Days
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 export default function Admin() {
   const [isAuthed, setIsAuthed] = useState(
     () => localStorage.getItem("admin_ok") === "yes",
@@ -701,6 +892,7 @@ export default function Admin() {
         </div>
         <DashboardStats />
         <StorageMonitor adminPass={adminPass} />
+        <TrialManager adminPass={adminPass} />
         <div className="bg-[#121A2E]/70 backdrop-blur-xl rounded-[20px] border border-white/10 p-5 mb-6 relative overflow-hidden">
           <div className="flex justify-between items-center mb-4">
             <h3

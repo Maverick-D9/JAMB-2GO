@@ -27,7 +27,7 @@ export const VITALS = {
     LABEL_SHORT: `${DISPLAY_COMMA} Pass`,
   },
   TRIAL: {
-    DURATION_DAYS: 3,
+    DURATION_DAYS: 10,
   },
 
   // === CBT - MIRROR OF BACKEND VITALS.CBT ===

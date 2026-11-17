@@ -1,0 +1,17 @@
+name: Keep Render Awake
+
+on:
+  schedule:
+    - cron: '*/10 * * * *' # every 10 mins
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping JAMB-2GO Backend
+        run: |
+          echo "Pinging backend..."
+          curl -s -o /dev/null -w "%{http_code}" https://jamb-2go-backend.onrender.com/health
+          echo ""
+          echo "Done"

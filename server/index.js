@@ -10,6 +10,7 @@ const mongoose = require("mongoose");
 const VITALS = require("./config/vitals");
 const User = require("./models/User");
 const { registerLiveRankHandlers } = require("./sockets/liveRankHandler");
+const { registerDuelHandlers } = require("./sockets/duelHandler");
 const { rateLimit } = require("express-rate-limit");
 const {
   getDisplayName,
@@ -19,6 +20,10 @@ const {
 const arenaRankService = require("./services/arenaRankService");
 const arenaRedis = require("./utils/arenaRedis");
 const monitorService = require("./services/systemMonitorService");
+const {
+  getDuelRank,
+  getDuelLeaderboard,
+} = require("./services/duelRankService");
 
 mongoose
   .connect(VITALS.SYSTEM.MONGODB_URI, { dbName: VITALS.SYSTEM.MONGODB_DB_NAME })
@@ -831,6 +836,25 @@ app.get("/api/debug/bank", (req, res) => {
   );
 });
 
+// ===LIVE DUEL ROUTES ===
+app.get("/api/duel/rank/:username", async (req, res) => {
+  try {
+    const rank = await getDuelRank(req.params.username);
+    res.json(rank);
+  } catch (e) {
+    res.status(500).json({ error: "rank failed" });
+  }
+});
+
+app.get("/api/duel/leaderboard", async (req, res) => {
+  try {
+    const board = await getDuelLeaderboard(10);
+    res.json(board);
+  } catch (e) {
+    res.status(500).json({ error: "leaderboard failed" });
+  }
+});
+
 // === ROOM + RANK PERSISTENCE FIXED ===
 let roomState = {};
 let socketUserMap = {};
@@ -1103,6 +1127,7 @@ global.liveRooms = liveRooms;
 
 io.on("connection", (socket) => {
   registerLiveRankHandlers(io, socket, liveRooms);
+  registerDuelHandlers(io, socket, { getRandomQuestion, getShuffledQuestion });
 
   socket.on("join_room", async ({ room, username }) => {
     console.log(`🔵 JOIN: ${username} -> ${room}`);

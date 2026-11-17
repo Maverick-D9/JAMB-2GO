@@ -18,6 +18,7 @@ import ReviewFab from "./components/ReviewFab.jsx";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import { getLiveRank } from "./config/liveRanks";
 import TextHype from "./components/TextHype.jsx";
+import DuelArena from "./pages/DuelArena";
 function RankUpAnimation({ newRank, onClose }) {
   if (!newRank) return null;
 
@@ -755,6 +756,12 @@ export default function App() {
     window.location.pathname === "/privacy-policy"
   ) {
     return <PrivacyPolicy />;
+  }
+  if (
+    typeof window !== "undefined" &&
+    window.location.pathname === "/duel-arena"
+  ) {
+    return <DuelArena />;
   }
   const isEnglishRoom = room === "english-room";
   const hasFullAccess = access?.tier === "full_access";
@@ -1707,7 +1714,7 @@ export default function App() {
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-5">
             <button
               onClick={() => {
                 if (!hasFullAccess) {
@@ -1760,6 +1767,23 @@ export default function App() {
               </div>
               <div className="text-[11px] text-slate-400 mt-1">
                 Wake up the Scholar in you!.
+              </div>
+            </button>
+            <button
+              onClick={() => {
+                // FREE - no paywall check, like English Live Room
+                window.location.href = "/duel-arena";
+              }}
+              className={`text-left p-[16px] rounded-[20px] border backdrop-blur-xl bg-[#121A2E]/80 border-red-500/30 hover:shadow-[0_0_30px_rgba(239,68,68,0.3)]`}
+            >
+              <div className="w-9 h-9 rounded-xl bg-red-500/15 grid place-items-center">
+                ⚔️
+              </div>
+              <div className="mt-3 font-extrabold text-[13px] text-white">
+                Duel Arena
+              </div>
+              <div className="text-[11px] text-slate-400 mt-1">
+                1v1. 10 questions. Winner takes all.
               </div>
             </button>
           </div>

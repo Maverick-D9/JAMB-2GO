@@ -245,7 +245,7 @@ export default function CBTDrillSetup() {
       window.location.href = "/cbt-drill-run";
     } catch {
       setLoading(false);
-      alert("Server error - is backend running on port 5000?");
+      alert("Unable to connect. Please try again.");
     }
   };
 

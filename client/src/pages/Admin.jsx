@@ -654,7 +654,7 @@ export default function Admin() {
       });
       setCounts(normalized);
     } catch (err) {
-      setLoginError("❌ Server not reachable");
+      setLoginError("❌ Unable to connect.Please try again");
     }
   };
   const handleLogout = () => {

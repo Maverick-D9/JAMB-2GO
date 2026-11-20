@@ -239,7 +239,7 @@ export default function Auth({ onAuth }) {
       clearTimeout(timeoutId);
       if (err.name === "AbortError") {
         showToast(
-          "Server not responding - Check backend terminal. Is it running on 5000?",
+          "Something went wrong. Please check your internet connection and try again.",
         );
         console.error("TIMEOUT - API:", API);
       } else {

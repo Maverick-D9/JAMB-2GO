@@ -172,6 +172,7 @@ export default function DuelArena() {
     socket.emit("duel:history", { username });
     socket.on("duel:history_result", (h) => setHistory(h));
     socket.on("duel:waiting", () => setState("waiting"));
+    socket.on("duel:cancelled", () => setState("lobby"));
     socket.on("duel:result", () => refreshDuelData());
     socket.on("duel:finished", () => refreshDuelData());
     socket.on("duel:complete", () => refreshDuelData());
@@ -222,6 +223,7 @@ export default function DuelArena() {
       socket.off("duel:score_update");
       socket.off("duel:finished");
       socket.off("duel:history_result");
+      socket.off("duel:cancelled");
     };
   }, []);
 
@@ -254,6 +256,10 @@ export default function DuelArena() {
     setToast(null);
     setState("waiting");
     socket.emit("duel:join", { username });
+  };
+  const cancelMatchmaking = () => {
+    socket.emit("duel:cancel", { username });
+    setState("lobby");
   };
   const answer = (opt) => {
     if (selected) return;
@@ -588,6 +594,15 @@ export default function DuelArena() {
           >
             MATCHMAKING...
           </motion.div>
+          <button
+            onClick={cancelMatchmaking}
+            className="mt-6 px-6 py-3 rounded-xl bg-white/10 border border-white/20 text-white font-black text-[13px] active:scale-95"
+          >
+            ✕ Stop Searching
+          </button>
+          <p className="mt-2 text-[11px] text-slate-500">
+            Return to Duel Arena
+          </p>
         </div>
       </div>
     );

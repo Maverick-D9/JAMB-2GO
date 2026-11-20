@@ -164,6 +164,20 @@ function registerDuelHandlers(io, socket, helpers = {}) {
       setTimeout(() => nextQuestion(io, duel), 1200);
     }
   });
+  socket.on("duel:cancel", ({ username }) => {
+    const qi = queue.findIndex((q) => q.socketId === socket.id);
+    if (qi >= 0) queue.splice(qi, 1);
+
+    // Also try by username in case socketId changed
+    if (username) {
+      const qi2 = queue.findIndex(
+        (q) => q.username.toLowerCase() === username.toLowerCase(),
+      );
+      if (qi2 >= 0) queue.splice(qi2, 1);
+    }
+
+    socket.emit("duel:cancelled");
+  });
 
   socket.on("duel:leave", () => leaveDuel(io, socket));
   socket.on("disconnect", () => {

@@ -164,6 +164,29 @@ function registerDuelHandlers(io, socket, helpers = {}) {
       setTimeout(() => nextQuestion(io, duel), 1200);
     }
   });
+  // --- DUEL CHAT: only 2 players in this duel can chat ---
+  socket.on("duel:chat", ({ duelId, text }) => {
+    const duel = duels.get(duelId);
+    if (!duel) return;
+    // Security: sender must be a player in this duel
+    const sender = duel.players.find((p) => p.socketId === socket.id);
+    if (!sender) return;
+
+    const clean = (text || "").toString().trim().slice(0, 200);
+    if (!clean) return;
+
+    const msg = {
+      from: sender.username,
+      text: clean,
+      at: Date.now(),
+    };
+
+    // Send to BOTH players (same pattern as your score_update)
+    for (const p of duel.players) {
+      io.to(p.socketId).emit("duel:chat_message", msg);
+    }
+  });
+
   socket.on("duel:cancel", ({ username }) => {
     const qi = queue.findIndex((q) => q.socketId === socket.id);
     if (qi >= 0) queue.splice(qi, 1);

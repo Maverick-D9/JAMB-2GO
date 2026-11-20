@@ -19,6 +19,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import { getLiveRank } from "./config/liveRanks";
 import TextHype from "./components/TextHype.jsx";
 import DuelArena from "./pages/DuelArena";
+import ChristmasDecor from "./components/ChristmasDecor.jsx";
 function RankUpAnimation({ newRank, onClose }) {
   if (!newRank) return null;
 
@@ -1074,6 +1075,7 @@ export default function App() {
   if (!showChat) {
     return (
       <div className="min-h-screen w-full bg-[#050A14] relative flex justify-center items-start py-6 px-4 overflow-hidden">
+        <ChristmasDecor />
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Permanent+Marker&family=Cinzel:wght@800&display=swap');
           @keyframes drift {
@@ -1658,7 +1660,35 @@ export default function App() {
               className="font-black text-[42px] tracking-tight drop-shadow-[0_0_24px_rgba(56,189,248,0.6)]"
               style={{ fontFamily: "Cinzel" }}
             >
-              <span className="text-white">SCHOLARS'</span>
+              <span className="text-white">
+                <span className="relative inline-block">
+                  S{/* SANTA HAT - SVG, HAT ONLY, NO FACE */}
+                  <svg
+                    className="absolute -top-[26px] -left-[10px] -rotate-[18deg] pointer-events-none"
+                    width="46"
+                    height="34"
+                    viewBox="0 0 46 34"
+                  >
+                    {/* hat body */}
+                    <path
+                      d="M4 26 Q8 4 26 6 Q34 7 40 14 L36 20 Q28 12 18 22 Q10 28 4 26 Z"
+                      fill="#DC2626"
+                    />
+                    {/* white brim */}
+                    <rect
+                      x="2"
+                      y="24"
+                      width="34"
+                      height="8"
+                      rx="4"
+                      fill="white"
+                    />
+                    {/* pompom */}
+                    <circle cx="40" cy="16" r="6" fill="white" />
+                  </svg>
+                </span>
+                CHOLARS'
+              </span>
               <span className="text-[#38BDF8]">•</span>
               <span className="text-white">HAVEN</span>
             </div>

@@ -152,6 +152,10 @@ export default function DuelArena() {
     duelDraws: 0,
   });
   const [leaderboard, setLeaderboard] = useState([]);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatOpen, setChatOpen] = useState(false);
+  const chatEndRef = useRef(null);
 
   const refreshDuelData = () => {
     fetch(`${VITALS.SYSTEM.API_BASE}/api/duel/rank/${username}`)
@@ -190,6 +194,11 @@ export default function DuelArena() {
       setMyScore(0);
       setOppScore(0);
       setResult(null);
+      setChatMessages([]);
+      setChatOpen(false);
+    });
+    socket.on("duel:chat_message", (msg) => {
+      setChatMessages((prev) => [...prev.slice(-49), msg]);
     });
     socket.on("duel:question", (d) => {
       setQ(d.question);
@@ -224,9 +233,12 @@ export default function DuelArena() {
       socket.off("duel:finished");
       socket.off("duel:history_result");
       socket.off("duel:cancelled");
+      socket.off("duel:chat_message");
     };
   }, []);
-
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages, chatOpen]);
   useEffect(() => {
     if (!expiresAt) return;
     const iv = setInterval(
@@ -270,6 +282,15 @@ export default function DuelArena() {
       answer: opt,
       answerText: textForOpt,
     });
+  };
+  const sendChat = () => {
+    const clean = chatInput.trim();
+    if (!clean) return;
+    socket.emit("duel:chat", {
+      duelId: duelIdRef.current || duelId,
+      text: clean,
+    });
+    setChatInput("");
   };
 
   const toastEl = toast ? (
@@ -699,6 +720,83 @@ export default function DuelArena() {
         <div className="text-[12px] font-black text-right">
           {opponent} • <span className="text-red-300">{oppScore} pts</span>
         </div>
+      </div>
+      {/* DUEL CHAT - floating button + panel */}
+      <div className="relative z-20">
+        <button
+          onClick={() => setChatOpen(!chatOpen)}
+          className="fixed bottom-4 right-4 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-red-600 to-orange-500 text-2xl shadow-2xl active:scale-95 flex items-center justify-center"
+        >
+          💬
+          {chatMessages.length > 0 && !chatOpen && (
+            <span className="absolute -top-1 -right-1 bg-amber-400 text-black text-[10px] font-black w-5 h-5 rounded-full grid place-items-center">
+              {chatMessages.length}
+            </span>
+          )}
+        </button>
+
+        {chatOpen && (
+          <div className="fixed bottom-[76px] right-4 z-50 w-[320px] max-w-[90vw] h-[380px] bg-[#0F172A] border border-white/15 rounded-[20px] flex flex-col overflow-hidden shadow-2xl">
+            <div className="px-4 py-3 bg-white/5 border-b border-white/10 flex justify-between items-center">
+              <span className="text-[13px] font-black">Chat vs {opponent}</span>
+              <button
+                onClick={() => setChatOpen(false)}
+                className="text-white/60 text-[16px]"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-3 space-y-2">
+              {chatMessages.length === 0 ? (
+                <p className="text-center text-white/40 text-[12px] mt-8">
+                  No messages yet.
+                  <br />
+                  Say GL to {opponent} ⚔️
+                </p>
+              ) : (
+                chatMessages.map((m, i) => {
+                  const isMe = m.from === username;
+                  return (
+                    <div
+                      key={i}
+                      className={`flex ${isMe ? "justify-end" : "justify-start"}`}
+                    >
+                      <div
+                        className={`max-w-[80%] px-3 py-2 rounded-2xl text-[13px] ${isMe ? "bg-orange-500 text-white rounded-br-md" : "bg-white/10 text-white rounded-bl-md"}`}
+                      >
+                        {!isMe && (
+                          <div className="text-[10px] font-bold text-amber-300">
+                            {m.from}
+                          </div>
+                        )}
+                        {m.text}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+              <div ref={chatEndRef} />
+            </div>
+
+            <div className="p-2 border-t border-white/10 flex gap-2">
+              <input
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && sendChat()}
+                placeholder={`Message ${opponent}...`}
+                maxLength={200}
+                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-[13px] text-white placeholder:text-white/30 outline-none"
+              />
+              <button
+                onClick={sendChat}
+                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-orange-500 font-black text-[13px]"
+              >
+                Send
+              </button>
+            </div>
+          </div>
+        )}
       </div>
       <div className="relative z-10 flex-1 flex flex-col justify-center px-4 max-w-[640px] w-full mx-auto py-6">
         <AnimatePresence mode="wait">

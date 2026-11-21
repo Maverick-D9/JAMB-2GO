@@ -56,7 +56,14 @@ export default function CBTExam() {
     }, 1000);
     return () => clearInterval(t);
   }, [examData, isSubmitting, totalDuration]);
-
+  // Auto-scroll active subject pill - ONLY scroll the pill bar, no touch question
+  useEffect(() => {
+    const bar = document.getElementById("subject-bar");
+    const btn = document.getElementById(`subj-${currentSubject}`);
+    if (!bar || !btn) return;
+    const target = btn.offsetLeft - bar.clientWidth / 2 + btn.clientWidth / 2;
+    bar.scrollTo({ left: target, behavior: "smooth" });
+  }, [currentSubject]);
   const questionsBySubject = useMemo(() => {
     if (!examData) return {};
     return examData.questions || examData.papers || {};
@@ -266,7 +273,10 @@ export default function CBTExam() {
         </div>
       </div>
 
-      <div className="relative z-10 flex gap-2 px-3 sm:px-4 py-3 overflow-x-auto bg-[#080C18]/50 whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div
+        id="subject-bar"
+        className="relative z-10 flex gap-2 px-3 sm:px-4 py-3 overflow-x-auto bg-[#080C18]/50 whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
         {subjectList.map((sub) => {
           const active = currentSubject === sub;
           const count = questionsBySubject[sub]?.length || 0;
@@ -275,6 +285,7 @@ export default function CBTExam() {
           return (
             <button
               key={sub}
+              id={`subj-${sub}`}
               onClick={() => {
                 setCurrentSubject(sub);
                 setCurrentIndex(0);

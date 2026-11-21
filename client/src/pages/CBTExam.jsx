@@ -13,6 +13,7 @@ export default function CBTExam() {
   const [showCalc, setShowCalc] = useState(false);
   const [calcVal, setCalcVal] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPalette, setShowPalette] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("cbt_exam");
@@ -65,6 +66,20 @@ export default function CBTExam() {
   const currentQuestions = questionsBySubject[currentSubject] || [];
   const currentQ = currentQuestions[currentIndex];
 
+  const handleNextSubject = () => {
+    const idx = subjectList.indexOf(currentSubject);
+    if (idx < subjectList.length - 1) {
+      setCurrentSubject(subjectList[idx + 1]);
+      setCurrentIndex(0);
+      setShowPalette(false);
+      window.scrollTo(0, 0);
+    } else {
+      handleSubmit(false);
+    }
+  };
+
+  const isLastSubject =
+    subjectList.indexOf(currentSubject) === subjectList.length - 1;
   const handleOption = (opt) => {
     if (!currentQ) return;
     setAnswers((prev) => ({ ...prev, [currentQ.id]: opt }));
@@ -202,7 +217,7 @@ export default function CBTExam() {
         </div>
       )}
 
-      <div className="relative z-10 bg-[#121A2E]/60 backdrop-blur-xl border-b border-white/10 px-4 py-2.5 flex justify-between items-center">
+      <div className="relative z-10 bg-[#121A2E]/60 backdrop-blur-xl border-b border-white/10 px-3 sm:px-4 py-2.5 flex flex-wrap gap-2 justify-between items-center">
         <div className="flex items-center gap-2.5">
           <div
             className="w-8 h-8 rounded-[10px] bg-gradient-to-br from-amber-400 to-amber-500 grid place-items-center font-black text-black text-[14px]"
@@ -229,7 +244,7 @@ export default function CBTExam() {
             </div>
           </div>
         </div>
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-1.5 sm:gap-2 items-center flex-wrap">
           <button
             onClick={() => setShowCalc(!showCalc)}
             className={`px-3 py-1.5 rounded-full font-bold text-[12px] border ${showCalc ? "bg-amber-400 text-black border-amber-400" : "bg-white/5 text-slate-300 border-white/10"}`}
@@ -251,7 +266,7 @@ export default function CBTExam() {
         </div>
       </div>
 
-      <div className="relative z-10 flex gap-2 px-4 py-3 overflow-x-auto bg-[#080C18]/50">
+      <div className="relative z-10 flex gap-2 px-3 sm:px-4 py-3 overflow-x-auto bg-[#080C18]/50 whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {subjectList.map((sub) => {
           const active = currentSubject === sub;
           const count = questionsBySubject[sub]?.length || 0;
@@ -264,20 +279,37 @@ export default function CBTExam() {
                 setCurrentSubject(sub);
                 setCurrentIndex(0);
               }}
-              className={`px-4 py-2 rounded-full font-extrabold text-[11px] uppercase border ${active ? "bg-amber-400 text-black border-amber-400" : "bg-[#121A2E]/70 text-slate-400 border-white/10"}`}
+              className={`shrink-0 px-4 py-2 rounded-full font-extrabold text-[11px] uppercase border ${active ? "bg-amber-400 text-black border-amber-400" : "bg-[#121A2E]/70 text-slate-400 border-white/10"}`}
             >
               {sub} • {done}/{count} {active ? "👑" : ""}
             </button>
           );
         })}
       </div>
+      {/* MOBILE PALETTE BUTTON - only on phone/tablet */}
+      <div className="lg:hidden relative z-20 px-3 pt-2 flex gap-2">
+        <button
+          onClick={() => setShowPalette(true)}
+          className="flex-1 py-2.5 rounded-xl bg-[#121A2E] border border-white/10 text-white text-[12px] font-extrabold"
+        >
+          ☰ Palette • {currentSubject.toUpperCase()} —{" "}
+          {currentQuestions.filter((q) => answers[q.id]).length}/
+          {currentQuestions.length} done
+        </button>
+        <button
+          onClick={handleNextSubject}
+          className="px-4 py-2.5 rounded-xl bg-gradient-to-br from-amber-400 to-amber-500 text-black text-[12px] font-extrabold"
+        >
+          {isLastSubject ? "Finish 👑" : "Next Subject →"}
+        </button>
+      </div>
 
-      <div className="flex-1 grid grid-cols-[1fr_310px] overflow-hidden relative z-10">
-        <div className="p-4 overflow-y-auto">
-          <div className="bg-[#121A2E]/80 backdrop-blur-xl border border-white/10 rounded-[24px] p-6">
+      <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[1fr_310px] overflow-hidden relative z-10">
+        <div className="flex-1 p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-[#121A2E]/80 backdrop-blur-xl border border-white/10 rounded-[20px] sm:rounded-[24px] p-4 sm:p-6">
             {currentQ ? (
               <>
-                <div className="text-[17px] font-semibold leading-[1.6] text-white">
+                <div className="text-[15px] sm:text-[17px] font-semibold leading-[1.65] text-white break-words">
                   <span
                     style={{
                       color: "#FBBF24",
@@ -305,20 +337,22 @@ export default function CBTExam() {
                         className={`opt-card flex gap-3 p-3.5 rounded-2xl cursor-pointer border ${isSelected ? "bg-amber-400/10 border-amber-400" : "bg-[#0F172A] border-white/10"}`}
                       >
                         <div
-                          className={`w-7 h-7 rounded-full grid place-items-center font-extrabold text-[12px] ${isSelected ? "bg-amber-400 text-black" : "bg-[#1e293b] text-slate-500"}`}
+                          className={`w-7 h-7 shrink-0 rounded-full grid place-items-center font-extrabold text-[12px] ${isSelected ? "bg-amber-400 text-black" : "bg-[#1e293b] text-slate-500"}`}
                         >
                           {k}
                         </div>
-                        <span className="text-[14px] text-white">{val}</span>
+                        <span className="text-[13px] sm:text-[14px] text-white leading-relaxed break-words">
+                          {val}
+                        </span>
                       </label>
                     );
                   })}
                 </div>
-                <div className="flex justify-between mt-7">
+                <div className="flex justify-between gap-2 mt-7">
                   <button
                     disabled={currentIndex === 0}
                     onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
-                    className="px-4 py-2 rounded-full border border-white/10 bg-[#0F172A] text-slate-400 text-[12px] font-bold disabled:opacity-40"
+                    className="flex-1 sm:flex-none px-4 py-2.5 rounded-full border border-white/10 bg-[#0F172A] text-slate-400 text-[12px] font-bold disabled:opacity-40"
                   >
                     ← Previous
                   </button>
@@ -329,7 +363,7 @@ export default function CBTExam() {
                         Math.min(currentQuestions.length - 1, i + 1),
                       )
                     }
-                    className="px-4 py-2 rounded-full bg-gradient-to-br from-sky-400 to-sky-500 text-black text-[12px] font-extrabold disabled:opacity-40"
+                    className="flex-1 sm:flex-none px-4 py-2.5 rounded-full bg-gradient-to-br from-sky-400 to-sky-500 text-black text-[12px] font-extrabold disabled:opacity-40"
                   >
                     Next →
                   </button>
@@ -343,7 +377,7 @@ export default function CBTExam() {
           </div>
         </div>
 
-        <div className="bg-[#121A2E]/60 backdrop-blur-xl m-4 ml-0 rounded-[20px] p-3.5 overflow-y-auto flex flex-col gap-3.5 border border-white/10">
+        <div className="hidden lg:flex bg-[#121A2E]/60 backdrop-blur-xl m-4 ml-0 rounded-[20px] p-3.5 overflow-y-auto flex-col gap-3.5 border border-white/10">
           {showCalc && (
             <div className="border border-white/10 rounded-[14px] p-2.5 bg-[#0F172A]">
               <input
@@ -453,6 +487,127 @@ export default function CBTExam() {
           </button>
         </div>
       </div>
+
+      {/* MOBILE FLOATING CALC - question still dey show for top */}
+      {showCalc && (
+        <div className="fixed z-[1000] lg:hidden left-3 right-3 bottom-3">
+          <div className="bg-[#121A2E] border border-white/20 rounded-[18px] p-3 shadow-2xl shadow-black/60">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-white text-[12px] font-extrabold">
+                CALCULATOR
+              </span>
+              <button
+                onClick={() => setShowCalc(false)}
+                className="w-7 h-7 rounded-full bg-white/10 text-white text-[12px]"
+              >
+                ✕
+              </button>
+            </div>
+            <input
+              value={calcVal}
+              onChange={(e) => setCalcVal(e.target.value)}
+              className="w-full p-2.5 mb-2 border border-white/10 rounded-lg bg-[#020617] text-white text-[16px] text-right font-bold"
+              placeholder="0"
+            />
+            <div className="grid grid-cols-4 gap-1.5">
+              {[
+                "7",
+                "8",
+                "9",
+                "/",
+                "4",
+                "5",
+                "6",
+                "*",
+                "1",
+                "2",
+                "3",
+                "-",
+                "0",
+                ".",
+                "=",
+                "+",
+              ].map((c) => (
+                <button
+                  key={c}
+                  onClick={() => {
+                    if (c === "=") {
+                      try {
+                        setCalcVal(
+                          String(
+                            Function('"use strict";return (' + calcVal + ")")(),
+                          ),
+                        );
+                      } catch {
+                        setCalcVal("Error");
+                      }
+                    } else setCalcVal((v) => v + c);
+                  }}
+                  className="p-2.5 rounded-lg border border-white/10 bg-[#141E2F] text-white text-[14px]"
+                >
+                  {c}
+                </button>
+              ))}
+              <button
+                onClick={() => setCalcVal("")}
+                className="col-span-4 p-2 bg-red-500 text-white rounded-lg font-bold text-[12px]"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MOBILE PALETTE DRAWER */}
+      {showPalette && (
+        <div className="fixed inset-0 z-[999] lg:hidden">
+          <div
+            className="absolute inset-0 bg-black/70"
+            onClick={() => setShowPalette(false)}
+          />
+          <div className="absolute bottom-0 left-0 right-0 bg-[#121A2E] rounded-t-[24px] p-4 max-h-[75vh] overflow-y-auto">
+            <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-3" />
+            <div className="flex justify-between items-center mb-3">
+              <h4 className="text-white font-extrabold text-[13px]">
+                PALETTE • {currentSubject.toUpperCase()}
+              </h4>
+              <button
+                onClick={() => setShowPalette(false)}
+                className="w-8 h-8 rounded-full bg-white/10 text-white"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="grid grid-cols-5 gap-2">
+              {currentQuestions.map((q, i) => {
+                const answered = !!answers[q.id];
+                const isCurrent = i === currentIndex;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      setCurrentIndex(i);
+                      setShowPalette(false);
+                    }}
+                    className={`h-11 rounded-[12px] font-extrabold text-[13px] border ${isCurrent ? "border-amber-400" : "border-white/10"} ${answered ? "bg-amber-400 text-black" : isCurrent ? "bg-white text-black" : "bg-[#0F172A] text-slate-400"}`}
+                  >
+                    {i + 1}
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              onClick={handleNextSubject}
+              className="w-full mt-4 p-3.5 bg-gradient-to-br from-amber-400 to-amber-500 text-black rounded-xl font-extrabold"
+            >
+              {isLastSubject
+                ? "FINISH & SEAL SCROLL 👑"
+                : `NEXT: ${subjectList[subjectList.indexOf(currentSubject) + 1]?.toUpperCase()} →`}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

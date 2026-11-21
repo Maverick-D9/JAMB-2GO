@@ -84,6 +84,10 @@ export default function CBTDrillSetup() {
   const [access, setAccess] = useState(null);
   const [checking, setChecking] = useState(true);
   const [paying, setPaying] = useState(false);
+  const [showSubjectDropdown, setShowSubjectDropdown] = useState(false);
+  const [subjectSearch, setSubjectSearch] = useState("");
+  const [topicSearch, setTopicSearch] = useState("");
+  const [showAllTopics, setShowAllTopics] = useState(false);
 
   const paidSubjects = [
     "english-room",
@@ -157,6 +161,8 @@ export default function CBTDrillSetup() {
         setTotalQs(d.totalQs || 0);
         if (d.topics && d.topics.length > 0) setTopic(d.topics[0]);
         else setTopic("");
+        setTopicSearch("");
+        setShowAllTopics(false);
       } catch {
         setTopics([]);
         setCounts({});
@@ -165,6 +171,15 @@ export default function CBTDrillSetup() {
     };
     fetchTopics();
   }, [subject]);
+  const filteredSubjects = paidSubjects.filter((s) =>
+    s.toLowerCase().includes(subjectSearch.toLowerCase()),
+  );
+  const filteredTopics = topics.filter((t) =>
+    t.toLowerCase().includes(topicSearch.toLowerCase()),
+  );
+  const visibleTopics = showAllTopics
+    ? filteredTopics
+    : filteredTopics.slice(0, 5);
 
   const handlePay = async () => {
     const u = getUser();
@@ -300,7 +315,7 @@ export default function CBTDrillSetup() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-[#070B18] text-white relative overflow-hidden">
+    <div className="min-h-screen w-full bg-[#070B18] text-white relative overflow-x-hidden">
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&display=swap');`}</style>
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute w-[700px] h-[500px] -top-[150px] -left-[150px] bg-[radial-gradient(ellipse_at_center,_rgba(56,189,248,0.18),_transparent_65%)] blur-[40px]" />
@@ -343,18 +358,52 @@ export default function CBTDrillSetup() {
               <label className="text-[10px] tracking-[0.14em] font-bold text-slate-500 uppercase">
                 Select Subject Room
               </label>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mt-3">
-                {paidSubjects.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setSubject(s)}
-                    className={`px-3 py-3 rounded-xl text-[11px] font-black border transition ${subject === s ? "bg-sky-400 text-black border-sky-400" : "bg-[#0B0F1E] border-white/10 text-slate-400 hover:text-white"}`}
-                  >
-                    {s.toUpperCase().replace("-ROOM", "")}{" "}
-                    {subject === s && totalQs > 0 ? `• ${totalQs}` : ""}
-                  </button>
-                ))}
-              </div>
+              <button
+                onClick={() => setShowSubjectDropdown((v) => !v)}
+                className="w-full mt-3 flex justify-between items-center px-4 py-3.5 rounded-xl bg-[#0B0F1E] border border-white/10 text-left font-black text-[13px]"
+              >
+                <span>
+                  {subject
+                    ? `${toPlain(subject).toUpperCase()}${totalQs > 0 ? ` • ${totalQs} Qs` : ""}`
+                    : "Select Subject..."}
+                </span>
+                <span className="text-slate-500">
+                  {showSubjectDropdown ? "▲" : "▼"}
+                </span>
+              </button>
+
+              {showSubjectDropdown && (
+                <div className="mt-3 bg-[#0B0F1E] border border-white/10 rounded-xl overflow-hidden">
+                  <input
+                    value={subjectSearch}
+                    onChange={(e) => setSubjectSearch(e.target.value)}
+                    placeholder="🔍 Search subject... e.g Physics"
+                    className="w-full px-4 py-3 bg-transparent border-b border-white/10 text-[13px] text-white placeholder:text-slate-500 outline-none"
+                  />
+                  <div className="max-h-[260px] overflow-y-auto overscroll-contain [scrollbar-width:thin]">
+                    {filteredSubjects.length === 0 ? (
+                      <div className="px-4 py-4 text-[12px] text-slate-500 text-center">
+                        No subject match “{subjectSearch}”
+                      </div>
+                    ) : (
+                      filteredSubjects.map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => {
+                            setSubject(s);
+                            setShowSubjectDropdown(false);
+                            setSubjectSearch("");
+                          }}
+                          className={`w-full text-left px-4 py-3 text-[12px] font-black border-b border-white/5 last:border-0 ${subject === s ? "bg-sky-400 text-black" : "text-slate-300 hover:bg-white/5 hover:text-white"}`}
+                        >
+                          {s.toUpperCase().replace("-ROOM", "")}
+                          {subject === s && " ✓"}
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="bg-[#121A2E]/70 backdrop-blur-xl border border-white/10 rounded-[20px] p-5">
@@ -369,6 +418,17 @@ export default function CBTDrillSetup() {
                   </span>
                 )}
               </div>
+              {subject && (
+                <input
+                  value={topicSearch}
+                  onChange={(e) => {
+                    setTopicSearch(e.target.value);
+                    setShowAllTopics(false);
+                  }}
+                  placeholder="🔍 Search topic... e.g Lexis"
+                  className="w-full mt-3 px-4 py-3 rounded-xl bg-[#0B0F1E] border border-white/10 text-[13px] text-white placeholder:text-slate-500 outline-none focus:border-sky-400/50"
+                />
+              )}
               {topics.length === 0 ? (
                 <div className="mt-3 p-6 text-center border border-dashed border-white/10 rounded-xl">
                   <p className="text-slate-500 text-sm">
@@ -377,26 +437,44 @@ export default function CBTDrillSetup() {
                       : "Select a subject to load topics"}
                   </p>
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 mt-3">
-                  {topics.map((t) => {
-                    const c = counts[t] || 0;
-                    return (
-                      <button
-                        key={t}
-                        onClick={() => setTopic(t)}
-                        className={`flex justify-between items-center px-4 py-3 rounded-xl text-[12px] font-bold border transition ${topic === t ? "bg-white text-black border-white" : "bg-[#0B0F1E] border-white/10 text-slate-300"}`}
-                      >
-                        <span>{t}</span>
-                        <span
-                          className={`px-2.5 py-1 rounded-full text-[11px] font-black ${topic === t ? "bg-black text-white" : "bg-sky-400/15 text-sky-400"}`}
-                        >
-                          {c} Qs
-                        </span>
-                      </button>
-                    );
-                  })}
+              ) : filteredTopics.length === 0 ? (
+                <div className="mt-3 p-6 text-center border border-dashed border-white/10 rounded-xl">
+                  <p className="text-slate-500 text-sm">
+                    No topic match “{topicSearch}”
+                  </p>
                 </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 mt-3">
+                    {visibleTopics.map((t) => {
+                      const c = counts[t] || 0;
+                      return (
+                        <button
+                          key={t}
+                          onClick={() => setTopic(t)}
+                          className={`flex justify-between items-center px-4 py-3 rounded-xl text-[12px] font-bold border transition ${topic === t ? "bg-white text-black border-white" : "bg-[#0B0F1E] border-white/10 text-slate-300"}`}
+                        >
+                          <span>{t}</span>
+                          <span
+                            className={`px-2.5 py-1 rounded-full text-[11px] font-black ${topic === t ? "bg-black text-white" : "bg-sky-400/15 text-sky-400"}`}
+                          >
+                            {c} Qs
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {filteredTopics.length > 5 && (
+                    <button
+                      onClick={() => setShowAllTopics((v) => !v)}
+                      className="w-full mt-3 py-3 rounded-xl bg-[#0B0F1E] border border-white/10 text-[12px] font-black text-slate-300"
+                    >
+                      {showAllTopics
+                        ? "Show Less ▲"
+                        : `Show All Topics (${filteredTopics.length}) ↓`}
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </div>

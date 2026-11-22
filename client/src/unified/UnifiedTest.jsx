@@ -164,6 +164,8 @@ export default function UnifiedTest() {
   const [hasAccess, setHasAccess] = useState(null);
   const [user] = useState(getLoggedUser);
   const [liveDone, setLiveDone] = useState(null); // NEW: attempt for live test
+  const [selectedPast, setSelectedPast] = useState(null);
+  const [pastResult, setPastResult] = useState(null);
 
   useEffect(() => {
     fetchUnifiedTests().then((d) => setTests(d.tests || []));
@@ -190,6 +192,18 @@ export default function UnifiedTest() {
 
   const upcoming = tests.filter((t) => t.status === "upcoming");
   const past = tests.filter((t) => t.status === "ended");
+  const handleViewResult = async (t) => {
+    setSelectedPast(t);
+    setPastResult(null);
+    if (!user.username) return;
+    try {
+      const r = await fetch(
+        `${UNIFIED.API_BASE}/api/unified/tests/${t._id}/attempt?username=${encodeURIComponent(user.username)}`,
+      );
+      const d = await r.json();
+      if (d.done) setPastResult(d);
+    } catch {}
+  };
 
   return (
     <div className="min-h-screen bg-[#070B18] p-4 text-white">
@@ -276,11 +290,58 @@ export default function UnifiedTest() {
                 {t.topic || "all"}
               </p>
             </div>
-            <span className="text-[11px] bg-white/10 px-3 py-1.5 rounded-full">
+            <button
+              onClick={() => handleViewResult(t)}
+              className="text-[11px] bg-amber-400 text-black font-bold px-3 py-1.5 rounded-full cursor-pointer active:scale-95"
+            >
               View Result →
-            </span>
+            </button>
           </div>
         ))}
+
+        {/* Show result when you click View Result */}
+        {selectedPast && (
+          <div className="bg-[#121A2E] border border-amber-400/30 rounded-[20px] p-4 mt-4">
+            <div className="flex justify-between items-center">
+              <h3 className="font-black text-[15px]">
+                {selectedPast.title} — Result
+              </h3>
+              <button
+                onClick={() => setSelectedPast(null)}
+                className="text-slate-400 text-[12px]"
+              >
+                ✕ Close
+              </button>
+            </div>
+
+            {pastResult ? (
+              <div className="mt-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 text-center">
+                <p className="text-[13px] text-white">
+                  @{user.username} — Score:{" "}
+                  <b className="text-amber-400">
+                    {pastResult.score} / {pastResult.total}
+                  </b>
+                </p>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Your first attempt na the one wey count.
+                </p>
+              </div>
+            ) : (
+              <p className="text-[12px] text-slate-400 mt-3">
+                You no submit this test — no result for @
+                {user.username || "you"}.
+              </p>
+            )}
+
+            <div className="mt-4">
+              <UnifiedLeaderboard
+                testId={selectedPast._id}
+                testTitle={selectedPast.title}
+                compact={false}
+              />
+            </div>
+          </div>
+        )}
 
         <button
           onClick={() => (window.location.href = "/")}

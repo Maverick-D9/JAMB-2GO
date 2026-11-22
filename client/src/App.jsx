@@ -20,6 +20,8 @@ import { getLiveRank } from "./config/liveRanks";
 import TextHype from "./components/TextHype.jsx";
 import DuelArena from "./pages/DuelArena";
 import ChristmasDecor from "./components/ChristmasDecor.jsx";
+import UnifiedTest from "./unified/UnifiedTest";
+import UnifiedExam from "./unified/UnifiedExam";
 function RankUpAnimation({ newRank, onClose }) {
   if (!newRank) return null;
 
@@ -614,6 +616,18 @@ export default function App() {
   const [unreadDMs, setUnreadDMs] = useState({});
   const [hovered, setHovered] = useState(false);
 
+  // NEW: Unified Test - Live badge
+  const [unifiedLive, setUnifiedLive] = useState(null);
+  useEffect(() => {
+    fetch(`${API_BASE}/api/unified/tests`)
+      .then((r) => r.json())
+      .then((d) => {
+        const live = (d.tests || []).find((t) => t.status === "live");
+        setUnifiedLive(live || null);
+      })
+      .catch(() => {});
+  }, []);
+
   // RANK UP DETECTION - FIXED
   useEffect(() => {
     if (myScore === 0) return;
@@ -763,6 +777,18 @@ export default function App() {
     window.location.pathname === "/duel-arena"
   ) {
     return <DuelArena />;
+  }
+  if (
+    typeof window !== "undefined" &&
+    window.location.pathname === "/unified-test"
+  ) {
+    return <UnifiedTest />;
+  }
+  if (
+    typeof window !== "undefined" &&
+    window.location.pathname.startsWith("/unified-exam")
+  ) {
+    return <UnifiedExam />;
   }
   const isEnglishRoom = room === "english-room";
   const hasFullAccess = access?.tier === "full_access";
@@ -1814,6 +1840,39 @@ export default function App() {
               </div>
               <div className="text-[11px] text-slate-400 mt-1">
                 1v1. 10 questions. Winner takes all.
+              </div>
+            </button>
+            {/* 5th Card - Unified Test */}
+            <button
+              onClick={() => {
+                window.location.href = "/unified-test";
+              }}
+              className="text-left p-[16px] rounded-[20px] border backdrop-blur-xl bg-[#121A2E]/80 border-amber-400/40 hover:shadow-[0_0_30px_rgba(251,191,36,0.35)] hover:scale-[1.02] transition col-span-2 md:col-span-1"
+            >
+              <div className="flex justify-between items-start">
+                <div className="w-9 h-9 rounded-xl bg-amber-400/15 grid place-items-center">
+                  🏆
+                </div>
+                {unifiedLive ? (
+                  <span className="text-[10px] px-2 py-1 rounded-full bg-red-500 text-white font-black animate-pulse">
+                    🔴 LIVE NOW
+                  </span>
+                ) : (
+                  <span className="text-[10px] px-2 py-1 rounded-full bg-white/10 text-slate-400 font-bold">
+                    UPCOMING
+                  </span>
+                )}
+              </div>
+              <div className="mt-3 font-extrabold text-[13px] text-white">
+                Unified Test
+              </div>
+              <div className="text-[11px] text-slate-400 mt-1">
+                {unifiedLive
+                  ? `${unifiedLive.title} • Enter now, top the board!`
+                  : "Sunday Mega Test • Compete for #1 on Leaderboard"}
+              </div>
+              <div className="text-[11px] text-amber-300 font-bold mt-2">
+                Enter Test →
               </div>
             </button>
           </div>

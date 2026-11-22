@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { VITALS } from "../config/vitals";
+import UnifiedAdmin from "../unified/UnifiedAdmin";
 
 const API = VITALS.SYSTEM.API_BASE;
 const SUBJECTS = [
@@ -893,6 +894,7 @@ export default function Admin() {
         <DashboardStats />
         <StorageMonitor adminPass={adminPass} />
         <TrialManager adminPass={adminPass} />
+        <UnifiedAdmin />
         <div className="bg-[#121A2E]/70 backdrop-blur-xl rounded-[20px] border border-white/10 p-5 mb-6 relative overflow-hidden">
           <div className="flex justify-between items-center mb-4">
             <h3

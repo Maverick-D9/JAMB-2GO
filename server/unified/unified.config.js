@@ -1,0 +1,40 @@
+// server/unified/unified.config.js
+// Unified Test - own brain, no import from vitals.js
+
+module.exports = {
+  SUBJECTS: [
+    "english",
+    "mathematics",
+    "physics",
+    "chemistry",
+    "biology",
+    "commerce",
+    "economics",
+    "government",
+    "accounting",
+    "literature",
+    "crs",
+    "irs",
+    "geography",
+    "agric",
+  ],
+  SUBJECT_ICONS: {
+    english: "📖",
+    mathematics: "🧮",
+    physics: "⚛️",
+    chemistry: "🧪",
+    biology: "🧬",
+    commerce: "💼",
+    economics: "📈",
+    government: "🏛️",
+    accounting: "💰",
+    literature: "📚",
+    crs: "✝️",
+    irs: "☪️",
+    geography: "🌍",
+    agric: "🌾",
+  },
+  DEFAULT_DURATION_MINUTES: 120,
+  DEFAULT_QUESTIONS_PER_SUBJECT: 40,
+  STATUSES: ["draft", "upcoming", "live", "ended"],
+};

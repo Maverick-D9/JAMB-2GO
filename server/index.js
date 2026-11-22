@@ -158,12 +158,15 @@ const paymentRoutes = require("./routes/payment");
 const drillRoutes = require("./routes/drill");
 const authRoutes = require("./routes/auth");
 const adminStorageRoutes = require("./routes/adminStorage");
+const unifiedRoutes = require("./unified/unified.routes");
 
 app.use("/api/cbt", cbtRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/drill", drillRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminStorageRoutes);
+app.use("/api/unified", unifiedRoutes);
+app.use("/api/unified/vault", require("./unified/unifiedVault.routes"));
 
 const server = http.createServer(app);
 const io = new Server(server, {

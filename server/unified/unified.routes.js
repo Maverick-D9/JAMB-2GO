@@ -104,19 +104,30 @@ function readSubjectQuestions(subject) {
   }
   return qs;
 }
-
-// GET - Lobby
+// GET - Lobby - FIXED: respect startAt, auto-end, Lagos time
 router.get("/tests", async (req, res) => {
   try {
     const tests = await UnifiedTest.find().sort({ startAt: -1 }).lean();
     const now = new Date();
     for (const t of tests) {
-      if (t.status === "upcoming" && new Date(t.startAt) <= now) {
+      const start = new Date(t.startAt);
+      // endAt = startAt + duration, NOT now + duration
+      const end = t.endAt
+        ? new Date(t.endAt)
+        : new Date(start.getTime() + (t.durationMinutes || 120) * 60000);
+
+      let newStatus = t.status;
+      if (now < start) newStatus = "upcoming";
+      else if (now >= start && now < end) newStatus = "live";
+      else if (now >= end) newStatus = "ended";
+
+      if (newStatus !== t.status || !t.endAt) {
         await UnifiedTest.findByIdAndUpdate(t._id, {
-          status: "live",
-          endAt: new Date(now.getTime() + (t.durationMinutes || 120) * 60000),
+          status: newStatus,
+          endAt: end,
         });
-        t.status = "live";
+        t.status = newStatus;
+        t.endAt = end;
       }
     }
     res.json({ tests });
@@ -227,8 +238,7 @@ router.get("/tests/:id/questions", async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
-
-// POST - Admin creates test - NOW WITH TOPIC
+// POST - Admin creates test - FIXED: treat input as Lagos time (UTC+1)
 router.post("/tests", checkAdmin, async (req, res) => {
   const {
     title,
@@ -240,14 +250,35 @@ router.post("/tests", checkAdmin, async (req, res) => {
   } = req.body;
   if (!title || !startAt)
     return res.status(400).json({ error: "Title + Start time needed" });
+
+  // startAt comes as "2026-11-22T10:00" from datetime-local = Lagos time
+  // Convert Lagos -> UTC by subtracting 1 hour, so 10 Lagos stays 10 Lagos
+  let startDate;
+  if (
+    typeof startAt === "string" &&
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(startAt)
+  ) {
+    const [datePart, timePart] = startAt.split("T");
+    const [y, m, d] = datePart.split("-").map(Number);
+    const [hh, mm] = timePart.split(":").map(Number);
+    // Date.UTC creates UTC, minus 1 hour for Lagos
+    startDate = new Date(Date.UTC(y, m - 1, d, hh - 1, mm || 0));
+  } else {
+    startDate = new Date(startAt);
+  }
+
+  const duration = durationMinutes || 120;
+  const endDate = new Date(startDate.getTime() + duration * 60000);
+
   const test = await UnifiedTest.create({
     title,
     subjects: subjects || [],
     topic: (topic || "all").trim() || "all",
-    startAt: new Date(startAt),
-    durationMinutes: durationMinutes || 120,
+    startAt: startDate,
+    endAt: endDate,
+    durationMinutes: duration,
     questionsPerSubject: questionsPerSubject || 40,
-    status: "upcoming",
+    status: "upcoming", // Always start as upcoming, never live
   });
   res.json({ success: true, test });
 });

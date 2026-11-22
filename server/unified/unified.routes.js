@@ -117,7 +117,9 @@ router.get("/tests", async (req, res) => {
         : new Date(start.getTime() + (t.durationMinutes || 120) * 60000);
 
       let newStatus = t.status;
-      if (now < start) newStatus = "upcoming";
+      if (t.status === "live" && end > now) {
+        newStatus = "live"; // Manual Make Live - respect am, no revert
+      } else if (now < start) newStatus = "upcoming";
       else if (now >= start && now < end) newStatus = "live";
       else if (now >= end) newStatus = "ended";
 
@@ -282,21 +284,21 @@ router.post("/tests", checkAdmin, async (req, res) => {
   });
   res.json({ success: true, test });
 });
-
-// POST - Make Live NOW
+// POST - Make Live NOW - FIXED: also move startAt to now so GET no revert am
 router.post("/tests/:id/make-live", checkAdmin, async (req, res) => {
   try {
     const t = await UnifiedTest.findById(req.params.id);
     if (!t) return res.status(404).json({ error: "Test not found" });
+    const now = new Date();
     t.status = "live";
-    t.endAt = new Date(Date.now() + (t.durationMinutes || 120) * 60000);
+    t.startAt = now; // <-- THIS na the key
+    t.endAt = new Date(now.getTime() + (t.durationMinutes || 120) * 60000);
     await t.save();
     res.json({ success: true, test: t });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
-
 // POST - End test
 router.post("/tests/:id/end", checkAdmin, async (req, res) => {
   try {
@@ -309,8 +311,7 @@ router.post("/tests/:id/end", checkAdmin, async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
-
-// DELETE - Delete test (only after it don end)
+// DELETE - Delete test + all its attempts
 router.delete("/tests/:id", checkAdmin, async (req, res) => {
   try {
     const t = await UnifiedTest.findById(req.params.id);
@@ -322,6 +323,8 @@ router.delete("/tests/:id", checkAdmin, async (req, res) => {
         error: "End the test first before you delete am",
       });
     }
+    // Delete all attempts for this test too, so e no remain for DB
+    await UnifiedAttempt.deleteMany({ testId: req.params.id });
     await UnifiedTest.findByIdAndDelete(req.params.id);
     res.json({ success: true });
   } catch (e) {

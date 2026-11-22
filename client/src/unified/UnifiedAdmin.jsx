@@ -51,7 +51,7 @@ export default function UnifiedAdmin() {
       body: JSON.stringify({
         title: title.trim(),
         subjects,
-        topic: topic.trim() || "all", // NEW
+        topic: topic.trim() || "all",
         startAt,
         durationMinutes: Number(duration),
         questionsPerSubject: Number(questionsPerSubject) || 40,
@@ -62,7 +62,7 @@ export default function UnifiedAdmin() {
     if (d.success) {
       setTitle("");
       setDate("");
-      setTopic("all"); // NEW: reset
+      setTopic("all");
       loadTests();
     }
   };
@@ -101,7 +101,9 @@ export default function UnifiedAdmin() {
   // DELETE TEST - only after test don end
   const deleteTest = async (id, title) => {
     if (
-      !confirm(`Delete "${title}" permanently? E go comot from All Tests list.`)
+      !confirm(
+        `Delete "${title}" permanently?\n\nE go delete test + ALL attempts/scores wey people don take for am. You no fit undo am. Continue?`,
+      )
     )
       return;
     setMsg("⏳ Deleting...");
@@ -187,7 +189,6 @@ export default function UnifiedAdmin() {
         🏆 UNIFIED TEST — Admin
       </h3>
 
-      {/* ✅ NEW TABS */}
       <div className="flex gap-2 mt-3">
         <button
           onClick={() => setTab("tests")}
@@ -203,10 +204,8 @@ export default function UnifiedAdmin() {
         </button>
       </div>
 
-      {/* ✅ VAULT TAB */}
       {tab === "vault" && <UnifiedVaultAdmin />}
 
-      {/* ✅ TESTS TAB - your old code, nothing change */}
       {tab === "tests" && (
         <>
           <h3 className="font-black text-white text-[15px] mt-4">
@@ -219,7 +218,6 @@ export default function UnifiedAdmin() {
             className="w-full mt-3 px-3 py-2.5 rounded-xl bg-[#080C18] border border-white/10 text-white text-[13px] outline-none"
           />
 
-          {/* NEW: TOPIC FILTER */}
           <label className="text-[11px] text-slate-400 mt-3 block">
             Topic Filter — leave as "all" for all topics, or type one topic
           </label>
@@ -303,7 +301,6 @@ export default function UnifiedAdmin() {
           </button>
           {msg && <p className="text-[12px] mt-2 text-slate-300">{msg}</p>}
 
-          {/* LIST + MAKE LIVE */}
           <h4 className="text-white font-black text-[13px] mt-6 mb-2">
             All Tests ({tests.length})
           </h4>
@@ -328,7 +325,6 @@ export default function UnifiedAdmin() {
                       {t.subjects?.join(", ")} • {t.questionsPerSubject || 40}{" "}
                       Qs/subject
                     </p>
-                    {/* NEW: Show Topic */}
                     <p className="text-[11px] text-amber-300/80">
                       📌 Topic: {t.topic || "all"}
                     </p>
@@ -350,7 +346,6 @@ export default function UnifiedAdmin() {
                         End
                       </button>
                     )}
-                    {/* NEW: Reset All Attempts - always show */}
                     <button
                       onClick={() => resetAllAttempts(t._id, t.title)}
                       disabled={resettingId === t._id}
@@ -360,8 +355,8 @@ export default function UnifiedAdmin() {
                         ? "Resetting..."
                         : "🔄 Reset Attempts"}
                     </button>
-                    {/* DELETE - only show when test don end */}
-                    {t.status === "ended" && (
+                    {/* DELETE - show for upcoming + ended, hide for live (End first) */}
+                    {t.status !== "live" && (
                       <button
                         onClick={() => deleteTest(t._id, t.title)}
                         className="px-3 py-2 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 font-bold text-[11px]"
@@ -371,7 +366,6 @@ export default function UnifiedAdmin() {
                     )}
                   </div>
                 </div>
-                {/* NEW: Reset ONE user row */}
                 <div className="flex gap-1.5 mt-2">
                   <input
                     value={resetUser[t._id] || ""}

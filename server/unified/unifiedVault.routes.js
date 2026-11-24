@@ -1,22 +1,43 @@
 const express = require("express");
 const multer = require("multer");
-const cloudinary = require("cloudinary").v2;
+const cloudinary = require("./cloudinary");
 const UnifiedQuestion = require("./unifiedQuestion.model");
 const router = express.Router();
-const upload = multer({ dest: "uploads/" });
 
-cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.CLOUD_KEY,
-  api_secret: process.env.CLOUD_SECRET,
+// Use memory, not disk - Render no keep disk files
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
 });
 
 // 1. Upload diagram file -> Cloudinary
-router.post("/upload-diagram", upload.single("image"), async (req, res) => {
+router.post("/upload-diagram", upload.single("diagram"), async (req, res) => {
   try {
-    const r = await cloudinary.uploader.upload(req.file.path);
-    res.json({ success: true, url: r.secure_url });
+    if (!req.file)
+      return res
+        .status(400)
+        .json({ success: false, error: "No image selected" });
+
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: "jamb2go/unified-diagrams",
+          resource_type: "image",
+          transformation: [{ width: 800, crop: "limit", quality: "auto" }],
+        },
+        (err, result) => (err ? reject(err) : resolve(result)),
+      );
+      stream.end(req.file.buffer);
+    });
+
+    res.json({
+      success: true,
+      diagramUrl: result.secure_url,
+      diagramPublicId: result.public_id,
+      url: result.secure_url,
+    });
   } catch (e) {
+    console.log("Cloudinary upload error:", e);
     res.json({ success: false, error: e.message });
   }
 });
@@ -43,7 +64,6 @@ router.post("/bulk", async (req, res) => {
 });
 
 // 4. List for admin + for exam picker
-// IMPORTANT: /list MUST come before /:id, else Express go think "list" na ID
 router.get("/list", async (req, res) => {
   try {
     const { subject } = req.query;
@@ -72,7 +92,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// 5. UPDATE ONE - for Edit button in Manage Vault
+// 5. UPDATE ONE
 router.put("/:id", async (req, res) => {
   try {
     const updated = await UnifiedQuestion.findByIdAndUpdate(
@@ -88,7 +108,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// 6. DELETE ONE - for Delete button in Manage Vault
+// 6. DELETE ONE
 router.delete("/:id", async (req, res) => {
   try {
     await UnifiedQuestion.findByIdAndDelete(req.params.id);

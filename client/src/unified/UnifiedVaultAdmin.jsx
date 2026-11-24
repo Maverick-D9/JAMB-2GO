@@ -148,14 +148,14 @@ export default function UnifiedVaultAdmin() {
     if (!file) return;
     setMsg("⏳ Uploading diagram...");
     const fd = new FormData();
-    fd.append("image", file);
+    fd.append("diagram", file);
     const r = await fetch(
       `${UNIFIED.API_BASE}/api/unified/vault/upload-diagram`,
       { method: "POST", headers: { "x-admin-password": pass }, body: fd },
     );
     const d = await r.json();
     if (d.success) {
-      setDiagramUrl(d.url);
+      setDiagramUrl(d.diagramUrl || d.url);
       setDiagramType("file");
       setMsg("✅ Diagram uploaded!");
     } else setMsg("❌ Upload failed: " + d.error);

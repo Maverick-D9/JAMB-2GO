@@ -7,7 +7,6 @@ import UnifiedLeaderboard from "./UnifiedLeaderboard";
 // NEW: Get logged-in user from your Auth.jsx (jambite_user)
 function getLoggedUser() {
   try {
-    // Try unified.config getUser() first, if e exist
     if (typeof getUser === "function") {
       const u = getUser();
       if (u?.username)
@@ -55,7 +54,7 @@ function LiveCard({ live, hasAccess, username, alreadyDone }) {
   const countdown = useCountdown(live.endAt);
 
   const enter = () => {
-    if (alreadyDone) return; // NEW: Block if don do am
+    if (alreadyDone) return;
     if (!hasAccess) {
       window.location.href = "/pricing";
       return;
@@ -76,7 +75,6 @@ function LiveCard({ live, hasAccess, username, alreadyDone }) {
         </span>
       </div>
       <h2 className="text-xl font-black mt-3">{live.title}</h2>
-      {/* NEW: Topic badge */}
       <p className="text-[11px] text-amber-300/80 mt-1">
         📌 Topic: {live.topic || "all"}
       </p>
@@ -91,7 +89,6 @@ function LiveCard({ live, hasAccess, username, alreadyDone }) {
         ))}
       </div>
 
-      {/* NEW: If don do am, show score + lock button */}
       {alreadyDone ? (
         <div className="mt-4">
           <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 text-center">
@@ -163,7 +160,7 @@ export default function UnifiedTest() {
   const [tests, setTests] = useState([]);
   const [hasAccess, setHasAccess] = useState(null);
   const [user] = useState(getLoggedUser);
-  const [liveDone, setLiveDone] = useState(null); // NEW: attempt for live test
+  const [liveDoneMap, setLiveDoneMap] = useState({}); // { testId: attempt }
   const [selectedPast, setSelectedPast] = useState(null);
   const [pastResult, setPastResult] = useState(null);
 
@@ -172,23 +169,30 @@ export default function UnifiedTest() {
     checkUnifiedAccess().then((r) => setHasAccess(r.hasAccess));
   }, []);
 
-  // NEW: Check if this username don do the LIVE test before
-  const live = tests.find((t) => t.status === "live");
+  // FIX: ALL live tests, not just first one
+  const lives = tests.filter((t) => t.status === "live");
+
+  // Check attempt for EACH live test
   useEffect(() => {
-    if (!live?._id || !user.username) {
-      setLiveDone(null);
+    if (!user.username || lives.length === 0) {
+      setLiveDoneMap({});
       return;
     }
-    fetch(
-      `${UNIFIED.API_BASE}/api/unified/tests/${live._id}/attempt?username=${encodeURIComponent(user.username)}`,
-    )
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.done) setLiveDone(d);
-        else setLiveDone(null);
-      })
-      .catch(() => setLiveDone(null));
-  }, [live?._id, user.username]);
+    lives.forEach((live) => {
+      fetch(
+        `${UNIFIED.API_BASE}/api/unified/tests/${live._id}/attempt?username=${encodeURIComponent(user.username)}`,
+      )
+        .then((r) => r.json())
+        .then((d) => {
+          setLiveDoneMap((p) => ({
+            ...p,
+            [live._id]: d.done ? d : null,
+          }));
+        })
+        .catch(() => {});
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(lives.map((t) => t._id)), user.username]);
 
   const upcoming = tests.filter((t) => t.status === "upcoming");
   const past = tests.filter((t) => t.status === "ended");
@@ -221,7 +225,6 @@ export default function UnifiedTest() {
           <p className="text-slate-400 text-[13px] mt-1">
             Everybody. Same paper. Same time.
           </p>
-          {/* NEW: Show logged-in username */}
           {user.username ? (
             <p className="text-[12px] mt-2 text-slate-300">
               👤 Logged in as <b className="text-white">@{user.username}</b>
@@ -238,29 +241,35 @@ export default function UnifiedTest() {
           )}
         </div>
 
-        {live ? (
-          <LiveCard
-            live={live}
-            hasAccess={hasAccess}
-            username={user.username}
-            alreadyDone={liveDone}
-          />
-        ) : (
+        {/* FIX: Show ALL live tests */}
+        {lives.length === 0 ? (
           <div className="bg-[#121A2E]/60 border border-white/10 rounded-[20px] p-5 mb-4 text-center text-slate-400 text-[13px]">
             No live test right now. Check upcoming below 👇
           </div>
-        )}
-        {live && (
-          <UnifiedLeaderboard
-            testId={live._id}
-            testTitle={live.title}
-            compact={false}
-          />
+        ) : (
+          <>
+            <h3 className="text-[11px] tracking-widest font-bold text-red-400 mb-2">
+              🔴 LIVE NOW ({lives.length})
+            </h3>
+            {lives.map((live) => (
+              <div key={live._id}>
+                <LiveCard
+                  live={live}
+                  hasAccess={hasAccess}
+                  username={user.username}
+                  alreadyDone={liveDoneMap[live._id] || null}
+                />
+                <UnifiedLeaderboard
+                  testId={live._id}
+                  testTitle={live.title}
+                  compact={false}
+                />
+              </div>
+            ))}
+          </>
         )}
 
-        <h3 className="text-[11px] tracking-widest font-bold text-slate-500 mb-2"></h3>
-
-        <h3 className="text-[11px] tracking-widest font-bold text-slate-500 mb-2">
+        <h3 className="text-[11px] tracking-widest font-bold text-slate-500 mb-2 mt-5">
           UPCOMING
         </h3>
         {upcoming.length === 0 && (
@@ -299,7 +308,6 @@ export default function UnifiedTest() {
           </div>
         ))}
 
-        {/* Show result when you click View Result */}
         {selectedPast && (
           <div className="bg-[#121A2E] border border-amber-400/30 rounded-[20px] p-4 mt-4">
             <div className="flex justify-between items-center">

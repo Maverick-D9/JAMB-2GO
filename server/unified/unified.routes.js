@@ -5,6 +5,12 @@ const fs = require("fs");
 const path = require("path");
 const UnifiedTest = require("./unified.model");
 const UnifiedAttempt = require("./unifiedAttempt.model");
+const multer = require("multer");
+const cloudinary = require("./cloudinary");
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
 
 let UnifiedQuestion = null;
 try {
@@ -439,5 +445,38 @@ router.delete("/tests/:id/attempts/:username", checkAdmin, async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+// POST - Upload Diagram to Cloudinary
+router.post(
+  "/questions/upload-diagram",
+  checkAdmin,
+  upload.single("diagram"),
+  async (req, res) => {
+    try {
+      if (!req.file)
+        return res.status(400).json({ error: "No image selected" });
+
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: "jamb2go/unified-diagrams",
+            resource_type: "image",
+            transformation: [{ width: 800, crop: "limit", quality: "auto" }],
+          },
+          (err, result) => (err ? reject(err) : resolve(result)),
+        );
+        stream.end(req.file.buffer);
+      });
+
+      res.json({
+        success: true,
+        diagramUrl: result.secure_url,
+        diagramPublicId: result.public_id,
+      });
+    } catch (e) {
+      console.log("Cloudinary upload error:", e);
+      res.status(500).json({ error: "Upload failed: " + e.message });
+    }
+  },
+);
 
 module.exports = router;

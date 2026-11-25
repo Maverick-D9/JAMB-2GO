@@ -589,6 +589,9 @@ export default function App() {
   const [showChat, setShowChat] = useState(false);
   const [showMobileChat, setShowMobileChat] = useState(false);
   const [room, setRoom] = useState(() => authedUser?.subject || "english-room");
+  const [subjectSearch, setSubjectSearch] = useState("");
+  const [showAllSubjects, setShowAllSubjects] = useState(false);
+  const subjectScrollRef = useRef(null);
   const [palaceMode, setPalaceMode] = useState("arena");
   const [currentQ, setCurrentQ] = useState(null);
   const currentQRef = useRef(null);
@@ -1100,7 +1103,7 @@ export default function App() {
 
   if (!showChat) {
     return (
-      <div className="min-h-screen w-full bg-[#050A14] relative flex justify-center items-start py-6 px-4 overflow-hidden">
+      <div className="min-h-screen w-full bg-[#050A14] relative flex justify-center items-start py-6 px-4 overflow-x-hidden">
         <ChristmasDecor />
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Permanent+Marker&family=Cinzel:wght@800&display=swap');
@@ -1680,97 +1683,9 @@ export default function App() {
           />
         )}
 
-        <div className="relative z-10 w-[640px] max-w-[95vw]">
-          <div className="text-center">
-            <div
-              className="font-black text-[42px] tracking-tight drop-shadow-[0_0_24px_rgba(56,189,248,0.6)]"
-              style={{ fontFamily: "Cinzel" }}
-            >
-              <span className="text-white">
-                <span className="relative inline-block">
-                  S{/* SANTA HAT - SVG, HAT ONLY, NO FACE */}
-                  <svg
-                    className="absolute -top-[26px] -left-[10px] -rotate-[18deg] pointer-events-none"
-                    width="46"
-                    height="34"
-                    viewBox="0 0 46 34"
-                  >
-                    {/* hat body */}
-                    <path
-                      d="M4 26 Q8 4 26 6 Q34 7 40 14 L36 20 Q28 12 18 22 Q10 28 4 26 Z"
-                      fill="#DC2626"
-                    />
-                    {/* white brim */}
-                    <rect
-                      x="2"
-                      y="24"
-                      width="34"
-                      height="8"
-                      rx="4"
-                      fill="white"
-                    />
-                    {/* pompom */}
-                    <circle cx="40" cy="16" r="6" fill="white" />
-                  </svg>
-                </span>
-                CHOLARS'
-              </span>
-              <span className="text-[#38BDF8]">•</span>
-              <span className="text-white">HAVEN</span>
-            </div>
-            <p className="text-slate-400 text-[13px] mt-1">
-              Welcome back,Scholar-{" "}
-              <span className="text-white font-bold">{username} 👑</span> •{" "}
-              {hasFullAccess
-                ? `✅ ${access.status} • ${access.daysLeft}d left`
-                : `🔓 Free Zone — English Only`}
-            </p>
-          </div>
-
-          {/* === OPTION B + SUBSCRIBE DURING TRIAL FIX === */}
-          {hasFullAccess ? (
-            <div className="mt-4 bg-emerald-500/10 border border-emerald-500/20 rounded-[14px] px-4 py-2.5 flex justify-between items-center backdrop-blur-xl gap-2">
-              <span className="text-emerald-300 text-[12px] font-bold shrink-0">
-                👑{" "}
-                {access.status === "trial"
-                  ? `🎁 Trial: ${access.daysLeft}d left`
-                  : `Active Pass: ${access.daysLeft}d left`}
-              </span>
-              <div className="flex items-center gap-2">
-                <span className="text-emerald-400 text-[11px] hidden md:inline">
-                  All rooms unlocked
-                </span>
-                {access.status === "trial" && (
-                  <button
-                    onClick={() => setShowPaywall(true)}
-                    className="bg-amber-400 text-black text-[11px] font-black px-3.5 py-1.5 rounded-full shadow-[0_0_20px_rgba(251,191,36,0.4)] hover:scale-105 transition"
-                  >
-                    Upgrade Now — Keep {access.daysLeft}d +{" "}
-                    {VITALS.SUBSCRIPTION.DURATION_DAYS}d 👑
-                  </button>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="mt-4 bg-amber-400/10 border border-amber-400/20 rounded-[14px] px-4 py-3 flex justify-between items-center backdrop-blur-xl">
-              <div>
-                <div className="text-amber-200 text-[12px] font-bold">
-                  🔓 Free Zone — English Only
-                </div>
-                <div className="text-amber-200/60 text-[11px]">
-                  Unlock all for {VITALS.SUBSCRIPTION.LABEL}
-                </div>
-              </div>
-              <button
-                onClick={() => setShowPaywall(true)}
-                className="bg-amber-400 text-black text-[11px] font-black px-3.5 py-1.5 rounded-full"
-              >
-                Unlock 👑
-              </button>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-5">
+        <div className="relative z-10 w-full lg:w-[1120px] max-w-[96vw] flex flex-col lg:flex-row gap-5 items-start">
+          {/* ===== LEFT RAIL - DESKTOP ONLY ===== */}
+          <aside className="hidden lg:flex flex-col gap-3 w-[285px] shrink-0 sticky top-6">
             <button
               onClick={() => {
                 if (!hasFullAccess) {
@@ -1791,6 +1706,7 @@ export default function App() {
                 4 subjects, Controlled timing.
               </div>
             </button>
+
             <button
               onClick={() => {
                 if (!hasFullAccess) {
@@ -1811,6 +1727,7 @@ export default function App() {
                 Topic by topic mastery.
               </div>
             </button>
+
             <button
               onClick={() => setPalaceMode("arena")}
               className={`text-left p-[16px] rounded-[20px] border backdrop-blur-xl bg-[#121A2E]/80 ${palaceMode === "arena" ? "border-sky-400/50 shadow-[0_0_30px_rgba(56,189,248,0.3)]" : "border-white/10"}`}
@@ -1825,12 +1742,12 @@ export default function App() {
                 Wake up the Scholar in you!.
               </div>
             </button>
+
             <button
               onClick={() => {
-                // FREE - no paywall check, like English Live Room
                 window.location.href = "/duel-arena";
               }}
-              className={`text-left p-[16px] rounded-[20px] border backdrop-blur-xl bg-[#121A2E]/80 border-red-500/30 hover:shadow-[0_0_30px_rgba(239,68,68,0.3)]`}
+              className="text-left p-[16px] rounded-[20px] border backdrop-blur-xl bg-[#121A2E]/80 border-red-500/30 hover:shadow-[0_0_30px_rgba(239,68,68,0.3)]"
             >
               <div className="w-9 h-9 rounded-xl bg-red-500/15 grid place-items-center">
                 ⚔️
@@ -1842,12 +1759,12 @@ export default function App() {
                 1v1. 10 questions. Winner takes all.
               </div>
             </button>
-            {/* 5th Card - Unified Test */}
+
             <button
               onClick={() => {
                 window.location.href = "/unified-test";
               }}
-              className="text-left p-[16px] rounded-[20px] border backdrop-blur-xl bg-[#121A2E]/80 border-amber-400/40 hover:shadow-[0_0_30px_rgba(251,191,36,0.35)] hover:scale-[1.02] transition col-span-2 md:col-span-1"
+              className="text-left p-[16px] rounded-[20px] border backdrop-blur-xl bg-[#121A2E]/80 border-amber-400/40 hover:shadow-[0_0_30px_rgba(251,191,36,0.35)]"
             >
               <div className="flex justify-between items-start">
                 <div className="w-9 h-9 rounded-xl bg-amber-400/15 grid place-items-center">
@@ -1875,43 +1792,313 @@ export default function App() {
                 Enter Test →
               </div>
             </button>
-          </div>
+          </aside>
 
-          <div className="mt-4 mb-3 text-[11px] text-sky-300/70 uppercase text-center tracking-[0.18em] font-black">
-            ⚗️ CHOOSE YOUR BATTLEFIELD — SCULPT YOUR MIND ⚗️
-          </div>
-
-          <div
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-            className="grid grid-cols-2 gap-2.5"
-          >
-            {SUBJECTS.map((s) => {
-              const isEnglish = s.id === "english-room";
-              const locked = !isEnglish && !hasFullAccess;
-              return (
-                <button
-                  key={s.id}
-                  onClick={() => handleSubjectClick(s.id)}
-                  className={`relative p-[18px] rounded-[16px] border font-extrabold text-[13px] backdrop-blur-xl transition-all hover:scale-[1.03] hover:shadow-[0_0_30px_rgba(56,189,248,0.4)] ${s.id === room ? "bg-sky-400 border-sky-400 text-black shadow-[0_0_30px_rgba(56,189,248,0.6)]" : locked ? "bg-[#121A2E]/40 border-white/5 text-slate-500" : "bg-[#141E2F]/80 border-white/10 text-white hover:border-sky-400/50"}`}
-                >
-                  {s.label} {locked ? "🔒" : "✅"}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="flex justify-between items-center mt-4 pt-4 border-t border-white/5">
-            <div className="text-[11px] text-slate-600">
-              {VITALS.SUBSCRIPTION.NAME} • {VITALS.SUBSCRIPTION.LABEL} • Nerd
-              Mode ON
+          {/* ===== MAIN COLUMN ===== */}
+          <div className="w-full lg:flex-1 lg:min-w-0 lg:w-0">
+            <div className="text-center">
+              <div
+                className="font-black text-[32px] lg:text-[42px] tracking-tight drop-shadow-[0_0_24px_rgba(56,189,248,0.6)]"
+                style={{ fontFamily: "Cinzel" }}
+              >
+                <span className="text-white">
+                  <span className="relative inline-block">
+                    S
+                    <svg
+                      className="absolute -top-[18px] -left-[2px] -rotate-[18deg] pointer-events-none"
+                      width="46"
+                      height="34"
+                      viewBox="0 0 46 34"
+                    >
+                      <path
+                        d="M4 26 Q8 4 26 6 Q34 7 40 14 L36 20 Q28 12 18 22 Q10 28 4 26 Z"
+                        fill="#DC2626"
+                      />
+                      <rect
+                        x="2"
+                        y="24"
+                        width="34"
+                        height="8"
+                        rx="4"
+                        fill="white"
+                      />
+                      <circle cx="40" cy="16" r="6" fill="white" />
+                    </svg>
+                  </span>
+                  CHOLARS'
+                </span>
+                <span className="text-[#38BDF8]">•</span>
+                <span className="text-white">HAVEN</span>
+              </div>
+              <p className="text-slate-400 text-[13px] mt-1">
+                Welcome back,Scholar-{" "}
+                <span className="text-white font-bold">{username} 👑</span> •{" "}
+                {hasFullAccess
+                  ? `✅ ${access.status} • ${access.daysLeft}d left`
+                  : `🔓 Free Zone — English Only`}
+              </p>
             </div>
-            <button
-              onClick={handleLogout}
-              className="border border-white/10 text-slate-500 text-[11px] px-3.5 py-1.5 rounded-full"
+
+            {hasFullAccess ? (
+              <div className="mt-4 bg-emerald-500/10 border border-emerald-500/20 rounded-[14px] px-4 py-2.5 flex justify-between items-center backdrop-blur-xl gap-2">
+                <span className="text-emerald-300 text-[12px] font-bold shrink-0">
+                  👑{" "}
+                  {access.status === "trial"
+                    ? `🎁 Trial: ${access.daysLeft}d left`
+                    : `Active Pass: ${access.daysLeft}d left`}
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-400 text-[11px] hidden md:inline">
+                    All rooms unlocked
+                  </span>
+                  {access.status === "trial" && (
+                    <button
+                      onClick={() => setShowPaywall(true)}
+                      className="bg-amber-400 text-black text-[11px] font-black px-3.5 py-1.5 rounded-full"
+                    >
+                      Upgrade Now — Keep {access.daysLeft}d +{" "}
+                      {VITALS.SUBSCRIPTION.DURATION_DAYS}d 👑
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="mt-4 bg-amber-400/10 border border-amber-400/20 rounded-[14px] px-4 py-3 flex justify-between items-center backdrop-blur-xl">
+                <div>
+                  <div className="text-amber-200 text-[12px] font-bold">
+                    🔓 Free Zone — English Only
+                  </div>
+                  <div className="text-amber-200/60 text-[11px]">
+                    Unlock all for {VITALS.SUBSCRIPTION.LABEL}
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowPaywall(true)}
+                  className="bg-amber-400 text-black text-[11px] font-black px-3.5 py-1.5 rounded-full"
+                >
+                  Unlock 👑
+                </button>
+              </div>
+            )}
+
+            {/* ===== MOBILE ROLLER - MOBILE ONLY ===== */}
+            <div
+              className="lg:hidden flex gap-3 overflow-x-auto pb-2 mt-5 snap-x snap-mandatory"
+              style={{ scrollbarWidth: "none" }}
             >
-              Log out
-            </button>
+              <button
+                onClick={() => {
+                  if (!hasFullAccess) {
+                    setShowPaywall(true);
+                    return;
+                  }
+                  setPalaceMode("scholar");
+                }}
+                className="shrink-0 snap-start w-[210px] text-left p-[16px] rounded-[20px] border bg-[#121A2E]/80 border-violet-500/20"
+              >
+                <div className="w-9 h-9 rounded-xl bg-violet-500/15 grid place-items-center">
+                  🎯
+                </div>
+                <div className="mt-3 font-extrabold text-[13px] text-white">
+                  CBT Practice {!hasFullAccess && "🔒"}
+                </div>
+                <div className="text-[11px] text-slate-400 mt-1">
+                  4 subjects, Controlled timing.
+                </div>
+              </button>
+              <button
+                onClick={() => {
+                  if (!hasFullAccess) {
+                    setShowPaywall(true);
+                    return;
+                  }
+                  window.location.href = "/cbt-drill";
+                }}
+                className="shrink-0 snap-start w-[210px] text-left p-[16px] rounded-[20px] border bg-[#121A2E]/80 border-emerald-500/20"
+              >
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/15 grid place-items-center">
+                  🏆
+                </div>
+                <div className="mt-3 font-extrabold text-[13px] text-white">
+                  Drill Palace {!hasFullAccess && "🔒"}
+                </div>
+                <div className="text-[11px] text-slate-400 mt-1">
+                  Topic by topic mastery.
+                </div>
+              </button>
+              <button
+                onClick={() => setPalaceMode("arena")}
+                className="shrink-0 snap-start w-[210px] text-left p-[16px] rounded-[20px] border bg-[#121A2E]/80 border-sky-400/30"
+              >
+                <div className="w-9 h-9 rounded-xl bg-sky-400/15 grid place-items-center">
+                  ▶️
+                </div>
+                <div className="mt-3 font-extrabold text-[13px] text-white">
+                  Live Room Quiz
+                </div>
+                <div className="text-[11px] text-slate-400 mt-1">
+                  Wake up the Scholar in you!.
+                </div>
+              </button>
+              <button
+                onClick={() => {
+                  window.location.href = "/duel-arena";
+                }}
+                className="shrink-0 snap-start w-[210px] text-left p-[16px] rounded-[20px] border bg-[#121A2E]/80 border-red-500/30"
+              >
+                <div className="w-9 h-9 rounded-xl bg-red-500/15 grid place-items-center">
+                  ⚔️
+                </div>
+                <div className="mt-3 font-extrabold text-[13px] text-white">
+                  Duel Arena
+                </div>
+                <div className="text-[11px] text-slate-400 mt-1">
+                  1v1. 10 questions. Winner takes all.
+                </div>
+              </button>
+              <button
+                onClick={() => {
+                  window.location.href = "/unified-test";
+                }}
+                className="shrink-0 snap-start w-[210px] text-left p-[16px] rounded-[20px] border bg-[#121A2E]/80 border-amber-400/40"
+              >
+                <div className="w-9 h-9 rounded-xl bg-amber-400/15 grid place-items-center">
+                  🏆
+                </div>
+                <div className="mt-3 font-extrabold text-[13px] text-white">
+                  Unified Test
+                </div>
+                <div className="text-[11px] text-slate-400 mt-1">
+                  Sunday Mega Test • Compete for #1
+                </div>
+                <div className="text-[11px] text-amber-300 font-bold mt-2">
+                  Enter Test →
+                </div>
+              </button>
+            </div>
+
+            <div className="mt-10 mb-3 text-[11px] text-sky-300/70 uppercase text-center tracking-[0.18em] font-black">
+              ⚗️ CHOOSE YOUR BATTLEFIELD — SCULPT YOUR MIND ⚗️
+            </div>
+
+            {/* --- YOUR EXISTING SUBJECT ROLLER GOES HERE - copy am as e dey --- */}
+            <div className="mt-1 relative z-10 w-full max-w-full">
+              <div className="flex items-center gap-2">
+                <div className="flex-1 flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-[#121A2E]/80 border border-white/10">
+                  <span className="text-[13px]">🔍</span>
+                  <input
+                    value={subjectSearch}
+                    onChange={(e) => setSubjectSearch(e.target.value)}
+                    placeholder="Search subject... e.g Physics"
+                    className="flex-1 bg-transparent outline-none text-[13px] text-white placeholder:text-slate-500"
+                  />
+                  {subjectSearch && (
+                    <button
+                      onClick={() => setSubjectSearch("")}
+                      className="text-slate-500 text-[13px] px-1"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+                <button
+                  onClick={() =>
+                    subjectScrollRef.current?.scrollBy({
+                      left: -220,
+                      behavior: "smooth",
+                    })
+                  }
+                  className="w-9 h-9 shrink-0 rounded-full bg-[#121A2E] border border-white/10 grid place-items-center text-slate-300"
+                >
+                  ‹
+                </button>
+                <button
+                  onClick={() =>
+                    subjectScrollRef.current?.scrollBy({
+                      left: 220,
+                      behavior: "smooth",
+                    })
+                  }
+                  className="w-9 h-9 shrink-0 rounded-full bg-[#121A2E] border border-white/10 grid place-items-center text-slate-300"
+                >
+                  ›
+                </button>
+              </div>
+              <div
+                ref={subjectScrollRef}
+                onMouseEnter={() => setHovered(true)}
+                onMouseLeave={() => setHovered(false)}
+                className="flex gap-2 mt-3 overflow-x-auto pb-1 snap-x snap-mandatory"
+                style={{ scrollbarWidth: "none" }}
+              >
+                {SUBJECTS.filter((s) =>
+                  s.label.toLowerCase().includes(subjectSearch.toLowerCase()),
+                ).map((s) => {
+                  const isEnglish = s.id === "english-room";
+                  const locked = !isEnglish && !hasFullAccess;
+                  const isActive = s.id === room;
+                  return (
+                    <button
+                      key={s.id}
+                      onClick={() => handleSubjectClick(s.id)}
+                      className={`shrink-0 snap-start px-4 py-2.5 rounded-full border text-[12px] font-black whitespace-nowrap ${isActive ? "bg-sky-400 border-sky-400 text-black" : locked ? "bg-[#121A2E]/60 border-white/5 text-slate-500" : "bg-[#141E2F]/80 border-white/10 text-white"}`}
+                    >
+                      {s.label} {locked ? "🔒" : "✅"}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="flex justify-between items-center mt-1.5 px-1">
+                <span className="text-[10px] text-slate-500 font-bold tracking-widest">
+                  {
+                    SUBJECTS.filter((s) =>
+                      s.label
+                        .toLowerCase()
+                        .includes(subjectSearch.toLowerCase()),
+                    ).length
+                  }{" "}
+                  SUBJECTS • SWIPE →
+                </span>
+                <button
+                  onClick={() => setShowAllSubjects((v) => !v)}
+                  className="text-[11px] text-sky-400 font-bold"
+                >
+                  {showAllSubjects ? "Hide ▲" : "View All ↓"}
+                </button>
+              </div>
+              {showAllSubjects && (
+                <div className="grid grid-cols-3 gap-2 mt-3">
+                  {SUBJECTS.filter((s) =>
+                    s.label.toLowerCase().includes(subjectSearch.toLowerCase()),
+                  ).map((s) => {
+                    const isEnglish = s.id === "english-room";
+                    const locked = !isEnglish && !hasFullAccess;
+                    return (
+                      <button
+                        key={s.id}
+                        onClick={() => handleSubjectClick(s.id)}
+                        className={`p-3 rounded-[12px] border font-extrabold text-[11px] ${s.id === room ? "bg-sky-400 border-sky-400 text-black" : locked ? "bg-[#121A2E]/40 border-white/5 text-slate-500" : "bg-[#141E2F]/80 border-white/10 text-white"}`}
+                      >
+                        {s.label} {locked ? "🔒" : "✅"}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-between items-center mt-4 pt-4 border-t border-white/5">
+              <div className="text-[11px] text-slate-600">
+                {VITALS.SUBSCRIPTION.NAME} • {VITALS.SUBSCRIPTION.LABEL} • Nerd
+                Mode ON
+              </div>
+              <button
+                onClick={handleLogout}
+                className="border border-white/10 text-slate-500 text-[11px] px-3.5 py-1.5 rounded-full"
+              >
+                Log out
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -2082,6 +2269,16 @@ export default function App() {
                   className="text-white text-[21px] md:text-[26px] font-[800] leading-[1.25] tracking-tight"
                   dangerouslySetInnerHTML={{ __html: currentQ.question_text }}
                 />
+                {currentQ?.diagramUrl ? (
+                  <img
+                    src={currentQ.diagramUrl}
+                    alt="Question diagram"
+                    className="max-w-full max-h-[280px] rounded-xl border border-white/10 mx-auto object-contain bg-white p-2 mt-4"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                ) : null}
                 <div className="grid gap-3.5 mt-7">
                   {opts.map((o) => {
                     const isSelected = selected === o.k;

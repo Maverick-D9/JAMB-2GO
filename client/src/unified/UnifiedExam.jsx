@@ -40,6 +40,17 @@ export default function UnifiedExam() {
   const timerRef = useRef(null);
   const [showCalc, setShowCalc] = useState(false);
   const [calc, setCalc] = useState("");
+  const answersRef = useRef({});
+  const idxRef = useRef(0);
+  const submittedRef = useRef(false);
+
+  // Keep refs in sync so timer / beforeunload always see latest answers
+  useEffect(() => {
+    answersRef.current = answers;
+  }, [answers]);
+  useEffect(() => {
+    idxRef.current = idx;
+  }, [idx]);
 
   useEffect(() => {
     if (!id) {
@@ -52,28 +63,53 @@ export default function UnifiedExam() {
       setMsg("Please login first to take this test.");
       return;
     }
-    // NEW: Check backend if this username don do am before
-    fetch(
-      `${UNIFIED.API_BASE}/api/unified/tests/${id}/attempt?username=${encodeURIComponent(user.username)}`,
-    )
+    // B: Global timer - start/resume via backend, frozen questions
+    fetch(`${UNIFIED.API_BASE}/api/unified/tests/${id}/start`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: user.username,
+        fullName: user.fullName,
+        userId: user.userId,
+      }),
+    })
       .then((r) => r.json())
       .then((d) => {
-        if (d.done) {
-          setAlreadyDone(d);
+        // Already submitted - 409 from backend
+        if (d.error && !d.attempt) {
+          setLoading(false);
+          setMsg(d.error);
+          return;
+        }
+        const att = d.attempt;
+        if (!att) {
+          setLoading(false);
+          setMsg("Failed to load questions");
+          return;
+        }
+        // Expired or already submitted - show result with frozen questions
+        if (att.status === "submitted" || d.expired) {
+          setQuestions(att.questions || []);
+          setTestTitle(d.test?.title || "Unified Test");
+          setScore(att.score || 0);
+          setAnswers(att.answers || {});
+          setSubmitted(true);
+          submittedRef.current = true;
           setLoading(false);
           return;
         }
-        // If never do am, load questions
-        return fetch(`${UNIFIED.API_BASE}/api/unified/tests/${id}/questions`)
-          .then((r) => r.json())
-          .then((qd) => {
-            setQuestions(qd.questions || []);
-            setTestTitle(qd.test?.title || "Unified Test");
-            setTimeLeft((qd.test?.durationMinutes || 120) * 60);
-            setLoading(false);
-            if (!qd.questions?.length)
-              setMsg("No questions for this test yet.");
-          });
+        // In-progress: resume same questions + answers + index
+        setQuestions(att.questions || []);
+        setTestTitle(d.test?.title || "Unified Test");
+        setAnswers(att.answers || {});
+        answersRef.current = att.answers || {};
+        setIdx(att.currentIndex || 0);
+        idxRef.current = att.currentIndex || 0;
+        // B: timeLeft = global endAt - now (NOT duration from open)
+        const end = new Date(att.endsAt || d.test?.endAt).getTime();
+        setTimeLeft(Math.max(0, Math.floor((end - Date.now()) / 1000)));
+        setLoading(false);
+        if (!att.questions?.length) setMsg("No questions for this test yet.");
       })
       .catch(() => {
         setLoading(false);
@@ -81,13 +117,55 @@ export default function UnifiedExam() {
       });
   }, [id]);
 
+  // Autosave on answer / index change - debounce 500ms
+  useEffect(() => {
+    if (loading || submitted || !questions.length) return;
+    const t = setTimeout(() => {
+      fetch(`${UNIFIED.API_BASE}/api/unified/tests/${id}/autosave`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: user.username,
+          answers,
+          currentIndex: idx,
+        }),
+      }).catch(() => {});
+    }, 500);
+    return () => clearTimeout(t);
+  }, [answers, idx, loading, submitted, questions.length]);
+
+  // Save on tab close / refresh - best effort
+  useEffect(() => {
+    const onUnload = () => {
+      if (submittedRef.current || !questions.length) return;
+      try {
+        const blob = new Blob(
+          [
+            JSON.stringify({
+              username: user.username,
+              answers: answersRef.current,
+              currentIndex: idxRef.current,
+            }),
+          ],
+          { type: "application/json" },
+        );
+        navigator.sendBeacon(
+          `${UNIFIED.API_BASE}/api/unified/tests/${id}/autosave`,
+          blob,
+        );
+      } catch {}
+    };
+    window.addEventListener("beforeunload", onUnload);
+    return () => window.removeEventListener("beforeunload", onUnload);
+  }, [id, questions.length]);
+
   useEffect(() => {
     if (loading || submitted || !questions.length) return;
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timerRef.current);
-          handleSubmit();
+          handleSubmit(true);
           return 0;
         }
         return prev - 1;
@@ -102,33 +180,43 @@ export default function UnifiedExam() {
     return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
   };
 
-  // NEW: Submit + save to backend with username
-  const handleSubmit = async () => {
+  // Submit + save to backend with username - isAuto = timer expired
+  const handleSubmit = async (isAuto = false) => {
+    if (submittedRef.current) return;
+    submittedRef.current = true;
+    const currentAnswers = answersRef.current;
     let correct = 0;
     questions.forEach((q, i) => {
       if (
-        answers[i] &&
-        answers[i].toUpperCase() === (q.correct || "").toUpperCase()
+        currentAnswers[i] &&
+        String(currentAnswers[i]).toUpperCase() ===
+          (q.correct || "").toUpperCase()
       )
         correct++;
     });
     setScore(correct);
     setSubmitted(true);
     clearInterval(timerRef.current);
-    // Save attempt - backend go block if e don do am
+    // Save attempt - backend go block if e don do am, and recalculate score
     try {
-      await fetch(`${UNIFIED.API_BASE}/api/unified/tests/${id}/submit`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: user.username,
-          fullName: user.fullName,
-          userId: user.userId,
-          score: correct,
-          total: questions.length,
-          answers,
-        }),
-      });
+      const r = await fetch(
+        `${UNIFIED.API_BASE}/api/unified/tests/${id}/submit`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: user.username,
+            fullName: user.fullName,
+            userId: user.userId,
+            score: correct,
+            total: questions.length,
+            answers: currentAnswers,
+          }),
+        },
+      );
+      const d = await r.json();
+      if (d.attempt) setScore(d.attempt.score ?? correct);
+      if (r.status === 409 && d.score !== undefined) setScore(d.score);
     } catch {}
   };
 
@@ -194,8 +282,13 @@ export default function UnifiedExam() {
             {score} / {questions.length}
           </p>
           <p className="text-slate-400 mt-2">
-            {Math.round((score / questions.length) * 100)}% —{" "}
-            {score / questions.length >= 0.5 ? "Pass! 🔥" : "Keep pushing! 💪"}
+            {questions.length
+              ? Math.round((score / questions.length) * 100)
+              : 0}
+            % —{" "}
+            {questions.length && score / questions.length >= 0.5
+              ? "Pass! 🔥"
+              : "Keep pushing! 💪"}
           </p>
           <div className="grid grid-cols-2 gap-2 mt-6 text-left">
             <div className="bg-emerald-500/10 p-3 rounded-xl">
@@ -333,7 +426,7 @@ export default function UnifiedExam() {
             })()
           ) : (
             <button
-              onClick={handleSubmit}
+              onClick={() => handleSubmit(false)}
               className="flex-1 py-3 rounded-full bg-emerald-400 text-black font-black"
             >
               Submit ✅

@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { VITALS } from "../config/vitals";
 
 const API_BASE = VITALS.SYSTEM.API_BASE;
+const JAMB_MAX = VITALS.CBT?.JAMB_MAX_SCORE || 400;
 
 export default function CBTExam() {
   const [examData, setExamData] = useState(null);
@@ -14,7 +15,23 @@ export default function CBTExam() {
   const [calcVal, setCalcVal] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPalette, setShowPalette] = useState(false);
+  const submitRef = useRef(false);
+  const answersRef = useRef({});
+  const timeLeftRef = useRef(0);
+  const totalDurationRef = useRef(7200);
 
+  // Keep refs in sync for auto-submit inside interval
+  useEffect(() => {
+    answersRef.current = answers;
+  }, [answers]);
+  useEffect(() => {
+    timeLeftRef.current = timeLeft;
+  }, [timeLeft]);
+  useEffect(() => {
+    totalDurationRef.current = totalDuration;
+  }, [totalDuration]);
+
+  // --- LOAD + RESUME ---
   useEffect(() => {
     const saved = localStorage.getItem("cbt_exam");
     if (!saved) {
@@ -24,14 +41,58 @@ export default function CBTExam() {
     }
     try {
       const data = JSON.parse(saved);
-      // IMPORTANT: DO NOT SHUFFLE HERE - already shuffled in CBTSetup.jsx
       setExamData(data);
-      setCurrentSubject(data.subjects?.[0] || "english");
       const duration =
         (data.durationMinutes || data.config?.durationMinutes || 120) * 60;
       setTotalDuration(duration);
-      setTimeLeft(duration);
-      localStorage.setItem("cbt_timeTaken", "0");
+
+      // Restore progress
+      let restoredSubject = data.subjects?.[0] || "english";
+      let restoredIndex = 0;
+      let restoredAnswers = {};
+      try {
+        const p = JSON.parse(localStorage.getItem("cbt_progress") || "{}");
+        if (p.currentSubject) restoredSubject = p.currentSubject;
+        if (typeof p.currentIndex === "number") restoredIndex = p.currentIndex;
+      } catch {}
+      try {
+        restoredAnswers = JSON.parse(
+          localStorage.getItem("cbt_answers") || "{}",
+        );
+        // Fallback: answers stored inside cbt_exam itself
+        if (!Object.keys(restoredAnswers).length && data.answers)
+          restoredAnswers = data.answers;
+      } catch {}
+      setCurrentSubject(restoredSubject);
+      setCurrentIndex(restoredIndex);
+      setAnswers(restoredAnswers);
+
+      // OPTION A TIMER: endsAt - now, NOT full duration
+      if (data.endsAt) {
+        const remaining = Math.floor((data.endsAt - Date.now()) / 1000);
+        if (remaining <= 0) {
+          setTimeLeft(0);
+          // Will auto-submit via effect below
+        } else {
+          setTimeLeft(remaining);
+        }
+        const taken = Math.max(0, duration - Math.max(0, remaining));
+        localStorage.setItem("cbt_timeTaken", String(taken));
+      } else {
+        // Legacy exam without endsAt (created before fix) - create endsAt now from duration
+        // and persist it so next reload will resume correctly
+        const endsAt = Date.now() + duration * 1000;
+        const patched = {
+          ...data,
+          startedAt: data.startedAt || Date.now(),
+          endsAt,
+          attemptId: data.attemptId || data.examId || `att_${Date.now()}`,
+        };
+        localStorage.setItem("cbt_exam", JSON.stringify(patched));
+        setExamData(patched);
+        setTimeLeft(duration);
+        localStorage.setItem("cbt_timeTaken", "0");
+      }
     } catch (e) {
       console.error(e);
       alert("Corrupt exam file. Go to setup.");
@@ -39,12 +100,41 @@ export default function CBTExam() {
     }
   }, []);
 
+  // --- AUTOSAVE answers + position ---
   useEffect(() => {
-    if (!examData || timeLeft <= 0 || isSubmitting) return;
+    if (!examData) return;
+    try {
+      localStorage.setItem("cbt_answers", JSON.stringify(answers));
+      localStorage.setItem(
+        "cbt_progress",
+        JSON.stringify({ currentSubject, currentIndex }),
+      );
+      // Also mirror into cbt_exam so single key has everything
+      const raw = localStorage.getItem("cbt_exam");
+      if (raw) {
+        const d = JSON.parse(raw);
+        d.answers = answers;
+        d.currentSubject = currentSubject;
+        d.currentIndex = currentIndex;
+        localStorage.setItem("cbt_exam", JSON.stringify(d));
+      }
+    } catch {}
+  }, [answers, currentSubject, currentIndex, examData]);
+
+  // --- TIMER: tick from endsAt, not from full duration ---
+  useEffect(() => {
+    if (!examData || timeLeft <= 0 || isSubmitting) {
+      if (examData && timeLeft <= 0 && !submitRef.current && examData.endsAt) {
+        // Time already expired on load
+        submitRef.current = true;
+        setTimeout(() => handleSubmit(true), 200);
+      }
+      return;
+    }
     const t = setInterval(() => {
       setTimeLeft((prev) => {
         const next = prev - 1;
-        const taken = totalDuration - next;
+        const taken = totalDurationRef.current - next;
         localStorage.setItem("cbt_timeTaken", String(taken > 0 ? taken : 0));
         if (next <= 0) {
           clearInterval(t);
@@ -55,7 +145,9 @@ export default function CBTExam() {
       });
     }, 1000);
     return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [examData, isSubmitting, totalDuration]);
+
   // Auto-scroll active subject pill - ONLY scroll the pill bar, no touch question
   useEffect(() => {
     const bar = document.getElementById("subject-bar");
@@ -64,6 +156,7 @@ export default function CBTExam() {
     const target = btn.offsetLeft - bar.clientWidth / 2 + btn.clientWidth / 2;
     bar.scrollTo({ left: target, behavior: "smooth" });
   }, [currentSubject]);
+
   const questionsBySubject = useMemo(() => {
     if (!examData) return {};
     return examData.questions || examData.papers || {};
@@ -87,6 +180,7 @@ export default function CBTExam() {
 
   const isLastSubject =
     subjectList.indexOf(currentSubject) === subjectList.length - 1;
+
   const handleOption = (opt) => {
     if (!currentQ) return;
     setAnswers((prev) => ({ ...prev, [currentQ.id]: opt }));
@@ -100,12 +194,17 @@ export default function CBTExam() {
   };
 
   const handleSubmit = async (isAuto = false) => {
+    if (submitRef.current) return;
     if (isSubmitting) return;
     if (!isAuto) {
       if (!confirm("Submit exam? You cannot change after submission.")) return;
     }
+    submitRef.current = true;
     setIsSubmitting(true);
-    const timeTaken = totalDuration - timeLeft;
+    const finalAnswers = answersRef.current;
+    const finalTimeLeft = timeLeftRef.current;
+    const finalTotal = totalDurationRef.current;
+    const timeTaken = Math.max(0, finalTotal - finalTimeLeft);
     localStorage.setItem("cbt_timeTaken", String(timeTaken));
 
     let score = 0,
@@ -116,8 +215,8 @@ export default function CBTExam() {
       arr.forEach((q) => {
         total++;
         if (
-          answers[q.id] &&
-          String(answers[q.id]).toUpperCase() ===
+          finalAnswers[q.id] &&
+          String(finalAnswers[q.id]).toUpperCase() ===
             String(q.correct_answer || q.correct).toUpperCase()
         ) {
           score++;
@@ -130,20 +229,33 @@ export default function CBTExam() {
     const userId =
       localStorage.getItem("userId") ||
       localStorage.getItem("cbt_userId") ||
+      examData?.userId ||
       `anon_${Date.now()}`;
     if (!localStorage.getItem("userId")) localStorage.setItem("userId", userId);
     const userName =
       localStorage.getItem("userName") ||
       localStorage.getItem("cbt_name") ||
-      JSON.parse(localStorage.getItem("jambite_user") || "{}").username ||
-      "JAMBite";
+      (() => {
+        try {
+          return (
+            JSON.parse(localStorage.getItem("jambite_user") || "{}").username ||
+            "JAMBite"
+          );
+        } catch {
+          return "JAMBite";
+        }
+      })();
 
-    const attemptId = `att_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    // OPTION A: Reuse same attemptId from Setup - NO new ID on reload/resubmit
+    const attemptId =
+      examData?.attemptId ||
+      localStorage.getItem("lastAttemptId") ||
+      `att_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
     const payloadLeaderboard = {
       userId,
       name: userName,
-      totalScore: Math.round((score / (total || 1)) * 400),
+      totalScore: Math.round((score / (total || 1)) * JAMB_MAX),
       rawScore: score,
       rawTotal: total,
       breakdown,
@@ -156,7 +268,7 @@ export default function CBTExam() {
     try {
       const r = await fetch(`${API_BASE}/api/cbt/save-result`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-user-id": userId },
         body: JSON.stringify(payloadLeaderboard),
       });
       const d = await r.json();
@@ -170,14 +282,19 @@ export default function CBTExam() {
       total,
       breakdown,
       timeTaken,
-      jambScore: Math.round((score / (total || 1)) * 400),
+      jambScore: Math.round((score / (total || 1)) * JAMB_MAX),
       attemptId: localStorage.getItem("lastAttemptId"),
-      answers: answers,
+      answers: finalAnswers,
       questions: questionsBySubject,
-      userAnswers: answers,
+      userAnswers: finalAnswers,
     };
 
     localStorage.setItem("cbt_result", JSON.stringify(finalResult));
+    // Clear in-progress so next Start is fresh - but keep cbt_exam until result loads? Clear progress keys only
+    localStorage.removeItem("cbt_progress");
+    localStorage.removeItem("cbt_answers");
+    // Keep cbt_exam for now, Setup will clear on next Start. Remove it to avoid Resume banner after submit:
+    localStorage.removeItem("cbt_exam");
     window.location.href = "/cbt-result";
   };
 
@@ -333,6 +450,19 @@ export default function CBTExam() {
                   </span>
                   {currentQ.question_text || currentQ.question}
                 </div>
+
+                {currentQ.diagramUrl ? (
+                  <div className="mt-4">
+                    <img
+                      src={currentQ.diagramUrl}
+                      alt="Question diagram"
+                      className="max-w-full max-h-[320px] rounded-xl border border-white/10 mx-auto object-contain bg-white p-2"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  </div>
+                ) : null}
                 <div className="grid gap-2.5 mt-6">
                   {["A", "B", "C", "D"].map((k) => {
                     const optKey = `option_${k.toLowerCase()}`;
@@ -499,7 +629,7 @@ export default function CBTExam() {
         </div>
       </div>
 
-      {/* MOBILE FLOATING CALC - question still dey show for top */}
+      {/* MOBILE FLOATING CALC */}
       {showCalc && (
         <div className="fixed z-[1000] lg:hidden left-3 right-3 bottom-3">
           <div className="bg-[#121A2E] border border-white/20 rounded-[18px] p-3 shadow-2xl shadow-black/60">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import ReviewFab from "../components/ReviewFab.jsx";
 
 export default function CBTDrill() {
@@ -7,7 +7,13 @@ export default function CBTDrill() {
   const [answers, setAnswers] = useState({});
   const [timeLeft, setTimeLeft] = useState(0);
   const [config, setConfig] = useState(null);
+  const [loaded, setLoaded] = useState(false);
 
+  const answersRef = useRef({});
+  const finishedRef = useRef(false);
+  answersRef.current = answers;
+
+  // --- 1. LOAD + RESUME ---
   useEffect(() => {
     const qs = JSON.parse(localStorage.getItem("drillQuestions") || "[]");
     const cfg = JSON.parse(localStorage.getItem("drillConfig") || "{}");
@@ -16,35 +22,75 @@ export default function CBTDrill() {
       window.location.href = "/cbt-drill";
       return;
     }
+    let savedAnswers = {};
+    try {
+      savedAnswers = JSON.parse(localStorage.getItem("drillAnswers") || "{}");
+    } catch {}
+    let savedIndex = 0;
+    try {
+      savedIndex = parseInt(localStorage.getItem("drillIndex") || "0") || 0;
+    } catch {}
+
     setQuestions(qs);
     setConfig(cfg);
-    if (cfg.timed) setTimeLeft(qs.length * (cfg.timePerQ || 60));
+    setAnswers(savedAnswers);
+    answersRef.current = savedAnswers;
+    setIndex(Math.min(Math.max(0, savedIndex), qs.length - 1));
+
+    if (cfg.timed && cfg.endsAt) {
+      const remaining = Math.max(
+        0,
+        Math.floor((cfg.endsAt - Date.now()) / 1000),
+      );
+      setTimeLeft(remaining);
+    } else if (cfg.timed) {
+      setTimeLeft(qs.length * (cfg.timePerQ || 60));
+    }
+    setLoaded(true);
   }, []);
 
+  // --- 2. AUTOSAVE answers + index ---
   useEffect(() => {
-    if (!config?.timed || timeLeft <= 0) return;
-    const t = setInterval(() => {
-      setTimeLeft((s) => {
-        if (s <= 1) {
-          finishDrill();
-          return 0;
-        }
-        return s - 1;
-      });
-    }, 1000);
+    if (!loaded) return;
+    localStorage.setItem("drillAnswers", JSON.stringify(answers));
+  }, [answers, loaded]);
+
+  useEffect(() => {
+    if (!loaded) return;
+    localStorage.setItem("drillIndex", String(index));
+  }, [index, loaded]);
+
+  // --- 3. FINISH (no stale closure) ---
+  const finishDrill = useCallback(() => {
+    if (finishedRef.current) return;
+    finishedRef.current = true;
+    localStorage.setItem("drillAnswers", JSON.stringify(answersRef.current));
+    localStorage.setItem("drillFinished", "1");
+    window.location.href = "/cbt-drill-result";
+  }, []);
+
+  // --- 4. TIMER — based on endsAt, no re-shuffle ---
+  useEffect(() => {
+    if (!loaded || !config?.timed) return;
+    if (!config.endsAt) return;
+    const tick = () => {
+      const remaining = Math.max(
+        0,
+        Math.floor((config.endsAt - Date.now()) / 1000),
+      );
+      setTimeLeft(remaining);
+      if (remaining <= 0) finishDrill();
+    };
+    tick();
+    const t = setInterval(tick, 1000);
     return () => clearInterval(t);
-  }, [timeLeft, config]);
+  }, [loaded, config, finishDrill]);
 
   const selectAnswer = (opt) => {
     setAnswers((prev) => ({ ...prev, [index]: opt }));
   };
 
-  const finishDrill = () => {
-    localStorage.setItem("drillAnswers", JSON.stringify(answers));
-    window.location.href = "/cbt-drill-result";
-  };
-
-  if (!questions.length) return null;
+  if (!loaded || !questions.length) return null;
   const q = questions[index];
   const progress = ((index + 1) / questions.length) * 100;
   const formatTime = (s) =>
@@ -127,6 +173,16 @@ export default function CBTDrill() {
                 __html: q.question_text || q.question,
               }}
             />
+            {q?.diagramUrl ? (
+              <img
+                src={q.diagramUrl}
+                alt="Question diagram"
+                className="max-w-full max-h-[280px] rounded-xl border border-white/10 mx-auto object-contain bg-white p-2 mb-7 -mt-2"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                }}
+              />
+            ) : null}
             <div className="grid gap-3">
               {["A", "B", "C", "D"].map((k) => {
                 const key = `option_${k.toLowerCase()}`;

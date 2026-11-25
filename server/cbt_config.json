@@ -1,5 +1,5 @@
 {
   "enabled": true,
   "durationMinutes": 10,
-  "questionsPerSubject": 5
+  "questionsPerSubject": 40
 }

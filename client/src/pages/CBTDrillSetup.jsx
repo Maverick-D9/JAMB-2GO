@@ -239,10 +239,16 @@ export default function CBTDrillSetup() {
       if (!data.questions || data.questions.length === 0)
         return alert("No questions found");
 
-      // --- BREAK AAAABBBB PATTERN HERE ---
+      // --- BREAK AAAABBBB PATTERN HERE — UNTOUCHED ---
       const shuffled = strongShuffleQuestions(
         data.questions.map((q) => shuffleOptionsForQuestion(q)),
       );
+
+      // --- RESUME FIX ONLY: added startedAt / endsAt / drillId + clear stale state ---
+      const startedAt = Date.now();
+      const totalSeconds = timed ? shuffled.length * 60 : 0;
+      const endsAt = timed ? startedAt + totalSeconds * 1000 : null;
+      const drillId = `drill_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
       localStorage.setItem("drillQuestions", JSON.stringify(shuffled));
       localStorage.setItem(
@@ -255,8 +261,15 @@ export default function CBTDrillSetup() {
           timed,
           timePerQ: 60,
           availableQs: counts[topic] || 0,
+          drillId,
+          startedAt,
+          endsAt,
+          totalSeconds,
         }),
       );
+      localStorage.removeItem("drillAnswers");
+      localStorage.removeItem("drillIndex");
+      localStorage.removeItem("drillFinished");
       window.location.href = "/cbt-drill-run";
     } catch {
       setLoading(false);

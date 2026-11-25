@@ -34,74 +34,6 @@ const PALACE_MAP = {
   "irs-room": "irs",
 };
 
-// --- STRONG SHUFFLE UTILS ---
-function shuffleArray(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function strongShuffleQuestions(questions) {
-  let shuffled = shuffleArray(questions);
-  for (let i = 1; i < shuffled.length; i++) {
-    const prev = (
-      shuffled[i - 1].question_text ||
-      shuffled[i - 1].question ||
-      ""
-    ).slice(0, 22);
-    const curr = (
-      shuffled[i].question_text ||
-      shuffled[i].question ||
-      ""
-    ).slice(0, 22);
-    if (prev === curr) {
-      let k = i + 1;
-      while (
-        k < shuffled.length &&
-        (shuffled[k].question_text || shuffled[k].question || "").slice(
-          0,
-          22,
-        ) === curr
-      )
-        k++;
-      if (k < shuffled.length) {
-        [shuffled[i], shuffled[k]] = [shuffled[k], shuffled[i]];
-      }
-    }
-  }
-  return shuffled;
-}
-
-function shuffleOptionsForQuestion(q) {
-  const rawCorrect = q.correct_answer || q.correct || "A";
-  const key = String(rawCorrect).toLowerCase().replace("option_", "").charAt(0);
-  const correctText = q[`option_${key}`] || q.option_a;
-
-  const opts = [
-    { text: q.option_a },
-    { text: q.option_b },
-    { text: q.option_c },
-    { text: q.option_d },
-  ].filter((o) => o.text);
-
-  const shuffled = shuffleArray(opts);
-  const newIdx = shuffled.findIndex((o) => o.text === correctText);
-  const newLabel = ["A", "B", "C", "D"][newIdx >= 0 ? newIdx : 0];
-
-  return {
-    ...q,
-    option_a: shuffled[0]?.text || "",
-    option_b: shuffled[1]?.text || "",
-    option_c: shuffled[2]?.text || "",
-    option_d: shuffled[3]?.text || "",
-    correct_answer: newLabel,
-    correct: newLabel,
-  };
-}
-
 export default function CBTSetup() {
   const [config, setConfig] = useState(null);
   const [selected, setSelected] = useState([]);
@@ -115,6 +47,7 @@ export default function CBTSetup() {
   // Fallback = frontend VITALS, truth = backend /cbt/status limit
   const [dailyLimit, setDailyLimit] = useState(CBT.DAILY_LIMIT);
   const [dailyLoading, setDailyLoading] = useState(true);
+  const [resumeExam, setResumeExam] = useState(null);
 
   const getUser = () => {
     try {
@@ -130,6 +63,32 @@ export default function CBTSetup() {
   const email = authed.email || "";
   const REQUIRED = CBT.REQUIRED_SUBJECTS_COUNT; // 3
   const TOTAL_SUBJECTS = REQUIRED + 1; // + english
+
+  // --- OPTION A: Check for in-progress exam on mount ---
+  // Do NOT wipe it. If endsAt > now and same user, offer Resume.
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("cbt_exam");
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (!data?.endsAt) return;
+      if (data.userId && userId && data.userId !== userId) return;
+      if (Date.now() < data.endsAt) {
+        setResumeExam(data);
+        // Pre-fill selected from saved exam if possible
+        if (Array.isArray(data.subjects)) {
+          const others = data.subjects.filter((s) => s !== "english");
+          setSelected(others);
+        }
+      } else {
+        // Expired - clean it, so user can start fresh
+        localStorage.removeItem("cbt_exam");
+        localStorage.removeItem("cbt_progress");
+        localStorage.removeItem("cbt_answers");
+      }
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     fetch(`${API_BASE}/api/cbt/config`)
@@ -224,7 +183,7 @@ export default function CBTSetup() {
       .then((r) => r.json())
       .then((d) => {
         setDailyCount(d.count || 0);
-        if (d.limit) setDailyLimit(d.limit); // backend is truth
+        if (d.limit) setDailyLimit(d.limit);
         setDailyLoading(false);
       })
       .catch(() => setDailyLoading(false));
@@ -275,15 +234,45 @@ export default function CBTSetup() {
     }
   };
 
+  const handleResume = () => {
+    window.location.href = "/cbt-exam";
+  };
+
+  const handleDiscardAndStartNew = () => {
+    if (
+      !confirm(
+        "Discard current in-progress exam and start a new one? This will use 1 daily attempt.",
+      )
+    )
+      return;
+    localStorage.removeItem("cbt_exam");
+    localStorage.removeItem("cbt_progress");
+    localStorage.removeItem("cbt_answers");
+    localStorage.removeItem("cbt_result");
+    setResumeExam(null);
+  };
+
   const start = async () => {
     if (selected.length !== REQUIRED)
       return alert(`Select exactly ${REQUIRED} subjects`);
     if (dailyCount >= dailyLimit) {
       return alert(VITALS.MESSAGES.DAILY_LIMIT_REACHED(dailyCount, dailyLimit));
     }
+    // If there is an in-progress exam, don't silently wipe it
+    if (resumeExam) {
+      if (
+        !confirm(
+          "You have an exam in progress. Start a new one? This will discard it and use 1 daily attempt.",
+        )
+      )
+        return;
+    }
     localStorage.removeItem("cbt_result");
     localStorage.removeItem("cbt_exam");
-    sessionStorage.clear();
+    localStorage.removeItem("cbt_progress");
+    localStorage.removeItem("cbt_answers");
+    localStorage.removeItem("cbt_timeTaken");
+    // Do NOT sessionStorage.clear() - it wipes unrelated keys
     const res = await fetch(`${API_BASE}/api/cbt/start`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-user-id": userId },
@@ -310,17 +299,42 @@ export default function CBTSetup() {
     }
     if (data.cbtDailyUsage) setDailyCount(data.cbtDailyUsage.count);
 
-    if (data.questions) {
-      const fixed = {};
-      Object.entries(data.questions).forEach(([sub, arr]) => {
-        const withShuffledOpts = arr.map((q) => shuffleOptionsForQuestion(q));
-        fixed[sub] = strongShuffleQuestions(withShuffledOpts);
-      });
-      data.questions = fixed;
-      data.papers = fixed;
-    }
+    // OPTION A: Single source of truth = backend already shuffled options + questions.
+    // Do NOT shuffle again here. Use data.questions as-is.
+    // Add resume metadata ONCE:
+    const durationMinutes =
+      data.durationMinutes ||
+      data.config?.durationMinutes ||
+      config?.durationMinutes ||
+      CBT.DURATION_MINUTES;
+    const startedAt = Date.now();
+    const endsAt = startedAt + durationMinutes * 60 * 1000;
+    const attemptId = data.examId
+      ? `att_${data.examId}`
+      : `att_${startedAt}_${Math.random().toString(36).slice(2, 8)}`;
 
-    localStorage.setItem("cbt_exam", JSON.stringify(data));
+    const examToSave = {
+      ...data,
+      durationMinutes,
+      startedAt,
+      endsAt,
+      attemptId,
+      userId,
+      subjects: data.subjects,
+      questions: data.questions,
+      papers: data.questions,
+    };
+
+    localStorage.setItem("cbt_exam", JSON.stringify(examToSave));
+    // Init progress
+    localStorage.setItem("cbt_answers", JSON.stringify({}));
+    localStorage.setItem(
+      "cbt_progress",
+      JSON.stringify({
+        currentSubject: examToSave.subjects?.[0] || "english",
+        currentIndex: 0,
+      }),
+    );
     window.location.href = "/cbt-exam";
   };
 
@@ -501,6 +515,60 @@ export default function CBTSetup() {
             ✓ {VITALS.MESSAGES.PASS_BADGE} • {access?.daysLeft || 0}d left
           </span>
         </div>
+
+        {/* RESUME BANNER */}
+        {resumeExam && (
+          <div
+            style={{
+              background: "#fffbeb",
+              border: "1px solid #fde68a",
+              padding: "12px 14px",
+              borderRadius: 12,
+              marginBottom: 14,
+            }}
+          >
+            <div style={{ fontSize: 13, fontWeight: 800, color: "#92400e" }}>
+              👑 You have an exam in progress —{" "}
+              {resumeExam.subjects?.join(", ")} • Ends in{" "}
+              {Math.max(
+                0,
+                Math.floor((resumeExam.endsAt - Date.now()) / 60000),
+              )}{" "}
+              mins
+            </div>
+            <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+              <button
+                onClick={handleResume}
+                style={{
+                  flex: 1,
+                  padding: 10,
+                  background: "#0A0F1A",
+                  color: "#fff",
+                  borderRadius: 10,
+                  fontWeight: 800,
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                Resume Exam →
+              </button>
+              <button
+                onClick={handleDiscardAndStartNew}
+                style={{
+                  padding: 10,
+                  background: "transparent",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: 10,
+                  fontSize: 12,
+                  color: "#64748b",
+                  cursor: "pointer",
+                }}
+              >
+                Discard
+              </button>
+            </div>
+          </div>
+        )}
 
         <div
           style={{

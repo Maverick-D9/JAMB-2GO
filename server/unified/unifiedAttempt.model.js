@@ -1,4 +1,3 @@
-// server/unified/unifiedAttempt.model.js
 const mongoose = require("mongoose");
 const conn = require("./unified.db");
 
@@ -21,10 +20,19 @@ const AttemptSchema = new mongoose.Schema({
   score: { type: Number, default: 0 },
   total: { type: Number, default: 0 },
   answers: { type: Object, default: {} },
-  submittedAt: { type: Date, default: Date.now },
+  // RESUME - B: Global timer
+  status: {
+    type: String,
+    enum: ["in_progress", "submitted"],
+    default: "in_progress",
+  },
+  questions: { type: Array, default: [] }, // frozen snapshot
+  currentIndex: { type: Number, default: 0 },
+  startedAt: { type: Date, default: Date.now },
+  endsAt: { type: Date }, // = test.endAt (global), NOT now + duration
+  lastSavedAt: { type: Date, default: Date.now },
+  submittedAt: { type: Date },
 });
 
-// 1 username = 1 attempt per test - cheat-proof for backend
 AttemptSchema.index({ testId: 1, username: 1 }, { unique: true });
-
 module.exports = conn.model("UnifiedAttempt", AttemptSchema);

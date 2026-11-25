@@ -9,6 +9,7 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 const VITALS = require("./config/vitals");
 const User = require("./models/User");
+const UnifiedQuestion = require("./unified/unifiedQuestion.model");
 const { registerLiveRankHandlers } = require("./sockets/liveRankHandler");
 const { registerDuelHandlers } = require("./sockets/duelHandler");
 const { rateLimit } = require("express-rate-limit");
@@ -281,6 +282,53 @@ function loadQuestions() {
   });
 }
 loadQuestions();
+
+// === ARENA UNIFIED CACHE - DO NOT TOUCH SHUFFLE ===
+let unifiedBank = {};
+async function loadUnifiedBank() {
+  try {
+    const docs = await UnifiedQuestion.find({}).lean();
+    const tmp = {};
+    docs.forEach((q) => {
+      let corr = (q.correct || q.correct_answer || "A")
+        .toString()
+        .trim()
+        .toUpperCase();
+      corr = corr.match(/[ABCD]/)?.[0] || "A";
+      const subj = normalizeSubject(q.subject || "");
+      if (!subj) return;
+      if (!tmp[subj]) tmp[subj] = [];
+      tmp[subj].push({
+        question_text: q.questionText,
+        option_a: q.optionA,
+        option_b: q.optionB,
+        option_c: q.optionC,
+        option_d: q.optionD,
+        correct: corr,
+        correct_answer: corr,
+        explanation: q.explanation || "",
+        diagramUrl: q.diagramUrl || "",
+        topic: q.topic || "",
+        subject: subj,
+        source: "unified",
+      });
+    });
+    if (tmp["mathematics"] && !tmp["maths"]) tmp["maths"] = tmp["mathematics"];
+    if (tmp["maths"] && !tmp["mathematics"]) tmp["mathematics"] = tmp["maths"];
+    unifiedBank = tmp;
+    console.log(
+      "✅ Arena Unified loaded:",
+      Object.fromEntries(
+        Object.entries(unifiedBank).map(([k, v]) => [k, v.length]),
+      ),
+    );
+  } catch (e) {
+    console.log("Arena Unified load error:", e.message);
+  }
+}
+loadUnifiedBank();
+setInterval(loadUnifiedBank, 5 * 60 * 1000);
+
 function csvEscape(v) {
   if (v == null) return "";
   const s = String(v);
@@ -901,11 +949,21 @@ setInterval(() => {
   }
   if (c > 0) console.log(`🧹 Cleaned ${c} rooms`);
 }, ROOM_CLEANUP_INTERVAL);
+
 function getRandomQuestion(subject) {
   const canonical = normalizeSubject(subject);
-  const list = questionBank[canonical];
-  if (!list || list.length === 0) return null;
-  return list[Math.floor(Math.random() * list.length)];
+  const csvList = questionBank[canonical] || [];
+  const unifiedList = unifiedBank[canonical] || [];
+  const seen = new Set();
+  const combined = [];
+  for (const q of [...unifiedList, ...csvList]) {
+    const key = (q.question_text || "").trim().toLowerCase().slice(0, 80);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    combined.push(q);
+  }
+  if (combined.length === 0) return null;
+  return combined[Math.floor(Math.random() * combined.length)];
 }
 function emitParticipants(room) {
   const state = roomState[room];

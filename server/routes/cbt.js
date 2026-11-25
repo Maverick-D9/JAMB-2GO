@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const router = express.Router();
 const CbtResult = require("../models/CbtResult");
 const User = require("../models/User");
+const UnifiedQuestion = require("../unified/unifiedQuestion.model");
 const VITALS = require("../config/vitals");
 
 // === ALL TUNABLES FROM VITALS - DO NOT HARDCODE HERE ===
@@ -120,17 +121,83 @@ function strongShuffle(arr) {
   }
   return a;
 }
-function getQs(subject, n) {
+async function getQs(subject, n) {
   const key = subject.toLowerCase();
-  let bank = cbtBankCache[key] || [];
-  if (bank.length === 0) {
+
+  // --- A. Get CSV bank (old way) ---
+  let csvBank = cbtBankCache[key] || [];
+  if (csvBank.length === 0) {
     const alias =
       key === "maths" ? "mathematics" : key === "mathematics" ? "maths" : null;
-    if (alias) bank = cbtBankCache[alias] || [];
-    if (bank.length === 0) bank = DUMMY[key] || DUMMY.english;
+    if (alias) csvBank = cbtBankCache[alias] || [];
   }
+  // Normalize CSV to same shape
+  let csvQs = csvBank.map((q) => ({
+    question_text: q.question_text,
+    option_a: q.option_a,
+    option_b: q.option_b,
+    option_c: q.option_c,
+    option_d: q.option_d,
+    correct_answer: q.correct_answer,
+    subject: q.subject || subject,
+    explanation: q.explanation || "",
+    diagramUrl: "",
+    source: "csv",
+  }));
+
+  // --- B. Get Unified Vault bank (MongoDB) ---
+  let unifiedQs = [];
+  try {
+    // Try both "mathematics" and "maths" etc because subject name fit differ
+    const subjectRegex = new RegExp(`^${key}$`, "i");
+    const docs = await UnifiedQuestion.find({ subject: subjectRegex }).lean();
+    unifiedQs = docs.map((q) => {
+      // Normalize correct: fit be "A" or "optionA" or "A - ..."
+      let corr = (q.correct || "A").toString().trim().toUpperCase();
+      if (corr.includes("OPTIONA") || corr === "A") corr = "A";
+      else if (corr.includes("OPTIONB") || corr === "B") corr = "B";
+      else if (corr.includes("OPTIONC") || corr === "C") corr = "C";
+      else if (corr.includes("OPTIOND") || corr === "D") corr = "D";
+      else corr = corr.match(/[ABCD]/)?.[0] || "A";
+
+      return {
+        question_text: q.questionText,
+        option_a: q.optionA,
+        option_b: q.optionB,
+        option_c: q.optionC,
+        option_d: q.optionD,
+        correct_answer: corr,
+        subject: q.subject || subject,
+        explanation: q.explanation || "",
+        diagramUrl: q.diagramUrl || "",
+        topic: q.topic || "",
+        difficulty: q.difficulty || "medium",
+        source: "unified",
+      };
+    });
+  } catch (e) {
+    console.log("Unified fetch error:", e.message);
+  }
+
+  // --- C. Combine + Remove Duplicate (same question_text) ---
+  const seen = new Set();
+  const combined = [];
+  for (const q of [...unifiedQs, ...csvQs]) {
+    const clean = (q.question_text || "").trim().toLowerCase().slice(0, 80);
+    if (!clean || seen.has(clean)) continue;
+    seen.add(clean);
+    combined.push(q);
+  }
+
+  // --- D. If both empty, use DUMMY ---
+  let bank = combined;
+  if (bank.length === 0) bank = DUMMY[key] || DUMMY.english;
+
+  // --- E. Shuffle combined bank, pick N ---
   let shuffledBank = strongShuffle(bank);
   const picked = shuffledBank.slice(0, Math.min(n, bank.length));
+
+  // --- F. Shuffle options per question (same as before, but keep diagramUrl) ---
   return picked.map((q, idx) => {
     const correctLetter = (q.correct_answer || "A").toUpperCase();
     const options = [
@@ -152,6 +219,9 @@ function getQs(subject, n) {
       question_text: q.question_text,
       subject: q.subject || subject,
       explanation: q.explanation || "",
+      diagramUrl: q.diagramUrl || "",
+      topic: q.topic || "",
+      source: q.source || "csv",
       ...newOptionsMap,
       correct_answer: newCorrect,
       id:
@@ -165,7 +235,6 @@ function getQs(subject, n) {
     };
   });
 }
-
 router.get("/config", (req, res) => res.json(CONFIG));
 router.put("/config", (req, res) => {
   if (!checkAdminPassword(req))
@@ -290,9 +359,9 @@ router.post("/start", checkSubscription, async (req, res) => {
   }
   const allSubjects = ["english", ...subjects.map((s) => s.toLowerCase())];
   const questions = {};
-  allSubjects.forEach((sub) => {
-    questions[sub] = getQs(sub, CONFIG.questionsPerSubject);
-  });
+  for (const sub of allSubjects) {
+    questions[sub] = await getQs(sub, CONFIG.questionsPerSubject);
+  }
   res.json({
     subjects: allSubjects,
     questions,

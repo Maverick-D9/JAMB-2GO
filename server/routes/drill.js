@@ -4,6 +4,7 @@ const fsp = fs.promises;
 const path = require("path");
 const router = express.Router();
 const User = require("../models/User");
+const UnifiedQuestion = require("../unified/unifiedQuestion.model");
 const NodeCache = require("node-cache");
 
 // === TIER 3: CACHES ===
@@ -299,8 +300,51 @@ router.get("/questions", async (req, res) => {
       }
       questionsCache.set(qCacheKey, all);
     }
+    // === DRILL UNIFIED MERGE - DO NOT TOUCH SHUFFLE ===
+    let unifiedForDrill = [];
+    try {
+      const docs = await UnifiedQuestion.find({}).lean();
+      unifiedForDrill = docs
+        .filter((q) => {
+          const subj = normalizeSubject(q.subject || "");
+          if (subj !== subject) return false;
+          const a = (q.topic || "").trim().toLowerCase();
+          const b = topic.toLowerCase();
+          return a === b || a.includes(b) || b.includes(a);
+        })
+        .map((q) => {
+          let corr = (q.correct || q.correct_answer || "A")
+            .toString()
+            .trim()
+            .toUpperCase();
+          corr = corr.match(/[ABCD]/)?.[0] || "A";
+          return {
+            question_text: q.questionText,
+            option_a: q.optionA,
+            option_b: q.optionB,
+            option_c: q.optionC,
+            option_d: q.optionD,
+            correct: corr,
+            explanation: q.explanation || "",
+            diagramUrl: q.diagramUrl || "",
+            topic: q.topic || topic,
+          };
+        });
+    } catch (e) {
+      console.log("Drill Unified load error:", e.message);
+    }
 
-    const shuffled = [...all]
+    // Dedup Unified + CSV by question_text
+    const seen = new Set();
+    const combined = [];
+    for (const q of [...unifiedForDrill, ...all]) {
+      const key = (q.question_text || "").trim().toLowerCase().slice(0, 80);
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      combined.push(q);
+    }
+
+    const shuffled = [...combined]
       .sort(() => 0.5 - Math.random())
       .slice(0, countNum);
     const out = shuffled.map((q, i) => ({
@@ -314,8 +358,9 @@ router.get("/questions", async (req, res) => {
       option_d: q.option_d,
       correct: q.correct,
       explanation: q.explanation,
+      diagramUrl: q.diagramUrl || "", // <-- THIS LINE NA THE KEY
     }));
-    res.json({ questions: out, total: all.length });
+    res.json({ questions: out, total: combined.length });
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: e.message });

@@ -307,6 +307,20 @@ export default function CbtReview() {
                   </span>
                   {q.question_text}
                 </div>
+
+                {/* DIAGRAM FOR REVIEW PAGE */}
+                {q.diagramUrl ? (
+                  <div className="mt-4">
+                    <img
+                      src={q.diagramUrl}
+                      alt="Question diagram"
+                      className="max-w-full max-h-[320px] rounded-xl border border-white/10 mx-auto object-contain bg-white p-2"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  </div>
+                ) : null}
                 <div className="grid gap-2 mt-4">
                   {["A", "B", "C", "D"].map((letter) => {
                     const txt = q[`option_${letter.toLowerCase()}`];

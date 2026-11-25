@@ -110,6 +110,95 @@ function readSubjectQuestions(subject) {
   }
   return qs;
 }
+
+// STEP 2A: Build questions for a test - extracted from GET /tests/:id/questions
+// Returns frozen exam array. CSV id is now stable (no Date.now()) so resume works.
+async function buildQuestionsForTest(t) {
+  const subjects = t.subjects?.length ? t.subjects : ["english"];
+  const perSubject = t.questionsPerSubject || 40;
+  const testTopic = normalizeTopic(t.topic || "all");
+  const isAllTopics = !testTopic || testTopic === "all";
+  let exam = [];
+
+  let unifiedAll = [];
+  if (UnifiedQuestion) {
+    try {
+      unifiedAll = await UnifiedQuestion.find({}).lean();
+    } catch (e) {
+      console.log("Unified Vault read failed:", e.message);
+    }
+  }
+
+  for (const subj of subjects) {
+    const norm = normalizeSubject(subj);
+
+    // SOURCE 1: Unified Vault - filter by SUBJECT + TOPIC
+    const unifiedForSubject = unifiedAll.filter((q) => {
+      if (normalizeSubject(q.subject) !== norm) return false;
+      if (isAllTopics) return true;
+      return normalizeTopic(q.topic) === testTopic;
+    });
+    const shuffledUnified = [...unifiedForSubject].sort(
+      () => 0.5 - Math.random(),
+    );
+    const takeUnified = shuffledUnified.slice(0, perSubject);
+
+    // SOURCE 2: CSV Vault - filter by TOPIC too, if topic no be "all"
+    const needMore = perSubject - takeUnified.length;
+    let csvForSubject = [];
+    if (needMore > 0) {
+      let bank = readSubjectQuestions(subj);
+      if (!isAllTopics) {
+        bank = bank.filter((q) => normalizeTopic(q.topic) === testTopic);
+      }
+      const shuffledCsv = [...bank].sort(() => 0.5 - Math.random());
+      csvForSubject = shuffledCsv.slice(0, needMore);
+    }
+
+    const merged = [
+      ...takeUnified.map((q) => ({
+        id: `unified-${q._id}`,
+        subject: norm,
+        source: "unified-vault",
+        question_text: q.questionText || q.question_text || "",
+        option_a: q.optionA || q.option_a || "",
+        option_b: q.optionB || q.option_b || "",
+        option_c: q.optionC || q.option_c || "",
+        option_d: q.optionD || q.option_d || "",
+        correct: q.correct || "",
+        explanation: q.explanation || "",
+        topic: q.topic || "General",
+        diagramUrl: q.diagramUrl || "",
+        diagramType: q.diagramType || "",
+      })),
+      ...csvForSubject.map((q, idx) => ({
+        id: `csv-${norm}-${String(q.question_text || "")
+          .slice(0, 40)
+          .replace(/[^a-zA-Z0-9]+/g, "-")}-${idx}`,
+        subject: norm,
+        source: "csv-vault",
+        question_text: q.question_text,
+        option_a: q.option_a,
+        option_b: q.option_b,
+        option_c: q.option_c,
+        option_d: q.option_d,
+        correct: q.correct,
+        explanation: q.explanation || "",
+        topic: q.topic || "General",
+        diagramUrl: q.diagramUrl || q.diagram_url || "",
+        diagramType: q.diagramUrl ? "link" : "",
+      })),
+    ];
+
+    const finalShuffled = merged.sort(() => 0.5 - Math.random());
+    exam.push(...finalShuffled);
+    console.log(
+      `[Unified] ${subj} | topic=${t.topic || "all"}: Unified=${takeUnified.length} + CSV=${csvForSubject.length} = ${finalShuffled.length}/${perSubject}`,
+    );
+  }
+  return exam;
+}
+
 // GET - Lobby - FIXED: respect startAt, auto-end, Lagos time
 router.get("/tests", async (req, res) => {
   try {
@@ -145,99 +234,20 @@ router.get("/tests", async (req, res) => {
 });
 
 // GET - Questions from BOTH Vaults - NOW WITH TOPIC FILTER
+// Kept for backward compat - new flow uses POST /start which freezes questions
 router.get("/tests/:id/questions", async (req, res) => {
   try {
     const t = await UnifiedTest.findById(req.params.id);
     if (!t) return res.status(404).json({ error: "Test not found" });
-
-    const subjects = t.subjects?.length ? t.subjects : ["english"];
-    const perSubject = t.questionsPerSubject || 40;
-    // NEW: topic filter
-    const testTopic = normalizeTopic(t.topic || "all");
-    const isAllTopics = !testTopic || testTopic === "all";
-    let exam = [];
-
-    let unifiedAll = [];
-    if (UnifiedQuestion) {
-      try {
-        unifiedAll = await UnifiedQuestion.find({}).lean();
-      } catch (e) {
-        console.log("Unified Vault read failed:", e.message);
-      }
-    }
-
-    for (const subj of subjects) {
-      const norm = normalizeSubject(subj);
-
-      // SOURCE 1: Unified Vault - filter by SUBJECT + TOPIC
-      const unifiedForSubject = unifiedAll.filter((q) => {
-        if (normalizeSubject(q.subject) !== norm) return false;
-        if (isAllTopics) return true;
-        return normalizeTopic(q.topic) === testTopic;
-      });
-      const shuffledUnified = [...unifiedForSubject].sort(
-        () => 0.5 - Math.random(),
-      );
-      const takeUnified = shuffledUnified.slice(0, perSubject);
-
-      // SOURCE 2: CSV Vault - filter by TOPIC too, if topic no be "all"
-      const needMore = perSubject - takeUnified.length;
-      let csvForSubject = [];
-      if (needMore > 0) {
-        let bank = readSubjectQuestions(subj);
-        if (!isAllTopics) {
-          bank = bank.filter((q) => normalizeTopic(q.topic) === testTopic);
-        }
-        const shuffledCsv = [...bank].sort(() => 0.5 - Math.random());
-        csvForSubject = shuffledCsv.slice(0, needMore);
-      }
-
-      const merged = [
-        ...takeUnified.map((q) => ({
-          id: `unified-${q._id}`,
-          subject: norm,
-          source: "unified-vault",
-          question_text: q.questionText || q.question_text || "",
-          option_a: q.optionA || q.option_a || "",
-          option_b: q.optionB || q.option_b || "",
-          option_c: q.optionC || q.option_c || "",
-          option_d: q.optionD || q.option_d || "",
-          correct: q.correct || "",
-          explanation: q.explanation || "",
-          topic: q.topic || "General",
-          diagramUrl: q.diagramUrl || "",
-          diagramType: q.diagramType || "",
-        })),
-        ...csvForSubject.map((q, idx) => ({
-          id: `csv-${norm}-${idx}-${Date.now()}`,
-          subject: norm,
-          source: "csv-vault",
-          question_text: q.question_text,
-          option_a: q.option_a,
-          option_b: q.option_b,
-          option_c: q.option_c,
-          option_d: q.option_d,
-          correct: q.correct,
-          explanation: q.explanation || "",
-          topic: q.topic || "General",
-          diagramUrl: q.diagramUrl || q.diagram_url || "",
-          diagramType: q.diagramUrl ? "link" : "",
-        })),
-      ];
-
-      const finalShuffled = merged.sort(() => 0.5 - Math.random());
-      exam.push(...finalShuffled);
-      console.log(
-        `[Unified] ${subj} | topic=${t.topic || "all"}: Unified=${takeUnified.length} + CSV=${csvForSubject.length} = ${finalShuffled.length}/${perSubject}`,
-      );
-    }
-
+    const exam = await buildQuestionsForTest(t);
     res.json({
       test: {
         title: t.title,
         subjects: t.subjects,
         topic: t.topic || "all",
         durationMinutes: t.durationMinutes || 120,
+        endAt: t.endAt,
+        startAt: t.startAt,
       },
       questions: exam,
     });
@@ -246,6 +256,7 @@ router.get("/tests/:id/questions", async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+
 // POST - Admin creates test - FIXED: treat input as Lagos time (UTC+1)
 router.post("/tests", checkAdmin, async (req, res) => {
   const {
@@ -337,7 +348,136 @@ router.delete("/tests/:id", checkAdmin, async (req, res) => {
     res.status(500).json({ success: false, error: e.message });
   }
 });
-// GET - Check if this username don do this test before
+
+// STEP 2B: POST - Start / Resume - B: Global timer, frozen questions
+router.post("/tests/:id/start", async (req, res) => {
+  try {
+    const { username, fullName, userId } = req.body;
+    const uname = String(username || "")
+      .toLowerCase()
+      .trim();
+    if (!uname) return res.status(400).json({ error: "Login required" });
+    const t = await UnifiedTest.findById(req.params.id);
+    if (!t) return res.status(404).json({ error: "Test not found" });
+
+    const globalEnd = t.endAt
+      ? new Date(t.endAt)
+      : new Date(
+          new Date(t.startAt).getTime() + (t.durationMinutes || 120) * 60000,
+        );
+
+    let attempt = await UnifiedAttempt.findOne({
+      testId: req.params.id,
+      username: uname,
+    });
+    if (attempt) {
+      if (attempt.status === "submitted")
+        return res
+          .status(409)
+          .json({
+            error: "You don do this test before",
+            score: attempt.score,
+            total: attempt.total,
+          });
+      // If global end don pass, auto-submit with saved answers
+      if (new Date() >= globalEnd) {
+        let correct = 0;
+        (attempt.questions || []).forEach((q, i) => {
+          if (
+            attempt.answers?.[i] &&
+            String(attempt.answers[i]).toUpperCase() ===
+              String(q.correct || "").toUpperCase()
+          )
+            correct++;
+        });
+        attempt.score = correct;
+        attempt.total = attempt.questions.length;
+        attempt.status = "submitted";
+        attempt.submittedAt = new Date();
+        await attempt.save();
+        return res.json({
+          expired: true,
+          attempt,
+          test: {
+            title: t.title,
+            endAt: t.endAt,
+            durationMinutes: t.durationMinutes,
+          },
+        });
+      }
+      // Resume: same questions, same answers, same global end
+      attempt.endsAt = globalEnd;
+      await attempt.save();
+      return res.json({
+        resumed: true,
+        attempt,
+        test: {
+          title: t.title,
+          endAt: t.endAt,
+          durationMinutes: t.durationMinutes,
+        },
+      });
+    }
+
+    if (new Date() >= globalEnd)
+      return res.status(400).json({ error: "Test don end" });
+
+    const exam = await buildQuestionsForTest(t);
+    attempt = await UnifiedAttempt.create({
+      testId: req.params.id,
+      username: uname,
+      fullName: fullName || "",
+      userId: userId || "",
+      status: "in_progress",
+      questions: exam,
+      total: exam.length,
+      answers: {},
+      currentIndex: 0,
+      startedAt: new Date(),
+      endsAt: globalEnd,
+      lastSavedAt: new Date(),
+    });
+    res.json({
+      resumed: false,
+      attempt,
+      test: {
+        title: t.title,
+        endAt: t.endAt,
+        durationMinutes: t.durationMinutes,
+      },
+    });
+  } catch (e) {
+    if (e.code === 11000)
+      return res.status(409).json({ error: "You don do this test before" });
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// STEP 2B: POST - Autosave answers + index
+router.post("/tests/:id/autosave", async (req, res) => {
+  try {
+    const { username, answers, currentIndex } = req.body;
+    const uname = String(username || "")
+      .toLowerCase()
+      .trim();
+    const attempt = await UnifiedAttempt.findOne({
+      testId: req.params.id,
+      username: uname,
+    });
+    if (!attempt) return res.status(404).json({ error: "No attempt" });
+    if (attempt.status === "submitted")
+      return res.json({ success: true, submitted: true });
+    if (answers) attempt.answers = answers;
+    if (typeof currentIndex === "number") attempt.currentIndex = currentIndex;
+    attempt.lastSavedAt = new Date();
+    await attempt.save();
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET - Check if this username don do this test before - now returns resume data
 router.get("/tests/:id/attempt", async (req, res) => {
   try {
     const username = String(req.query.username || "")
@@ -348,20 +488,25 @@ router.get("/tests/:id/attempt", async (req, res) => {
       testId: req.params.id,
       username,
     });
-    if (found)
-      return res.json({
-        done: true,
-        score: found.score,
-        total: found.total,
-        submittedAt: found.submittedAt,
-      });
-    res.json({ done: false });
+    if (!found) return res.json({ done: false });
+    res.json({
+      done: found.status === "submitted",
+      inProgress: found.status === "in_progress",
+      score: found.score,
+      total: found.total,
+      answers: found.answers || {},
+      currentIndex: found.currentIndex || 0,
+      questions: found.questions || [],
+      startedAt: found.startedAt,
+      endsAt: found.endsAt,
+      submittedAt: found.submittedAt,
+    });
   } catch (e) {
     res.json({ done: false });
   }
 });
 
-// POST - Submit attempt - blocks 2nd attempt
+// POST - Submit attempt - updates in_progress, recalculates score, blocks 2nd attempt
 router.post("/tests/:id/submit", async (req, res) => {
   try {
     const { username, fullName, userId, score, total, answers } = req.body;
@@ -370,25 +515,51 @@ router.post("/tests/:id/submit", async (req, res) => {
       .trim();
     if (!uname) return res.status(400).json({ error: "Login required" });
 
-    const existing = await UnifiedAttempt.findOne({
+    let attempt = await UnifiedAttempt.findOne({
       testId: req.params.id,
       username: uname,
     });
-    if (existing)
+    if (attempt && attempt.status === "submitted")
       return res.status(409).json({
         error: "You don do this test before",
-        score: existing.score,
-        total: existing.total,
+        score: attempt.score,
+        total: attempt.total,
       });
 
-    const attempt = await UnifiedAttempt.create({
+    // Recalculate score from frozen questions - no trust frontend score
+    let finalScore = score || 0;
+    let finalTotal = total || 0;
+    if (attempt && attempt.questions?.length) {
+      finalTotal = attempt.questions.length;
+      finalScore = 0;
+      attempt.questions.forEach((q, i) => {
+        if (
+          answers?.[i] &&
+          String(answers[i]).toUpperCase() ===
+            String(q.correct || "").toUpperCase()
+        )
+          finalScore++;
+      });
+    }
+    if (attempt) {
+      attempt.score = finalScore;
+      attempt.total = finalTotal;
+      attempt.answers = answers || {};
+      attempt.status = "submitted";
+      attempt.submittedAt = new Date();
+      await attempt.save();
+      return res.json({ success: true, attempt });
+    }
+    attempt = await UnifiedAttempt.create({
       testId: req.params.id,
       username: uname,
       fullName: fullName || "",
       userId: userId || "",
-      score: score || 0,
-      total: total || 0,
+      score: finalScore,
+      total: finalTotal,
       answers: answers || {},
+      status: "submitted",
+      submittedAt: new Date(),
     });
     res.json({ success: true, attempt });
   } catch (e) {

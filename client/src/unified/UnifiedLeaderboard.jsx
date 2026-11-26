@@ -29,14 +29,19 @@ export default function UnifiedLeaderboard({
 
   useEffect(() => {
     if (!testId) return;
+    const load = () => {
+      fetch(`${UNIFIED.API_BASE}/api/unified/tests/${testId}/leaderboard`)
+        .then((r) => r.json())
+        .then((d) => {
+          setBoard(d.leaderboard || []);
+          setLoading(false);
+        })
+        .catch(() => setLoading(false));
+    };
     setLoading(true);
-    fetch(`${UNIFIED.API_BASE}/api/unified/tests/${testId}/leaderboard`)
-      .then((r) => r.json())
-      .then((d) => {
-        setBoard(d.leaderboard || []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    load();
+    const t = setInterval(load, 15000);
+    return () => clearInterval(t);
   }, [testId]);
 
   if (loading)

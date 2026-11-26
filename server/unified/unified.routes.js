@@ -372,13 +372,11 @@ router.post("/tests/:id/start", async (req, res) => {
     });
     if (attempt) {
       if (attempt.status === "submitted")
-        return res
-          .status(409)
-          .json({
-            error: "You don do this test before",
-            score: attempt.score,
-            total: attempt.total,
-          });
+        return res.status(409).json({
+          error: "You don do this test before",
+          score: attempt.score,
+          total: attempt.total,
+        });
       // If global end don pass, auto-submit with saved answers
       if (new Date() >= globalEnd) {
         let correct = 0;
@@ -649,5 +647,50 @@ router.post(
     }
   },
 );
+// GET - OVERALL LEADERBOARD - All Unified Tests combined
+// Rank = Total Score first, then Avg % . Updates automatically after every submit.
+router.get("/leaderboard/overall", async (req, res) => {
+  try {
+    const attempts = await UnifiedAttempt.find({ status: "submitted" }).lean();
+
+    const map = {};
+    for (const a of attempts) {
+      const key = String(a.username || "")
+        .toLowerCase()
+        .trim();
+      if (!key) continue;
+      if (!map[key]) {
+        map[key] = {
+          username: a.username,
+          fullName: a.fullName || "",
+          totalScore: 0,
+          totalPossible: 0,
+          testsPlayed: 0,
+          lastPlayed: a.submittedAt,
+        };
+      }
+      map[key].totalScore += a.score || 0;
+      map[key].totalPossible += a.total || 0;
+      map[key].testsPlayed += 1;
+      if (a.submittedAt > map[key].lastPlayed)
+        map[key].lastPlayed = a.submittedAt;
+    }
+
+    const board = Object.values(map)
+      .map((u) => ({
+        ...u,
+        percent: u.totalPossible
+          ? Math.round((u.totalScore / u.totalPossible) * 100)
+          : 0,
+      }))
+      .sort((a, b) => b.totalScore - a.totalScore || b.percent - a.percent)
+      .slice(0, 50)
+      .map((u, i) => ({ rank: i + 1, ...u }));
+
+    res.json({ success: true, count: board.length, leaderboard: board });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
 module.exports = router;

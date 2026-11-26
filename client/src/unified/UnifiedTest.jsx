@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { UNIFIED, getUser } from "./unified.config";
 import { fetchUnifiedTests, checkUnifiedAccess } from "./unified.api";
 import UnifiedLeaderboard from "./UnifiedLeaderboard";
+import UnifiedOverallLeaderboard from "./UnifiedOverallLeaderboard";
 
 // NEW: Get logged-in user from your Auth.jsx (jambite_user)
 function getLoggedUser() {
@@ -240,7 +241,7 @@ export default function UnifiedTest() {
             </p>
           )}
         </div>
-
+        <UnifiedOverallLeaderboard />
         {/* FIX: Show ALL live tests */}
         {lives.length === 0 ? (
           <div className="bg-[#121A2E]/60 border border-white/10 rounded-[20px] p-5 mb-4 text-center text-slate-400 text-[13px]">

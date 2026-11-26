@@ -19,7 +19,6 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import { getLiveRank } from "./config/liveRanks";
 import TextHype from "./components/TextHype.jsx";
 import DuelArena from "./pages/DuelArena";
-import ChristmasDecor from "./components/ChristmasDecor.jsx";
 import UnifiedTest from "./unified/UnifiedTest";
 import UnifiedExam from "./unified/UnifiedExam";
 function RankUpAnimation({ newRank, onClose }) {
@@ -1104,7 +1103,6 @@ export default function App() {
   if (!showChat) {
     return (
       <div className="min-h-screen w-full bg-[#050A14] relative flex justify-center items-start py-6 px-4 overflow-x-hidden">
-        <ChristmasDecor />
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Permanent+Marker&family=Cinzel:wght@800&display=swap');
           @keyframes drift {

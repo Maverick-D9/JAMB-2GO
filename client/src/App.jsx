@@ -1786,7 +1786,7 @@ export default function App() {
               <div className="text-[11px] text-slate-400 mt-1">
                 {unifiedLive
                   ? `${unifiedLive.title} • Enter now, top the board!`
-                  : "Sunday Mega Test • Compete for #1 on Leaderboard"}
+                  : "Night of Champions • Compete for #1 on Leaderboard"}
               </div>
               <div className="text-[11px] text-amber-300 font-bold mt-2">
                 Enter Test →
@@ -1856,7 +1856,7 @@ export default function App() {
                       onClick={() => setShowPaywall(true)}
                       className="bg-amber-400 text-black text-[11px] font-black px-3.5 py-1.5 rounded-full"
                     >
-                      Upgrade Now — Keep {access.daysLeft}d +{" "}
+                      Upgrade Now — Keep Free trial days +{" "}
                       {VITALS.SUBSCRIPTION.DURATION_DAYS}d 👑
                     </button>
                   )}
@@ -1969,7 +1969,7 @@ export default function App() {
                   Unified Test
                 </div>
                 <div className="text-[11px] text-slate-400 mt-1">
-                  Sunday Mega Test • Compete for #1
+                  Night of Champions • Compete for #1
                 </div>
                 <div className="text-[11px] text-amber-300 font-bold mt-2">
                   Enter Test →

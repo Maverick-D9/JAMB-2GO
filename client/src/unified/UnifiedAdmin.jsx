@@ -214,7 +214,7 @@ export default function UnifiedAdmin() {
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Sunday Mega Test"
+            placeholder="e.g. Night of Champions"
             className="w-full mt-3 px-3 py-2.5 rounded-xl bg-[#080C18] border border-white/10 text-white text-[13px] outline-none"
           />
 

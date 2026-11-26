@@ -472,64 +472,81 @@ export default function DuelArena() {
               border: "1px solid rgba(255,255,255,0.1)",
             }}
           >
-            <p className="font-extrabold text-[13px] text-white">
-              🏆 Top Duelists
-            </p>
+            <div className="flex justify-between items-center">
+              <p className="font-extrabold text-[13px] text-white">
+                🏆 Top Duelists
+              </p>
+              {leaderboard.length > 4 && (
+                <span className="text-[11px] text-white/40 animate-pulse">
+                  ↓ Scroll ↓
+                </span>
+              )}
+            </div>
             {leaderboard.length === 0 ? (
               <p className="text-[12px] text-slate-400 mt-2">
                 No duelists yet. Be the first!
               </p>
             ) : (
-              leaderboard.map((p, i) => {
-                const isMe = p.username === username;
-                return (
-                  <div
-                    key={p.username}
-                    className="flex justify-between items-center text-[12px] mt-2 px-3 py-2.5 rounded-xl"
-                    style={
-                      isMe
-                        ? {
-                            background: "rgba(99,102,241,0.18)",
-                            border: "1px solid #818CF8",
-                            boxShadow:
-                              "0 0 22px rgba(99,102,241,0.6), inset 0 0 12px rgba(99,102,241,0.25)",
-                            color: "#fff",
-                            fontWeight: 700,
-                          }
-                        : {
-                            background: "rgba(255,255,255,0.04)",
-                            border: "1px solid transparent",
-                            color: "#CBD5E1",
-                          }
-                    }
-                  >
-                    <span
+              <div
+                className="duel-leaderboard-scroll mt-1 pr-1 space-y-0"
+                style={{
+                  maxHeight: "240px",
+                  overflowY: "auto",
+                  overscrollBehavior: "contain",
+                  WebkitOverflowScrolling: "touch",
+                }}
+              >
+                {leaderboard.map((p, i) => {
+                  const isMe = p.username === username;
+                  return (
+                    <div
+                      key={p.username}
+                      className="flex justify-between items-center text-[12px] mt-2 px-3 py-2.5 rounded-xl"
                       style={
-                        i === 0 && !isMe
+                        isMe
                           ? {
-                              textShadow: "0 0 12px rgba(250,204,21,0.9)",
+                              background: "rgba(99,102,241,0.18)",
+                              border: "1px solid #818CF8",
+                              boxShadow:
+                                "0 0 22px rgba(99,102,241,0.6), inset 0 0 12px rgba(99,102,241,0.25)",
                               color: "#fff",
-                              fontWeight: 800,
+                              fontWeight: 700,
                             }
-                          : {}
+                          : {
+                              background: "rgba(255,255,255,0.04)",
+                              border: "1px solid transparent",
+                              color: "#CBD5E1",
+                            }
                       }
                     >
-                      {i === 0 ? "👑 " : ""}
-                      {i + 1}. {p.username}{" "}
-                      {isMe ? (
-                        <span className="text-[10px] bg-indigo-500 px-2 py-0.5 rounded-full ml-1">
-                          (You)
-                        </span>
-                      ) : (
-                        ""
-                      )}
-                    </span>
-                    <span className="text-amber-300 font-black">
-                      {p.duelPoints} pts • {p.duelWins}W
-                    </span>
-                  </div>
-                );
-              })
+                      <span
+                        style={
+                          i === 0 && !isMe
+                            ? {
+                                textShadow: "0 0 12px rgba(250,204,21,0.9)",
+                                color: "#fff",
+                                fontWeight: 800,
+                              }
+                            : {}
+                        }
+                      >
+                        {i === 0 ? "👑 " : ""}
+                        {i + 1}. {p.username}{" "}
+                        {isMe ? (
+                          <span className="text-[10px] bg-indigo-500 px-2 py-0.5 rounded-full ml-1">
+                            (You)
+                          </span>
+                        ) : (
+                          ""
+                        )}
+                      </span>
+                      <span className="text-amber-300 font-black">
+                        {p.duelPoints} pts • {p.duelWins}W
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             )}
           </motion.div>
 
@@ -605,37 +622,47 @@ export default function DuelArena() {
                 </div>
               </div>
             ) : (
-              history
-                .slice()
-                .reverse()
-                .map((h, i) => {
-                  const isWin = h.result === "WIN";
-                  const isDraw = h.result === "DRAW";
-                  return (
-                    <div
-                      key={i}
-                      className="mt-3 p-3.5 rounded-2xl bg-[#0F172A]"
-                      style={{
-                        border: `2px solid ${isWin ? "#10B981" : isDraw ? "#94A3B8" : "#EF4444"}`,
-                        boxShadow: `0 0 18px ${isWin ? "rgba(16,185,129,0.3)" : isDraw ? "rgba(148,163,184,0.2)" : "rgba(239,68,68,0.3)"}`,
-                      }}
-                    >
-                      <div className="flex justify-between items-center text-[12px]">
-                        <span className="text-white font-bold">
-                          vs {h.opponent} •{" "}
-                          {h.subject === "maths" ? "➗ Maths" : "📚 English"} •{" "}
-                          {h.myScore}-{h.opponentScore}
-                        </span>
-                        <span
-                          className={`font-black px-2.5 py-1 rounded-full text-[11px] ${isWin ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" : isDraw ? "bg-slate-500/20 text-slate-300 border border-slate-500/40" : "bg-red-500/20 text-red-300 border border-red-500/40"}`}
-                        >
-                          {isWin ? "✓ WIN" : isDraw ? "＝ DRAW" : "✕ LOSS"}{" "}
-                          {h.xpChange > 0 ? `+${h.xpChange}` : h.xpChange}
-                        </span>
+              <div
+                className="duel-leaderboard-scroll pr-1"
+                style={{
+                  maxHeight: "260px",
+                  overflowY: "auto",
+                  overscrollBehavior: "contain",
+                  WebkitOverflowScrolling: "touch",
+                }}
+              >
+                {history
+                  .slice()
+                  .reverse()
+                  .map((h, i) => {
+                    const isWin = h.result === "WIN";
+                    const isDraw = h.result === "DRAW";
+                    return (
+                      <div
+                        key={i}
+                        className="mt-3 p-3.5 rounded-2xl bg-[#0F172A]"
+                        style={{
+                          border: `2px solid ${isWin ? "#10B981" : isDraw ? "#94A3B8" : "#EF4444"}`,
+                          boxShadow: `0 0 18px ${isWin ? "rgba(16,185,129,0.3)" : isDraw ? "rgba(148,163,184,0.2)" : "rgba(239,68,68,0.3)"}`,
+                        }}
+                      >
+                        <div className="flex justify-between items-center text-[12px]">
+                          <span className="text-white font-bold">
+                            vs {h.opponent} •{" "}
+                            {h.subject === "maths" ? "➗ Maths" : "📚 English"}{" "}
+                            • {h.myScore}-{h.opponentScore}
+                          </span>
+                          <span
+                            className={`font-black px-2.5 py-1 rounded-full text-[11px] ${isWin ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" : isDraw ? "bg-slate-500/20 text-slate-300 border border-slate-500/40" : "bg-red-500/20 text-red-300 border border-red-500/40"}`}
+                          >
+                            {isWin ? "✓ WIN" : isDraw ? "＝ DRAW" : "✕ LOSS"}{" "}
+                            {h.xpChange > 0 ? `+${h.xpChange}` : h.xpChange}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })
+                    );
+                  })}
+              </div>
             )}
           </motion.div>
 
@@ -646,7 +673,7 @@ export default function DuelArena() {
             ← Back to Haven
           </button>
         </div>
-        <style>{`.group:hover .animate-ping{animation: radarPing 1s cubic-bezier(0,0,0.2,1) infinite;} @keyframes radarPing{0%{transform:scale(1);opacity:.6;}100%{transform:scale(1.12);opacity:0;}}`}</style>
+        <style>{`.group:hover .animate-ping{animation: radarPing 1s cubic-bezier(0,0,0.2,1) infinite;} @keyframes radarPing{0%{transform:scale(1);opacity:.6;}100%{transform:scale(1.12);opacity:0;}} .duel-leaderboard-scroll::-webkit-scrollbar{width:6px;} .duel-leaderboard-scroll::-webkit-scrollbar-track{background:rgba(255,255,255,0.05);border-radius:10px;} .duel-leaderboard-scroll::-webkit-scrollbar-thumb{background:rgba(249,115,22,0.6);border-radius:10px;} .duel-leaderboard-scroll{scrollbar-width:thin;scrollbar-color:rgba(249,115,22,0.6) transparent;}`}</style>
       </div>
     );
 

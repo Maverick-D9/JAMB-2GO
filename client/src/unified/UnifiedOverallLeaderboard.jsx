@@ -39,14 +39,13 @@ export default function UnifiedOverallLeaderboard() {
       .then((d) => {
         const newBoard = d.leaderboard || [];
         const newTop = newBoard[0]?.username?.toLowerCase();
-        // DETHRONE DETECT - if top don change and we don see one before
         if (prevTopRef.current && newTop && newTop !== prevTopRef.current) {
           setDethrone({
             from: prevTopRef.current,
             to: newBoard[0].username,
             at: Date.now(),
           });
-          setTimeout(() => setDethrone(null), 15000); // hide after 15s
+          setTimeout(() => setDethrone(null), 15000);
         }
         if (newTop) prevTopRef.current = newTop;
         setBoard(newBoard);
@@ -59,7 +58,7 @@ export default function UnifiedOverallLeaderboard() {
   useEffect(() => {
     load();
     const t = setInterval(load, 15000);
-    const tick = setInterval(() => setNowTick(Date.now()), 30000); // update timer every 30s
+    const tick = setInterval(() => setNowTick(Date.now()), 30000);
     return () => {
       clearInterval(t);
       clearInterval(tick);
@@ -80,10 +79,10 @@ export default function UnifiedOverallLeaderboard() {
     );
 
   const king = board[0];
+  const visibleBoard = board.slice(0, 20);
 
   return (
     <div className="bg-[#121A2E]/80 border border-amber-400/20 rounded-[20px] p-4 mb-5">
-      {/* 🔥 DETHRONE ALERT */}
       {dethrone && (
         <div className="mb-3 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-xl px-3 py-2.5 flex justify-between items-center animate-pulse">
           <span className="font-black text-[13px]">
@@ -109,7 +108,6 @@ export default function UnifiedOverallLeaderboard() {
         Ranked by total score across ALL Unified Tests. Updates every 15s.
       </p>
 
-      {/* 👑 CROWN DEFENSE TIMER */}
       {king && championSince && (
         <div className="mt-3 bg-gradient-to-r from-amber-400/20 to-yellow-500/10 border border-amber-400/30 rounded-xl px-3 py-2 flex items-center justify-between">
           <span className="text-[12px] font-bold text-amber-300">
@@ -120,11 +118,19 @@ export default function UnifiedOverallLeaderboard() {
           </span>
         </div>
       )}
-      {/* hidden tick to force re-render */}
       <span className="hidden">{nowTick}</span>
 
-      <div className="space-y-1.5 mt-3">
-        {board.slice(0, 20).map((b) => {
+      {/* SCROLLABLE LIST — swipe up/down, no long page */}
+      <div
+        className="leaderboard-scroll space-y-1.5 mt-3 pr-1"
+        style={{
+          maxHeight: "320px",
+          overflowY: "auto",
+          overscrollBehavior: "contain",
+          WebkitOverflowScrolling: "touch",
+        }}
+      >
+        {visibleBoard.map((b) => {
           const isMe = b.username?.toLowerCase() === me;
           const isTop1 = b.rank === 1;
           const isTop2 = b.rank === 2;
@@ -172,6 +178,19 @@ export default function UnifiedOverallLeaderboard() {
           );
         })}
       </div>
+
+      {visibleBoard.length > 4 && (
+        <p className="text-center text-[11px] text-slate-500 mt-2 animate-pulse">
+          ↓ Swipe / Scroll for more ↓
+        </p>
+      )}
+
+      <style>{`
+        .leaderboard-scroll::-webkit-scrollbar { width: 6px; }
+        .leaderboard-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
+        .leaderboard-scroll::-webkit-scrollbar-thumb { background: rgba(251,191,36,0.5); border-radius: 10px; }
+        .leaderboard-scroll { scrollbar-width: thin; scrollbar-color: rgba(251,191,36,0.5) transparent; }
+      `}</style>
     </div>
   );
 }

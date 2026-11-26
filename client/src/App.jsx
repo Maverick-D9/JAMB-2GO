@@ -613,6 +613,7 @@ export default function App() {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [prevLeaderboardData, setPrevLeaderboardData] = useState(null);
   const [roomUsers, setRoomUsers] = useState([]);
+  const [onlineUsers, setOnlineUsers] = useState([]);
   const [activeChat, setActiveChat] = useState("room");
   const [privateConversations, setPrivateConversations] = useState({});
   const [unreadDMs, setUnreadDMs] = useState({});
@@ -907,6 +908,16 @@ export default function App() {
     socket.off("userLeft");
     socket.off("update_scores");
     socket.off("private_message");
+    // --- STEP 2: Homepage online ---
+    if (username) {
+      const myFullName = authedUser?.fullName || authedUser?.name || username;
+      socket.emit("lobby_online", { username, fullName: myFullName });
+    }
+    socket.off("lobby_online_users");
+    socket.on("lobby_online_users", (users) => {
+      setOnlineUsers(users || []);
+      console.log("ONLINE USERS:", users);
+    });
     socket.off("access_denied");
     socket.on("receive_message", (d) =>
       setMessages((m) => [...m, { ...d, type: "chat" }]),
@@ -1060,6 +1071,7 @@ export default function App() {
       console.log(`Rank needs 5 players, have ${data.have}`);
     });
     return () => {
+      socket.off("lobby_online_users");
       socket.off("receive_message");
       socket.off("new_question");
       socket.off("answer_result");
@@ -1836,7 +1848,53 @@ export default function App() {
                   : `🔓 Free Zone — English Only`}
               </p>
             </div>
+            {/* --- STEP 4: WHO DEY ONLINE - POLISHED --- */}
+            <div className="mt-4 bg-[#121A2E]/80 backdrop-blur-xl border border-white/10 rounded-[16px] px-4 py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
+                  </span>
+                  <span className="text-white text-[12px] font-extrabold tracking-wide">
+                    ONLINE NOW • {onlineUsers.length}
+                  </span>
+                </div>
+                <span className="text-slate-500 text-[11px] font-bold">
+                  LIVE 🟢
+                </span>
+              </div>
 
+              <div
+                className="flex gap-2 mt-3 overflow-x-auto pb-1"
+                style={{ scrollbarWidth: "none" }}
+              >
+                {onlineUsers.length === 0 && (
+                  <span className="text-slate-500 text-[12px]">
+                    Nobody else online yet — you be first 👑
+                  </span>
+                )}
+                {onlineUsers.map((u) => {
+                  const isMe =
+                    u.username?.toLowerCase() === username?.toLowerCase();
+                  return (
+                    <span
+                      key={u.username}
+                      className={`shrink-0 flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full border text-[12px] font-bold ${isMe ? "bg-sky-400 text-black border-sky-400" : "bg-[#0F172A] text-slate-200 border-white/10"}`}
+                    >
+                      <span
+                        className={`w-6 h-6 rounded-full grid place-items-center text-[11px] font-black ${isMe ? "bg-black text-white" : "bg-slate-700 text-white"}`}
+                      >
+                        {u.username?.[0]?.toUpperCase()}
+                      </span>
+                      @{u.username}
+                      {isMe ? " (you)" : ""}
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
             {hasFullAccess ? (
               <div className="mt-4 bg-emerald-500/10 border border-emerald-500/20 rounded-[14px] px-4 py-2.5 flex justify-between items-center backdrop-blur-xl gap-2">
                 <span className="text-emerald-300 text-[12px] font-bold shrink-0">

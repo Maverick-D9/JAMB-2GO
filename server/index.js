@@ -909,6 +909,7 @@ app.get("/api/duel/leaderboard", async (req, res) => {
 // === ROOM + RANK PERSISTENCE FIXED ===
 let roomState = {};
 let socketUserMap = {};
+let globalOnline = new Map();
 const ROOM_MAX_USERS = 50;
 const ROOM_IDLE_MS = 60 * 60 * 1000;
 const ROOM_CLEANUP_INTERVAL = 5 * 60 * 1000;
@@ -1189,6 +1190,17 @@ global.liveRooms = liveRooms;
 io.on("connection", (socket) => {
   registerLiveRankHandlers(io, socket, liveRooms);
   registerDuelHandlers(io, socket, { getRandomQuestion, getShuffledQuestion });
+  // --- Homepage presence ---
+  socket.on("lobby_online", ({ username, fullName }) => {
+    if (!username) return;
+    socket._lobbyUser = username.toLowerCase();
+    globalOnline.set(username.toLowerCase(), {
+      username,
+      fullName: fullName || "",
+      socketId: socket.id,
+    });
+    io.emit("lobby_online_users", [...globalOnline.values()]);
+  });
 
   socket.on("join_room", async ({ room, username }) => {
     console.log(`🔵 JOIN: ${username} -> ${room}`);
@@ -1537,6 +1549,11 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
+    if (socket._lobbyUser) {
+      const u = globalOnline.get(socket._lobbyUser);
+      if (u?.socketId === socket.id) globalOnline.delete(socket._lobbyUser);
+      io.emit("lobby_online_users", [...globalOnline.values()]);
+    }
     const data = socketUserMap[socket.id];
     if (data) {
       console.log(`⚫ DISCONNECT: ${data.username} from ${data.room}`);

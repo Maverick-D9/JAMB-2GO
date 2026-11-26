@@ -36,6 +36,19 @@ function getLoggedUser() {
     userId: localStorage.getItem("userId") || "",
   };
 }
+// FIX: Calculate LIVE on frontend too, no wait backend status update
+function getLiveStatus(t) {
+  if (!t?.startAt) return t?.status || "upcoming";
+  if (t.status === "ended") return "ended";
+  const now = new Date();
+  const start = new Date(t.startAt);
+  const end = t.endAt
+    ? new Date(t.endAt)
+    : new Date(start.getTime() + (t.durationMinutes || 120) * 60000);
+  if (now < start) return "upcoming";
+  if (now >= start && now < end) return "live";
+  return "ended";
+}
 
 function useCountdown(target) {
   const [now, setNow] = useState(Date.now());
@@ -166,13 +179,18 @@ export default function UnifiedTest() {
   const [pastResult, setPastResult] = useState(null);
 
   useEffect(() => {
-    fetchUnifiedTests().then((d) => setTests(d.tests || []));
-    checkUnifiedAccess().then((r) => setHasAccess(r.hasAccess));
+    const load = () => {
+      fetchUnifiedTests().then((d) => setTests(d.tests || []));
+      checkUnifiedAccess().then((r) => setHasAccess(r.hasAccess));
+    };
+    load();
+    // Re-check every 10s - test go turn LIVE by itself
+    const t = setInterval(load, 10000);
+    return () => clearInterval(t);
   }, []);
 
-  // FIX: ALL live tests, not just first one
-  const lives = tests.filter((t) => t.status === "live");
-
+  // FIX: ALL live tests, not just first one - use client time, no refresh needed
+  const lives = tests.filter((t) => getLiveStatus(t) === "live");
   // Check attempt for EACH live test
   useEffect(() => {
     if (!user.username || lives.length === 0) {
@@ -195,8 +213,8 @@ export default function UnifiedTest() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(lives.map((t) => t._id)), user.username]);
 
-  const upcoming = tests.filter((t) => t.status === "upcoming");
-  const past = tests.filter((t) => t.status === "ended");
+  const upcoming = tests.filter((t) => getLiveStatus(t) === "upcoming");
+  const past = tests.filter((t) => getLiveStatus(t) === "ended");
   const handleViewResult = async (t) => {
     setSelectedPast(t);
     setPastResult(null);

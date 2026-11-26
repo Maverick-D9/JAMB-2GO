@@ -647,19 +647,19 @@ router.post(
     }
   },
 );
-// GET - OVERALL LEADERBOARD - All Unified Tests combined
-// Rank = Total Score first, then Avg % . Updates automatically after every submit.
+// GET - OVERALL LEADERBOARD - All Unified Tests combined + Champion Timer + Dethrone
 router.get("/leaderboard/overall", async (req, res) => {
   try {
     const attempts = await UnifiedAttempt.find({ status: "submitted" }).lean();
 
+    // --- 1. Final totals ---
     const map = {};
     for (const a of attempts) {
       const key = String(a.username || "")
         .toLowerCase()
         .trim();
       if (!key) continue;
-      if (!map[key]) {
+      if (!map[key])
         map[key] = {
           username: a.username,
           fullName: a.fullName || "",
@@ -668,7 +668,6 @@ router.get("/leaderboard/overall", async (req, res) => {
           testsPlayed: 0,
           lastPlayed: a.submittedAt,
         };
-      }
       map[key].totalScore += a.score || 0;
       map[key].totalPossible += a.total || 0;
       map[key].testsPlayed += 1;
@@ -687,10 +686,48 @@ router.get("/leaderboard/overall", async (req, res) => {
       .slice(0, 50)
       .map((u, i) => ({ rank: i + 1, ...u }));
 
-    res.json({ success: true, count: board.length, leaderboard: board });
+    // --- 2. Replay history to find when current King collect crown ---
+    let championSince = null;
+    let lastDethrone = null;
+    if (board.length) {
+      const sorted = [...attempts].sort(
+        (a, b) => new Date(a.submittedAt) - new Date(b.submittedAt),
+      );
+      const running = {};
+      let currentKing = null;
+      let kingSince = null;
+      for (const a of sorted) {
+        const key = String(a.username || "")
+          .toLowerCase()
+          .trim();
+        running[key] = (running[key] || 0) + (a.score || 0);
+        // find leader at this point
+        let leader = null,
+          best = -1;
+        for (const [k, v] of Object.entries(running))
+          if (v > best) {
+            best = v;
+            leader = k;
+          }
+        if (leader !== currentKing) {
+          if (currentKing)
+            lastDethrone = { from: currentKing, to: leader, at: a.submittedAt };
+          currentKing = leader;
+          kingSince = a.submittedAt;
+        }
+      }
+      championSince = kingSince;
+    }
+
+    res.json({
+      success: true,
+      count: board.length,
+      leaderboard: board,
+      championSince,
+      lastDethrone,
+    });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
-
 module.exports = router;

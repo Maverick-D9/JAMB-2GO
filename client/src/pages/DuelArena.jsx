@@ -6,17 +6,14 @@ import { VITALS } from "../config/vitals";
 const socket = io.connect(VITALS.SYSTEM.API_BASE);
 
 // --- FLOATING DOODLES - NOW WELL VISIBLE ---
-// Before: opacity 0.1, all white, 18-48px. Now: 34-68px, 0.85 opacity, gold/white/indigo + glow
 const CHESS_COLORS = {
-  "♞": "#FACC15", // gold knight
-  "♜": "#FFFFFF", // white rook
-  "♛": "#FACC15", // gold queen
+  "♞": "#FACC15",
+  "♜": "#FFFFFF",
+  "♛": "#FACC15",
   "♟️": "#FFFFFF",
-  "♔": "#FB7185", // red king
+  "♔": "#FB7185",
   "♟": "#FFFFFF",
 };
-// --- FLOATING DOODLES - BALANCED LEFT + RIGHT ---
-// Left side: 2% - 20% | Right side: 80% - 97% | Centre kept clear so cards no cover dem
 const LEFT_DOODLES = [
   { icon: "♞", top: "6%", left: "4%", size: 68, color: "#FACC15" },
   { icon: "⚔️", top: "18%", left: "12%", size: 32, color: "#FFFFFF" },
@@ -156,6 +153,9 @@ export default function DuelArena() {
   const [chatInput, setChatInput] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
   const chatEndRef = useRef(null);
+  // --- NEW: SUBJECT PICKER ---
+  const [subject, setSubject] = useState("english");
+  const [duelSubject, setDuelSubject] = useState("english");
 
   const refreshDuelData = () => {
     fetch(`${VITALS.SYSTEM.API_BASE}/api/duel/rank/${username}`)
@@ -190,6 +190,7 @@ export default function DuelArena() {
       duelIdRef.current = d.duelId;
       setDuelId(d.duelId);
       setOpponent(d.opponent);
+      setDuelSubject(d.subject || subject || "english");
       setState("battle");
       setMyScore(0);
       setOppScore(0);
@@ -262,12 +263,12 @@ export default function DuelArena() {
     setExpiresAt(null);
     setToast(null);
     setState("waiting");
-    socket.emit("duel:join", { username });
+    socket.emit("duel:join", { username, subject });
   };
   const join = () => {
     setToast(null);
     setState("waiting");
-    socket.emit("duel:join", { username });
+    socket.emit("duel:join", { username, subject });
   };
   const cancelMatchmaking = () => {
     socket.emit("duel:cancel", { username });
@@ -369,7 +370,7 @@ export default function DuelArena() {
             </span>
           </motion.div>
 
-          {/* 2. HOW DUEL WORKS - #1E293B + PURE WHITE */}
+          {/* 2. HOW DUEL WORKS */}
           <motion.div
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -393,13 +394,73 @@ export default function DuelArena() {
               className="text-[12px] mt-1 leading-5"
               style={{ color: "#FFFFFF" }}
             >
-              • 1v1 • 10 questions • 30s each
+              - 1v1 • 10 questions • 30s each
+              <br />• Subjects: 📚 English • ➗ Maths
+              <br />•{" "}
+              {subject === "maths"
+                ? "➗ Maths — Algebra • Numbers • Ratio"
+                : "📚 English — Comprehension • Lexis • Oral"}
               <br />• Winner <b style={{ color: "#FFFFFF" }}>+20 pts</b> • Loser{" "}
               <b style={{ color: "#FFFFFF" }}>-10 pts</b> • Draw 0
             </div>
           </motion.div>
 
-          {/* 3. TOP DUELISTS - USER ROW GLOWING INDIGO */}
+          {/* SUBJECT PICKER */}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.17 }}
+            className="mt-4 text-left"
+          >
+            <p className="font-extrabold text-[13px] text-white px-1">
+              Choose Your Battlefield
+            </p>
+            <div className="grid grid-cols-2 gap-3 mt-2">
+              <button
+                onClick={() => setSubject("english")}
+                className={`p-4 rounded-[20px] text-left border-2 transition-all active:scale-95 ${
+                  subject === "english"
+                    ? "bg-indigo-500/20 border-indigo-400 shadow-[0_0_22px_rgba(99,102,241,0.5)]"
+                    : "bg-white/5 border-white/10"
+                }`}
+              >
+                <div className="text-[24px]">📚</div>
+                <div className="font-black text-[14px] mt-1">English</div>
+                <div className="text-[11px] text-white/60">
+                  Comprehension • Lexis
+                </div>
+                {subject === "english" && (
+                  <div className="text-[11px] text-indigo-300 font-bold mt-1">
+                    ✓ Selected
+                  </div>
+                )}
+              </button>
+              <button
+                onClick={() => setSubject("maths")}
+                className={`p-4 rounded-[20px] text-left border-2 transition-all active:scale-95 ${
+                  subject === "maths"
+                    ? "bg-emerald-500/20 border-emerald-400 shadow-[0_0_22px_rgba(16,185,129,0.5)]"
+                    : "bg-white/5 border-white/10"
+                }`}
+              >
+                <div className="text-[24px]">➗</div>
+                <div className="font-black text-[14px] mt-1">Maths</div>
+                <div className="text-[11px] text-white/60">
+                  Algebra • Numbers
+                </div>
+                {subject === "maths" && (
+                  <div className="text-[11px] text-emerald-300 font-bold mt-1">
+                    ✓ Selected
+                  </div>
+                )}
+              </button>
+            </div>
+            <p className="text-[11px] text-white/40 mt-2 px-1">
+              You go only match person wey pick same subject as you.
+            </p>
+          </motion.div>
+
+          {/* 3. TOP DUELISTS */}
           <motion.div
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -472,7 +533,7 @@ export default function DuelArena() {
             )}
           </motion.div>
 
-          {/* FIND OPPONENT + RADAR PULSE ON HOVER */}
+          {/* FIND OPPONENT */}
           <div className="relative group mt-4">
             <span className="absolute inset-0 rounded-2xl bg-red-500/40 opacity-0 group-hover:opacity-100 group-hover:animate-ping pointer-events-none" />
             <span
@@ -494,11 +555,11 @@ export default function DuelArena() {
               className="relative w-full py-4 rounded-2xl bg-gradient-to-r from-red-600 to-orange-500 text-white font-black text-[15px] overflow-hidden"
             >
               <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
-              ⚔️ Find Opponent
+              ⚔️ Find Opponent • {subject === "maths" ? "Maths" : "English"}
             </motion.button>
           </div>
 
-          {/* 1. LAST DUELS - ALWAYS SHOW, DIRECTLY UNDER FIND OPPONENT */}
+          {/* 1. LAST DUELS */}
           <motion.div
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -520,7 +581,6 @@ export default function DuelArena() {
             </div>
 
             {history.length === 0 ? (
-              // Empty state - Nice No Battles Yet graphic
               <div className="mt-3 rounded-2xl border border-dashed border-white/15 bg-white/[0.03] p-6 text-center">
                 <div
                   className="text-[44px] leading-none"
@@ -562,7 +622,9 @@ export default function DuelArena() {
                     >
                       <div className="flex justify-between items-center text-[12px]">
                         <span className="text-white font-bold">
-                          vs {h.opponent} • {h.myScore}-{h.opponentScore}
+                          vs {h.opponent} •{" "}
+                          {h.subject === "maths" ? "➗ Maths" : "📚 English"} •{" "}
+                          {h.myScore}-{h.opponentScore}
                         </span>
                         <span
                           className={`font-black px-2.5 py-1 rounded-full text-[11px] ${isWin ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" : isDraw ? "bg-slate-500/20 text-slate-300 border border-slate-500/40" : "bg-red-500/20 text-red-300 border border-red-500/40"}`}
@@ -607,6 +669,9 @@ export default function DuelArena() {
           </div>
           <div className="text-slate-400 text-[12px] mt-1">
             The portal is scanning for a worthy rival...
+          </div>
+          <div className="mt-2 inline-block px-3 py-1 rounded-full bg-white/10 border border-white/15 text-[12px] font-bold">
+            {subject === "maths" ? "➗ Maths Duel" : "📚 English Duel"}
           </div>
           <motion.div
             animate={{ opacity: [0.3, 1, 0.3] }}
@@ -664,7 +729,7 @@ export default function DuelArena() {
             {result.pointsChange > 0
               ? `+${result.pointsChange}`
               : result.pointsChange}{" "}
-            pts
+            pts • {duelSubject === "maths" ? "➗ Maths" : "📚 English"}
           </p>
           <button
             onClick={() => (window.location.href = "/")}
@@ -676,7 +741,7 @@ export default function DuelArena() {
             onClick={rematch}
             className="mt-2 w-full py-3 rounded-[12px] font-black text-white border border-white/10"
           >
-            Rematch ⚔️
+            Rematch ⚔️ • {subject === "maths" ? "Maths" : "English"}
           </button>
         </motion.div>
       </div>
@@ -707,7 +772,8 @@ export default function DuelArena() {
             className="font-black text-[13px]"
             style={{ color: timerColor, textShadow: `0 0 12px ${timerColor}` }}
           >
-            Q{qNumber}/10 • {timer}s
+            Q{qNumber}/10 •{" "}
+            {duelSubject === "maths" ? "➗ MATHS" : "📚 ENGLISH"} • {timer}s
           </div>
           <div className="h-1.5 w-[80px] bg-white/10 rounded-full overflow-hidden mt-1 mx-auto">
             <motion.div
@@ -721,7 +787,7 @@ export default function DuelArena() {
           {opponent} • <span className="text-red-300">{oppScore} pts</span>
         </div>
       </div>
-      {/* DUEL CHAT - floating button + panel */}
+      {/* DUEL CHAT */}
       <div className="relative z-20">
         <button
           onClick={() => setChatOpen(!chatOpen)}

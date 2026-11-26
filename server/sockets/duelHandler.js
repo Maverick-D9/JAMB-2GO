@@ -40,7 +40,9 @@ function registerDuelHandlers(io, socket, helpers = {}) {
       }
     }
 
-    const opponent = queue.shift();
+    // Find opponent with SAME subject, not just anybody
+    const oppIndex = queue.findIndex((q) => q.subject === subj);
+    const opponent = oppIndex >= 0 ? queue.splice(oppIndex, 1)[0] : null;
 
     // FIX 3: Block same username duel - opponent must be put back, you must NOT be added
     if (opponent && opponent.username.toLowerCase() === lowerName) {
@@ -67,9 +69,7 @@ function registerDuelHandlers(io, socket, helpers = {}) {
     let tries = 0;
     while (questions.length < 10 && tries < 100) {
       tries++;
-      const q = getRandomQuestion
-        ? getRandomQuestion(opponent.subject || subj)
-        : null;
+      const q = getRandomQuestion ? getRandomQuestion(subj) : null;
       if (!q || !q.question_text) continue;
       const key = q.question_text.trim().toLowerCase();
       if (seen.has(key)) continue;
@@ -85,6 +85,7 @@ function registerDuelHandlers(io, socket, helpers = {}) {
 
     const duel = {
       id: duelId,
+      subject: subj,
       players: [
         { username: opponent.username, socketId: opponent.socketId, score: 0 },
         { username, socketId: socket.id, score: 0 },
@@ -102,11 +103,13 @@ function registerDuelHandlers(io, socket, helpers = {}) {
     io.to(opponent.socketId).emit("duel:matched", {
       duelId,
       opponent: username,
+      subject: subj,
       questionsCount: 10,
     });
     socket.emit("duel:matched", {
       duelId,
       opponent: opponent.username,
+      subject: subj,
       questionsCount: 10,
     });
 
@@ -287,6 +290,7 @@ async function finishDuel(io, duel, forcedWinner, forcedLoser, walkover) {
     const won = !isDraw && p.username === winner;
     const entry = {
       opponent: opp?.username || "Unknown",
+      subject: duel.subject || subj,
       result: isDraw ? "DRAW" : won ? "WIN" : "LOSS",
       myScore: p.score,
       opponentScore: opp?.score || 0,

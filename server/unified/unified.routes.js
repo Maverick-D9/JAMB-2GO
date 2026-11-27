@@ -328,7 +328,7 @@ router.post("/tests/:id/end", checkAdmin, async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
-// DELETE - Delete test + all its attempts
+// DELETE - Delete test ONLY, keep attempts so Overall Leaderboard stays fixed
 router.delete("/tests/:id", checkAdmin, async (req, res) => {
   try {
     const t = await UnifiedTest.findById(req.params.id);
@@ -340,8 +340,9 @@ router.delete("/tests/:id", checkAdmin, async (req, res) => {
         error: "End the test first before you delete am",
       });
     }
-    // Delete all attempts for this test too, so e no remain for DB
-    await UnifiedAttempt.deleteMany({ testId: req.params.id });
+    // WAY 1: DO NOT delete UnifiedAttempt here.
+    // Overall Leaderboard reads from UnifiedAttempt, so if we delete attempts,
+    // leaderboard go clear. Test go comot, scores go stay.
     await UnifiedTest.findByIdAndDelete(req.params.id);
     res.json({ success: true });
   } catch (e) {

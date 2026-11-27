@@ -721,43 +721,7 @@ export default function App() {
     );
   if (typeof window !== "undefined" && window.location.pathname === "/admin")
     return <Admin />;
-  if (
-    typeof window !== "undefined" &&
-    window.location.pathname === "/cbt-setup"
-  )
-    return <CBTSetup />;
-  if (typeof window !== "undefined" && window.location.pathname === "/cbt-exam")
-    return <CBTExam />;
-  if (
-    typeof window !== "undefined" &&
-    window.location.pathname === "/cbt-result"
-  )
-    return <CBTResult />;
-  if (
-    typeof window !== "undefined" &&
-    window.location.pathname.startsWith("/cbt-review")
-  )
-    return <CbtReview />;
-  if (
-    typeof window !== "undefined" &&
-    window.location.pathname === "/cbt-drill"
-  )
-    return <CBTDrillSetup />;
-  if (
-    typeof window !== "undefined" &&
-    window.location.pathname === "/cbt-drill-run"
-  )
-    return <CBTDrill />;
-  if (
-    typeof window !== "undefined" &&
-    window.location.pathname === "/cbt-drill-result"
-  )
-    return <CBTDrillResult />;
-  if (
-    typeof window !== "undefined" &&
-    window.location.pathname === "/cbt-drill-review"
-  )
-    return <CBTDrillReview />;
+
   if (
     typeof window !== "undefined" &&
     window.location.pathname === "/admin/topics"
@@ -775,12 +739,6 @@ export default function App() {
     window.location.pathname === "/privacy-policy"
   ) {
     return <PrivacyPolicy />;
-  }
-  if (
-    typeof window !== "undefined" &&
-    window.location.pathname === "/duel-arena"
-  ) {
-    return <DuelArena />;
   }
 
   const isEnglishRoom = room === "english-room";
@@ -1114,6 +1072,51 @@ export default function App() {
     window.location.pathname.startsWith("/unified-exam")
   ) {
     return <UnifiedExam />;
+  }
+
+  if (
+    typeof window !== "undefined" &&
+    window.location.pathname === "/cbt-setup"
+  )
+    return <CBTSetup />;
+  if (typeof window !== "undefined" && window.location.pathname === "/cbt-exam")
+    return <CBTExam />;
+  if (
+    typeof window !== "undefined" &&
+    window.location.pathname === "/cbt-result"
+  )
+    return <CBTResult />;
+  if (
+    typeof window !== "undefined" &&
+    window.location.pathname.startsWith("/cbt-review")
+  )
+    return <CbtReview />;
+  if (
+    typeof window !== "undefined" &&
+    window.location.pathname === "/cbt-drill"
+  )
+    return <CBTDrillSetup />;
+  if (
+    typeof window !== "undefined" &&
+    window.location.pathname === "/cbt-drill-run"
+  )
+    return <CBTDrill />;
+  if (
+    typeof window !== "undefined" &&
+    window.location.pathname === "/cbt-drill-result"
+  )
+    return <CBTDrillResult />;
+  if (
+    typeof window !== "undefined" &&
+    window.location.pathname === "/cbt-drill-review"
+  )
+    return <CBTDrillReview />;
+
+  if (
+    typeof window !== "undefined" &&
+    window.location.pathname === "/duel-arena"
+  ) {
+    return <DuelArena />;
   }
 
   if (!showChat) {

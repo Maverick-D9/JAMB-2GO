@@ -519,6 +519,190 @@ function TrialManager({ adminPass }) {
     </div>
   );
 }
+function AnnouncementAdmin({ adminPass, setStatus }) {
+  const [list, setList] = useState([]);
+  const [form, setForm] = useState({
+    title: "",
+    message: "",
+    linkLabel: "Join WhatsApp Group",
+    linkUrl: "",
+    type: "info",
+  });
+
+  const load = async () => {
+    try {
+      const r = await fetch(`${API}/api/announcements/all`, {
+        headers: { "x-admin-password": adminPass },
+      });
+      const d = await r.json();
+      setList(d.announcements || []);
+    } catch {}
+  };
+
+  useEffect(() => {
+    if (adminPass) load();
+  }, [adminPass]);
+
+  const save = async () => {
+    if (!form.title.trim() || !form.message.trim())
+      return setStatus("❌ Title + Message needed");
+    setStatus("⏳ Publishing announcement...");
+    try {
+      const res = await fetch(`${API}/api/announcements`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-password": adminPass,
+        },
+        body: JSON.stringify(form),
+      });
+      const d = await res.json();
+      if (!d.success) return setStatus("❌ " + (d.error || "Failed"));
+      setForm({
+        title: "",
+        message: "",
+        linkLabel: "Join WhatsApp Group",
+        linkUrl: "",
+        type: "info",
+      });
+      await load();
+      setStatus("✅ Announcement live on homepage");
+    } catch (e) {
+      setStatus("❌ Failed: " + e.message);
+    }
+  };
+
+  const toggle = async (a) => {
+    await fetch(`${API}/api/announcements/${a._id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-password": adminPass,
+      },
+      body: JSON.stringify({ ...a, isActive: !a.isActive }),
+    });
+    load();
+    setStatus(a.isActive ? "ℹ️ Announcement hidden" : "✅ Announcement shown");
+  };
+
+  const del = async (id) => {
+    if (!confirm("Delete this announcement?")) return;
+    await fetch(`${API}/api/announcements/${id}`, {
+      method: "DELETE",
+      headers: { "x-admin-password": adminPass },
+    });
+    load();
+    setStatus("✅ Announcement deleted");
+  };
+
+  return (
+    <div className="bg-[#121A2E]/70 backdrop-blur-xl rounded-[20px] border border-sky-400/20 p-5 mb-6 relative overflow-hidden">
+      <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-sky-400/30 to-transparent" />
+      <h3
+        className="text-white font-black text-[14px] flex items-center gap-2"
+        style={{ fontFamily: "Cinzel" }}
+      >
+        📢 HOMEPAGE ANNOUNCEMENT
+        <span className="text-[9px] bg-sky-500/15 text-sky-300 px-2.5 py-1 rounded-full border border-sky-500/20 font-sans">
+          LIVE
+        </span>
+      </h3>
+      <p className="text-slate-500 text-[11px] mt-1">
+        Wetin you post here go show for homepage immediately, above ONLINE NOW.
+      </p>
+
+      <input
+        value={form.title}
+        onChange={(e) => setForm({ ...form, title: e.target.value })}
+        placeholder="Title e.g. New WhatsApp Group"
+        className="w-full mt-4 px-4 py-3 rounded-full bg-[#0F172A] border border-white/10 text-white text-sm outline-none"
+      />
+      <textarea
+        value={form.message}
+        onChange={(e) => setForm({ ...form, message: e.target.value })}
+        placeholder="Message e.g. Join our new group for daily questions and answers..."
+        rows={3}
+        className="w-full mt-2 px-4 py-3 rounded-[16px] bg-[#0F172A] border border-white/10 text-white text-sm outline-none"
+      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+        <input
+          value={form.linkLabel}
+          onChange={(e) => setForm({ ...form, linkLabel: e.target.value })}
+          placeholder="Link Button Text e.g. Join WhatsApp Group"
+          className="px-4 py-3 rounded-full bg-[#0F172A] border border-white/10 text-white text-sm outline-none"
+        />
+        <input
+          value={form.linkUrl}
+          onChange={(e) => setForm({ ...form, linkUrl: e.target.value })}
+          placeholder="Link URL e.g. https://chat.whatsapp.com/..."
+          className="px-4 py-3 rounded-full bg-[#0F172A] border border-white/10 text-white text-sm outline-none"
+        />
+      </div>
+      <div className="flex gap-2 mt-3 flex-wrap">
+        <select
+          value={form.type}
+          onChange={(e) => setForm({ ...form, type: e.target.value })}
+          className="px-4 py-3 rounded-full bg-[#0F172A] border border-white/10 text-white text-sm outline-none"
+        >
+          <option value="info">📢 Info (Blue)</option>
+          <option value="warning">⚠️ Notice (Yellow)</option>
+          <option value="urgent">🚨 Urgent (Red)</option>
+        </select>
+        <button
+          onClick={save}
+          className="flex-1 min-w-[180px] py-3 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 text-black font-black text-sm"
+        >
+          Publish to Homepage →
+        </button>
+      </div>
+
+      <div className="mt-4 space-y-2 max-h-[300px] overflow-y-auto">
+        {list.length === 0 && (
+          <p className="text-slate-500 text-[12px]">No announcements yet.</p>
+        )}
+        {list.map((a) => (
+          <div
+            key={a._id}
+            className="bg-[#0F172A] border border-white/10 rounded-xl px-4 py-3 flex flex-wrap justify-between items-center gap-2"
+          >
+            <div className="min-w-0">
+              <p className="text-white font-bold text-[13px] truncate">
+                {a.title}{" "}
+                {a.isActive && (
+                  <span className="text-[9px] bg-emerald-500 text-white px-2 py-0.5 rounded-full ml-1">
+                    LIVE
+                  </span>
+                )}
+              </p>
+              <p className="text-[11px] text-slate-500 truncate max-w-[400px]">
+                {a.message}
+              </p>
+              {a.linkUrl && (
+                <p className="text-[11px] text-sky-300 truncate max-w-[400px]">
+                  🔗 {a.linkLabel || "Link"} — {a.linkUrl}
+                </p>
+              )}
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <button
+                onClick={() => toggle(a)}
+                className="px-4 py-2 rounded-full bg-white/10 text-white text-[12px] font-bold"
+              >
+                {a.isActive ? "Hide" : "Show"}
+              </button>
+              <button
+                onClick={() => del(a._id)}
+                className="px-4 py-2 rounded-full bg-red-500/15 border border-red-500/30 text-red-300 text-[12px] font-bold"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 export default function Admin() {
   const [isAuthed, setIsAuthed] = useState(
     () => localStorage.getItem("admin_ok") === "yes",
@@ -894,6 +1078,7 @@ export default function Admin() {
         <DashboardStats />
         <StorageMonitor adminPass={adminPass} />
         <TrialManager adminPass={adminPass} />
+        <AnnouncementAdmin adminPass={adminPass} setStatus={setStatus} />
         <UnifiedAdmin />
         <div className="bg-[#121A2E]/70 backdrop-blur-xl rounded-[20px] border border-white/10 p-5 mb-6 relative overflow-hidden">
           <div className="flex justify-between items-center mb-4">

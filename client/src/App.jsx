@@ -14,6 +14,7 @@ import CBTDrillReview from "./pages/CBTDrillReview";
 import AdminTopics from "./pages/AdminTopics";
 import { VITALS } from "./config/vitals";
 import Reviews from "./pages/Reviews";
+import AnnouncementBox from "./components/AnnouncementBox.jsx";
 import ReviewFab from "./components/ReviewFab.jsx";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import { getLiveRank } from "./config/liveRanks";
@@ -1848,6 +1849,7 @@ export default function App() {
                   : `🔓 Free Zone — English Only`}
               </p>
             </div>
+            <AnnouncementBox />
             {/* --- STEP 4: WHO DEY ONLINE - POLISHED --- */}
             <div className="mt-4 bg-[#121A2E]/80 backdrop-blur-xl border border-white/10 rounded-[16px] px-4 py-3">
               <div className="flex items-center justify-between">

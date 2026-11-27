@@ -782,18 +782,7 @@ export default function App() {
   ) {
     return <DuelArena />;
   }
-  if (
-    typeof window !== "undefined" &&
-    window.location.pathname === "/unified-test"
-  ) {
-    return <UnifiedTest />;
-  }
-  if (
-    typeof window !== "undefined" &&
-    window.location.pathname.startsWith("/unified-exam")
-  ) {
-    return <UnifiedExam />;
-  }
+
   const isEnglishRoom = room === "english-room";
   const hasFullAccess = access?.tier === "full_access";
   const canAccessCurrentRoom = isEnglishRoom || hasFullAccess;
@@ -1112,6 +1101,20 @@ export default function App() {
         }}
       />
     );
+
+  // SECURED: Unified Test only after login — newbies must signup first
+  if (
+    typeof window !== "undefined" &&
+    window.location.pathname === "/unified-test"
+  ) {
+    return <UnifiedTest />;
+  }
+  if (
+    typeof window !== "undefined" &&
+    window.location.pathname.startsWith("/unified-exam")
+  ) {
+    return <UnifiedExam />;
+  }
 
   if (!showChat) {
     return (

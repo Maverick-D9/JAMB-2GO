@@ -433,6 +433,22 @@ export default function UnifiedExam() {
             </button>
           )}
         </div>
+
+        {/* ALWAYS VISIBLE SUBMIT — user no need reach last question */}
+        <button
+          onClick={() => {
+            if (
+              confirm(
+                `Submit now? You don answer ${Object.keys(answers).length}/${questions.length} questions.`,
+              )
+            )
+              handleSubmit(false);
+          }}
+          className="w-full mt-3 py-3.5 rounded-full bg-emerald-400 text-black font-black text-[14px] shadow-[0_8px_24px_rgba(16,185,129,0.3)]"
+        >
+          Submit Test ✅ • {Object.keys(answers).length}/{questions.length}{" "}
+          Answered
+        </button>
         <p className="text-[11px] text-slate-500 mt-6 mb-2 uppercase">
           {q.subject} — Tap to jump
         </p>

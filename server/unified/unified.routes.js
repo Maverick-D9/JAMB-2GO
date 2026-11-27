@@ -56,6 +56,49 @@ function normalizeTopic(s) {
     .toLowerCase()
     .trim();
 }
+// FIX: Finalize expired in_progress attempts using their AUTOSAVED answers
+async function finalizeExpiredAttempts(testId, testDoc) {
+  try {
+    const pending = await UnifiedAttempt.find({
+      testId,
+      status: "in_progress",
+    });
+    if (!pending.length) return 0;
+    const now = new Date();
+    let changed = 0;
+    for (const att of pending) {
+      const end = testDoc?.endAt
+        ? new Date(testDoc.endAt)
+        : att.endsAt
+          ? new Date(att.endsAt)
+          : null;
+      if (!end || now < end) continue;
+      let correct = 0;
+      (att.questions || []).forEach((q, i) => {
+        if (
+          att.answers?.[i] &&
+          String(att.answers[i]).toUpperCase() ===
+            String(q.correct || "").toUpperCase()
+        )
+          correct++;
+      });
+      att.score = correct;
+      att.total = att.questions.length;
+      att.status = "submitted";
+      att.submittedAt = new Date();
+      await att.save();
+      changed++;
+    }
+    if (changed)
+      console.log(
+        `[Unified] Finalized ${changed} expired attempts for test ${testId}`,
+      );
+    return changed;
+  } catch (e) {
+    console.log("Finalize failed:", e.message);
+    return 0;
+  }
+}
 
 function parseCsvLine(line) {
   const vals = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/);
@@ -567,10 +610,16 @@ router.post("/tests/:id/submit", async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
-// GET - Leaderboard for one test - Top 50, sorted by score
+// GET - Leaderboard for one test - Top 50, ONLY submitted count
 router.get("/tests/:id/leaderboard", async (req, res) => {
   try {
-    const attempts = await UnifiedAttempt.find({ testId: req.params.id })
+    const t = await UnifiedTest.findById(req.params.id);
+    await finalizeExpiredAttempts(req.params.id, t);
+
+    const attempts = await UnifiedAttempt.find({
+      testId: req.params.id,
+      status: "submitted",
+    })
       .sort({ score: -1, submittedAt: 1 })
       .limit(50)
       .lean();
@@ -651,6 +700,11 @@ router.post(
 // GET - OVERALL LEADERBOARD - All Unified Tests combined + Champion Timer + Dethrone
 router.get("/leaderboard/overall", async (req, res) => {
   try {
+    // Finalize any expired in_progress across ALL tests before counting
+    const allTests = await UnifiedTest.find().lean();
+    for (const tt of allTests) {
+      await finalizeExpiredAttempts(String(tt._id), tt);
+    }
     const attempts = await UnifiedAttempt.find({ status: "submitted" }).lean();
 
     // --- 1. Final totals ---

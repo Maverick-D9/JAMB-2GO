@@ -86,6 +86,8 @@ const JWT_SECRET = process.env.JWT_SECRET || "jamb2go_secret_change_this";
 const GOOGLE_CLIENT_ID =
   process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID;
 global.pendingUsers = global.pendingUsers || new Map();
+// === NEW: Track 60s + 60s + 10mins + onscreen flow per email ===
+global.otpTrials = global.otpTrials || new Map();
 
 function genCode() {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -121,11 +123,56 @@ router.post("/request-otp", otpLimiter, async (req, res) => {
           "Please use a real Gmail / Yahoo email. Temporary emails are not allowed.",
       });
     }
-    // === Per-email cooldown: 60 secs ===
+
+    // === NEW: 10 mins cooldown check (after 2nd attempt) ===
+    const now = Date.now();
+    let trial = global.otpTrials.get(cleanEmail) || {
+      count: 0,
+      lastTry: 0,
+      cooldownUntil: 0,
+    };
+
+    // If user still dey inside 10 mins cooldown, block am
+    if (now < trial.cooldownUntil) {
+      const minsLeft = Math.ceil((trial.cooldownUntil - now) / 60000);
+      const secsLeft = Math.ceil((trial.cooldownUntil - now) / 1000);
+      return res.status(429).json({
+        error: `Try again after ${minsLeft} mins`,
+        cooldown: true,
+        minsLeft,
+        secsLeft,
+        cooldownUntil: trial.cooldownUntil,
+      });
+    }
+
+    // If cooldown don expire and count na 2, this na Attempt 3 -> show onscreen
+    let showOtpOnScreen = false;
+    let isThirdAttempt = false;
+    if (
+      trial.count >= 2 &&
+      trial.cooldownUntil !== 0 &&
+      now >= trial.cooldownUntil
+    ) {
+      isThirdAttempt = true;
+      showOtpOnScreen = true;
+    }
+
+    // If last try don pass 30 mins, reset count (fresh signup)
+    if (trial.lastTry && now - trial.lastTry > 30 * 60 * 1000) {
+      trial = { count: 0, lastTry: 0, cooldownUntil: 0 };
+      showOtpOnScreen = false;
+      isThirdAttempt = false;
+    }
+
+    // === Per-email cooldown: 60 secs (existing) ===
+    // Skip this check for 3rd attempt, because user don already wait 10 mins
     const lastOtp = global.lastOtpRequest?.get(cleanEmail);
-    if (lastOtp && Date.now() - lastOtp < 60 * 1000) {
+    if (!isThirdAttempt && lastOtp && Date.now() - lastOtp < 60 * 1000) {
+      const secsLeft = Math.ceil((60 * 1000 - (Date.now() - lastOtp)) / 1000);
       return res.status(429).json({
         error: "Please wait 60 seconds before requesting another OTP.",
+        cooldown60: true,
+        secsLeft,
       });
     }
 
@@ -154,12 +201,42 @@ router.post("/request-otp", otpLimiter, async (req, res) => {
     });
     global.lastOtpRequest = global.lastOtpRequest || new Map();
     global.lastOtpRequest.set(cleanEmail, Date.now());
-    res.json({ success: true, message: "OTP sent to " + email });
+
+    // === NEW: Update trial count ===
+    if (isThirdAttempt) {
+      // Reset after showing onscreen, so next signup cycle start fresh
+      global.otpTrials.set(cleanEmail, {
+        count: 0,
+        lastTry: now,
+        cooldownUntil: 0,
+      });
+    } else {
+      trial.count += 1;
+      trial.lastTry = now;
+      // After Attempt 2, set 10 mins cooldown for next try
+      if (trial.count === 2) {
+        trial.cooldownUntil = now + 10 * 60 * 1000;
+      }
+      global.otpTrials.set(cleanEmail, trial);
+    }
+
+    const attemptNumber = isThirdAttempt ? 3 : trial.count;
+
+    res.json({
+      success: true,
+      message: "OTP sent to " + email,
+      attempt: attemptNumber,
+      showOtpOnScreen,
+      otp: showOtpOnScreen ? code : undefined,
+      cooldownUntil: trial.cooldownUntil || 0,
+    });
 
     setImmediate(async () => {
       try {
         await sendOtp(cleanEmail, code);
-        console.log(`[OTP BG SENT] ${cleanEmail} -> ${code}`);
+        console.log(
+          `[OTP BG SENT] ${cleanEmail} -> ${code} | attempt ${attemptNumber} | onscreen ${showOtpOnScreen}`,
+        );
       } catch (e) {
         console.error(`[OTP BG FAIL] ${cleanEmail}:`, e.message);
       }

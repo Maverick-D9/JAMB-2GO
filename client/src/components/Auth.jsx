@@ -41,6 +41,12 @@ export default function Auth({ onAuth }) {
   const [otpEmail, setOtpEmail] = useState("");
   const otpRefs = useRef([]);
 
+  // === NEW: 60s + 60s + 10mins + onscreen flow ===
+  const [otpStage, setOtpStage] = useState(null); // null | "wait1" | "wait2" | "cooldown" | "showCode"
+  const [onscreenOtp, setOnscreenOtp] = useState("");
+  const [attempt, setAttempt] = useState(0);
+  const [cooldownSecs, setCooldownSecs] = useState(0);
+
   const [forgotEmail, setForgotEmail] = useState("");
   const [resetCode, setResetCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -145,6 +151,13 @@ export default function Auth({ onAuth }) {
     return () => clearTimeout(t);
   }, [timer, view, canResend]);
 
+  // === NEW: 10 mins cooldown countdown ===
+  useEffect(() => {
+    if (cooldownSecs <= 0) return;
+    const t = setTimeout(() => setCooldownSecs((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldownSecs]);
+
   const validate = () => {
     const e = {};
     if (!isLogin) {
@@ -174,6 +187,43 @@ export default function Auth({ onAuth }) {
     if (!val && i > 0) otpRefs.current[i - 1]?.focus();
   };
 
+  // === NEW: Helper to handle backend response for request-otp ===
+  const handleOtpResponse = (data, resOk) => {
+    if (!resOk) {
+      // Backend says still inside 10 mins cooldown
+      if (data.cooldown) {
+        setOtpStage("cooldown");
+        setCooldownSecs(data.secsLeft || (data.minsLeft || 10) * 60);
+        showToast(data.error || "Try again after 10 mins");
+        return false;
+      }
+      // Backend says wait 60 secs (user clicked too fast)
+      if (data.cooldown60) {
+        showToast(`Wait ${data.secsLeft || 60}s before you try again`);
+        return false;
+      }
+      throw new Error(data.error || "Failed to send OTP");
+    }
+    // Success
+    setAttempt(data.attempt || 1);
+    if (data.showOtpOnScreen && data.otp) {
+      setOnscreenOtp(data.otp);
+      setOtpStage("showCode");
+      // Auto-fill OTP boxes for user convenience
+      setOtp(String(data.otp).split(""));
+      showToast("Gmail delay too much, code shown on screen", "success");
+    } else if (data.attempt === 1) {
+      setOtpStage("wait1");
+      setTimer(60);
+      setCanResend(false);
+    } else if (data.attempt === 2) {
+      setOtpStage("wait2");
+      setTimer(60);
+      setCanResend(false);
+    }
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
@@ -182,10 +232,10 @@ export default function Auth({ onAuth }) {
       return;
     }
 
-    console.log("API CALLING:", API); // <- This will tell us if it's localhost or live
+    console.log("API CALLING:", API);
     setLoading(true);
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
     try {
       if (!isLogin) {
@@ -204,19 +254,22 @@ export default function Auth({ onAuth }) {
         clearTimeout(timeoutId);
         const data = await res.json();
         console.log("SERVER RESPONSE:", data, "Status:", res.status);
-        if (!res.ok) throw new Error(data.error || "Failed to send OTP");
 
-        // DEV helper - your backend returns devOtp
+        // OLD devOtp handling removed - backend no longer sends devOtp for attempt 1 & 2
         if (data.devOtp) {
           console.log("DEV OTP:", data.devOtp);
-          showToast(`DEV OTP: ${data.devOtp}`, "success");
         }
+
+        const ok = handleOtpResponse(data, res.ok);
+        if (!ok) return;
 
         setOtpEmail(form.email);
         setView("otp");
-        setTimer(60);
-        setCanResend(false);
         setOtp(["", "", "", "", "", ""]);
+        // If showCode, keep the auto-filled OTP, else clear
+        if (data.showOtpOnScreen && data.otp) {
+          setOtp(String(data.otp).split(""));
+        }
         showToast(data.message || "Code sent to " + form.email, "success");
       } else {
         const res = await fetch(`${API}/login`, {
@@ -248,7 +301,7 @@ export default function Auth({ onAuth }) {
       console.error("handleSubmit error:", err);
     } finally {
       clearTimeout(timeoutId);
-      setLoading(false); // THIS GUARANTEES "Please wait..." will always end
+      setLoading(false);
     }
   };
 
@@ -292,10 +345,15 @@ export default function Auth({ onAuth }) {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      const ok = handleOtpResponse(data, res.ok);
+      if (!ok) return;
       setTimer(60);
       setCanResend(false);
-      setOtp(["", "", "", "", "", ""]);
+      if (data.showOtpOnScreen && data.otp) {
+        setOtp(String(data.otp).split(""));
+      } else {
+        setOtp(["", "", "", "", "", ""]);
+      }
       showToast("Code resent to " + otpEmail, "success");
     } catch (err) {
       showToast(err.message);
@@ -360,6 +418,12 @@ export default function Auth({ onAuth }) {
     setLoading(false);
   };
 
+  const formatCooldown = (secs) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
+
   return (
     <div className="min-h-screen w-full bg-[#080C18] relative flex items-center justify-center p-4 overflow-hidden">
       <style>{`
@@ -403,7 +467,7 @@ export default function Auth({ onAuth }) {
             color: "white",
             padding: "12px 20px",
             borderRadius: 100,
-            zIndex: 50,
+            zIndex: 60,
             fontSize: 13,
             fontWeight: 600,
             border: `1px solid ${toast.type === "error" ? "#ef4444" : "#10b981"}`,
@@ -411,6 +475,161 @@ export default function Auth({ onAuth }) {
           }}
         >
           {toast.type === "error" ? "❌" : "✅"} {toast.msg}
+        </div>
+      )}
+
+      {/* === NEW POPUPS: 60s + 60s + 10mins + onscreen === */}
+      {otpStage === "wait1" && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div
+            className="bg-[#121A2E] border border-white/10 rounded-[24px] p-6 max-w-sm w-full text-center"
+            style={{ animation: "fadeIn 0.3s ease" }}
+          >
+            <div className="text-4xl mb-2">📧</div>
+            <h3 className="font-black text-white text-[20px]">
+              Check Your Gmail
+            </h3>
+            <p className="text-slate-400 text-[13px] mt-2 leading-relaxed">
+              We don send OTP to{" "}
+              <b className="text-white">{otpEmail || form.email}</b>. Wait for{" "}
+              <b className="text-sky-400">{timer}s</b> to see am.
+            </p>
+            <p className="text-[11px] text-slate-500 mt-2">
+              Check <b>Spam / Bin</b> folder if you no see am for Inbox.
+            </p>
+            <div className="text-[48px] font-black text-sky-400 my-3">
+              {timer}
+            </div>
+            <button
+              onClick={() => setOtpStage(null)}
+              disabled={timer > 0}
+              className={`w-full py-3 rounded-full font-black text-sm ${timer > 0 ? "bg-[#1e3a5f] text-slate-400 cursor-not-allowed" : "bg-[#38BDF8] text-black cursor-pointer"}`}
+            >
+              {timer > 0 ? `Wait ${timer}s...` : "I Don See Am - Enter Code"}
+            </button>
+            {timer === 0 && (
+              <button
+                onClick={handleResend}
+                className="w-full mt-2 bg-transparent border-none text-sky-400 text-[12px] font-bold cursor-pointer underline"
+              >
+                No OTP? Click Create Again & Wait Another 60s
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {otpStage === "wait2" && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div
+            className="bg-[#121A2E] border border-white/10 rounded-[24px] p-6 max-w-sm w-full text-center"
+            style={{ animation: "fadeIn 0.3s ease" }}
+          >
+            <div className="text-4xl mb-2">🔄</div>
+            <h3 className="font-black text-white text-[20px]">
+              Still Waiting?
+            </h3>
+            <p className="text-slate-400 text-[13px] mt-2 leading-relaxed">
+              We don send again to{" "}
+              <b className="text-white">{otpEmail || form.email}</b>. Wait
+              another <b className="text-sky-400">{timer}s</b>, check Spam /
+              Bin.
+            </p>
+            <div className="text-[48px] font-black text-amber-400 my-3">
+              {timer}
+            </div>
+            {timer === 0 && (
+              <p className="text-[12px] text-red-400 font-bold">
+                If e still fail, try again after 10 mins
+              </p>
+            )}
+            <button
+              onClick={() => setOtpStage(null)}
+              disabled={timer > 0}
+              className={`w-full py-3 rounded-full font-black text-sm mt-2 ${timer > 0 ? "bg-[#1e3a5f] text-slate-400 cursor-not-allowed" : "bg-[#38BDF8] text-black cursor-pointer"}`}
+            >
+              {timer > 0 ? `Wait ${timer}s...` : "Enter Code"}
+            </button>
+            {timer === 0 && (
+              <button
+                onClick={() => {
+                  setOtpStage("cooldown");
+                  setCooldownSecs(10 * 60);
+                }}
+                className="w-full mt-2 bg-transparent border-none text-slate-400 text-[12px] cursor-pointer"
+              >
+                Close - I Go Try After 10 Mins
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {otpStage === "cooldown" && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div
+            className="bg-[#121A2E] border border-white/10 rounded-[24px] p-6 max-w-sm w-full text-center"
+            style={{ animation: "fadeIn 0.3s ease" }}
+          >
+            <div className="text-4xl mb-2">⏳</div>
+            <h3 className="font-black text-white text-[20px]">
+              Please Wait 10 Mins
+            </h3>
+            <p className="text-slate-400 text-[13px] mt-2 leading-relaxed">
+              Gmail still dey delay. Try again after{" "}
+              <b className="text-white">10 mins</b>.
+            </p>
+            <div className="text-[32px] font-black text-amber-400 my-3">
+              {formatCooldown(cooldownSecs)}
+            </div>
+            <p className="text-[11px] text-slate-500">
+              If you try again after 10 mins, we go show the code for screen.
+            </p>
+            <button
+              onClick={() => setOtpStage(null)}
+              className="w-full mt-4 py-3 rounded-full bg-white/10 text-white font-bold text-sm cursor-pointer"
+            >
+              Close
+            </button>
+            <button
+              onClick={handleResend}
+              disabled={cooldownSecs > 0}
+              className={`w-full mt-2 py-3 rounded-full font-black text-sm ${cooldownSecs > 0 ? "bg-[#1e3a5f] text-slate-400 cursor-not-allowed" : "bg-[#38BDF8] text-black cursor-pointer"}`}
+            >
+              {cooldownSecs > 0
+                ? `Wait ${formatCooldown(cooldownSecs)}...`
+                : "Try Again Now - Show Code"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {otpStage === "showCode" && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div
+            className="bg-[#121A2E] border border-amber-400/30 rounded-[24px] p-6 max-w-sm w-full text-center"
+            style={{ animation: "fadeIn 0.3s ease" }}
+          >
+            <div className="text-4xl mb-2">✅</div>
+            <h3 className="font-black text-white text-[20px]">
+              Your Code (Gmail Delay)
+            </h3>
+            <p className="text-slate-400 text-[13px] mt-2">
+              Gmail delay too much, so here be your code:
+            </p>
+            <div className="text-[36px] font-black tracking-[0.3em] my-4 bg-amber-400/15 border border-amber-400/30 py-3 rounded-xl text-amber-300">
+              {onscreenOtp}
+            </div>
+            <p className="text-[11px] text-slate-500">
+              We still send am to your Gmail too. Use this code to continue.
+            </p>
+            <button
+              onClick={() => setOtpStage(null)}
+              className="w-full mt-4 py-3 rounded-full bg-[#38BDF8] text-black font-black text-sm cursor-pointer"
+            >
+              Enter Code
+            </button>
+          </div>
         </div>
       )}
 
@@ -665,6 +884,12 @@ export default function Auth({ onAuth }) {
                   </div>
                   <p className="text-center text-slate-500 text-[11px]">
                     Check your Gmail for the code - {otpEmail}
+                    {attempt > 0 && (
+                      <span className="block mt-1 text-amber-400/80">
+                        Attempt {attempt} of 3{" "}
+                        {attempt === 3 ? "(Code shown on screen)" : ""}
+                      </span>
+                    )}
                   </p>
                   <button
                     type="submit"
